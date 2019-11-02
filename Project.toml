@@ -1,0 +1,4 @@
+name = "DiffieHellmanGroups"
+uuid = "7bc550bc-9601-4906-95d7-193b8621be1b"
+authors = ["akels <akels14@gmail.com>"]
+version = "0.1.0"
