@@ -3,18 +3,19 @@ using Primes
 
 struct PrimeGroup <: AbstractGroup 
     G::Mod
+    q::Integer
     t::Int # security of the group
-    function PrimeGroup(G,t)
+    function PrimeGroup(G,q,t)
         @assert isprime(G.mod)
         # I could also test by calculating Euler totient
-        new(G,t)
+        new(G,q,t)
     end
 end
 
-PrimeGroup(g,p,t) = PrimeGroup(Mod(g,p),t)
+PrimeGroup(g,p,q,t) = PrimeGroup(Mod(g,p),q,t)
 value(G::PrimeGroup) = G.G.val
+order(G::PrimeGroup) = G.q
 security(G::PrimeGroup) = G.t
-
 
 ### Some prime group generation algorithms. References:
 # + https://crypto.stackexchange.com/questions/820/how-does-one-calculate-a-primitive-root-for-diffie-hellman
@@ -27,7 +28,7 @@ function SophieGermainGroup(rng::AbstractRNG,g::Integer,t::Int)
         q = rngprime(rng,2*t)
         p = 2*q + 1
         if g!=p-1 && isprime(p)
-            return PrimeGroup(g,p,t)
+            return PrimeGroup(g,p,q,t)
         end
     end
 end
@@ -50,7 +51,7 @@ function DSAStandartGroup(rng::AbstractRNG,tp::Int,tg::Int)
         u = Mod(rngint(rng,tg),p)
         g = u^div((p-1),q)
         if g.val!=1 || g.val!=0
-            return PrimeGroup(g,tp)
+            return PrimeGroup(g,q,tp)
         end
     end
 end

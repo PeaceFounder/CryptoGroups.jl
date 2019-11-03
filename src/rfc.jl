@@ -23,7 +23,11 @@ function FirstOakleyGroup()
          EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245
          E485B576 625E7EC6 F44C42E9 A63A3620 FFFFFFFF FFFFFFFF"
     g = 2
-    return PrimeGroup(g,p,1024)
+
+    # q can perhaps be recalculated assuming that generation had been 
+    # done with SophieGermainGroup algorithm
+    
+    return PrimeGroup(g,p,0,1024)
 end
 
 
@@ -53,7 +57,7 @@ function SecondOakleyGroup()
          EE386BFB 5A899FA5 AE9F2411 7C4B1FE6 49286651 ECE65381
          FFFFFFFF FFFFFFFF"
     g = 2
-    return PrimeGroup(g,p,1024)
+    return PrimeGroup(g,p,0,1024)
 end
 
 
@@ -99,7 +103,9 @@ function MODP160Group()
        D662A4D1 8E73AFA3 2D779D59 18D08BC8 858F4DCE F97C2A24
        855E6EEB 22B3B2E5"
 
-    return PrimeGroup(g,p,1024)
+    q = hex"F518AA87 81A8DF27 8ABA4E7D 64B7CB9D 49462353"
+
+    return PrimeGroup(g,p,q,1024)
 end
 
 
@@ -163,7 +169,10 @@ function MODP224Group()
         EDFE72FE 9B6AA4BD 7B5A0F1C 71CFFF4C 19C418E1 F6EC0179
         81BC087F 2A7065B3 84B890D3 191F2BFA"
 
-    return PrimeGroup(g,p,2048)
+   q =  hex"801C0D34 C58D93FE 99717710 1F80535A 4738CEBC BF389A99
+        B36371EB"
+
+    return PrimeGroup(g,p,q,2048)
 end
 
 
@@ -228,6 +237,9 @@ function MODP256Group()
         EDFE72FE 9B6AA4BD 7B5A0F1C 71CFFF4C 19C418E1 F6EC0179
         81BC087F 2A7065B3 84B890D3 191F2BFA"
 
-    return PrimeGroup(g,p,2048)
+    q = hex"8CF83642 A709A097 B4479976 40129DA2 99B1A47D 1EB3750B
+       A308B0FE 64F5FBD3"
+
+    return PrimeGroup(g,p,q,2048)
 end
 

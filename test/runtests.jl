@@ -2,7 +2,7 @@ using CryptoGroups
 
 ### Testing prime groups
 
-G = PrimeGroup(5,23,4)
+G = PrimeGroup(5,23,0,4)
 @show G^2
 @show value(G)
 @show security(G)
