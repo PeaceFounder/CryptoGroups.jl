@@ -13,6 +13,7 @@ struct PrimeGroup <: CyclicGroup
 end
 
 PrimeGroup(g,p,q,t) = PrimeGroup(Mod(g,p),q,t)
+PrimeGroup(val::Integer,G::PrimeGroup) = PrimeGroup(val,G.G.mod,G.q,G.t)
 
 value(G::PrimeGroup) = G.G.val
 order(G::PrimeGroup) = G.q

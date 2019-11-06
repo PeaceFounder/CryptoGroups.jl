@@ -8,15 +8,6 @@ abstract type CyclicGroup <: AbstractGroup end
 import Base.^
 ^(G::AbstractGroup,n) = typeof(G)(G.G^n,G.q,G.t)
 
-import Base.mod
-mod(G::CyclicGroup) = mod(value(G),order(G))
-mod(n::Integer,G::CyclicGroup) = mod(n,order(G))
-
-import Base.powermod
-powermod(n::Integer,k::Integer,G::CyclicGroup) = powermod(n,k,order(G))
-
-import Base.inv
-inv(k::Integer,G::CyclicGroup) = powermod(k,order(G)-2,G)
 
 """
 The value of the group element.
@@ -34,7 +25,7 @@ include("primegroup.jl")
 include("rfc.jl")
 include("ellipticgroup.jl")
 
-export PrimeGroup, AbstractGroup, value, security, order
+export PrimeGroup, EllipticGroup, AbstractGroup, CyclicGroup, value, security, order
 
 end # module
 

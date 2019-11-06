@@ -12,12 +12,11 @@ end
 
 G = PrimeGroup(5,23,totient(23),4)
 @show G^2
-@show value(G)
+@show v = value(G)
 @show security(G)
 @show order(G)
-@show mod(G)
-@show powermod(4,10,G)
-@show inv(3,G)
+
+@test PrimeGroup(value(G^2),G)==G^2
 
 testgroup(G)
 
@@ -28,9 +27,8 @@ G = CryptoGroups.Scep256k1Group()
 @show value(G)
 @show security(G)
 @show order(G)
-@show mod(G)
-@show powermod(4,10,G)
-@show inv(3,G)
+
+# @test EllipticGroup(value(G^2),G)==G^2
 
 testgroup(G)
 

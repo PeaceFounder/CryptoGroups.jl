@@ -7,6 +7,8 @@ struct EllipticGroup <: CyclicGroup
     t::Int
 end
 
+#EllipticGroup(val::Integer,G::EllipticGroup) = EllipticGroup(val,,G.q,G.t)
+
 value(G::EllipticGroup) = G.G.𝑥.𝑛
 security(G::EllipticGroup) = G.t
 order(G::EllipticGroup) = G.q
