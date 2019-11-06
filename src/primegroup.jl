@@ -1,7 +1,7 @@
 using Mods
 using Primes
 
-struct PrimeGroup <: AbstractGroup 
+struct PrimeGroup <: CyclicGroup 
     G::Mod
     q::Integer
     t::Int # security of the group
@@ -13,9 +13,25 @@ struct PrimeGroup <: AbstractGroup
 end
 
 PrimeGroup(g,p,q,t) = PrimeGroup(Mod(g,p),q,t)
+
 value(G::PrimeGroup) = G.G.val
 order(G::PrimeGroup) = G.q
 security(G::PrimeGroup) = G.t
+
+import Base.*
+function *(X::PrimeGroup,Y::PrimeGroup)
+    # Parametrizing group with p and q is not an option as that would recompile the code. 
+    qx,qy = order(X), order(Y)
+    px,py = X.G.mod, Y.G.mod
+    
+    if px!=py || qx!=qy
+        error("Groups are not equal")
+    else
+        G = X.G * Y.G
+        return PrimeGroup(G,X.q,X.t)
+    end
+end
+
 
 ### Some prime group generation algorithms. References:
 # + https://crypto.stackexchange.com/questions/820/how-does-one-calculate-a-primitive-root-for-diffie-hellman

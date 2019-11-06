@@ -1,7 +1,7 @@
 ### Wrapping elliptic group from ECC
 using ECC
 
-struct EllipticGroup <: AbstractGroup 
+struct EllipticGroup <: CyclicGroup 
     G
     q
     t::Int
@@ -19,3 +19,10 @@ function Scep256k1Group()
 end
 
 ^(G::EllipticGroup,n) = EllipticGroup(n*G.G,G.q,G.t)
+
+# When more elliptic groups appears then check for the elements should become important.
+import Base.*
+*(X::EllipticGroup,Y::EllipticGroup) = EllipticGroup(X.G + Y.G,X.q,X.t)
+
+import Base.==
+==(X::EllipticGroup,Y::EllipticGroup) = X.G==Y.G
