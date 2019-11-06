@@ -32,6 +32,17 @@ function *(X::PrimeGroup,Y::PrimeGroup)
     end
 end
 
+import Base.==
+function ==(X::PrimeGroup,Y::PrimeGroup)
+    qx,qy = order(X), order(Y)
+    px,py = X.G.mod, Y.G.mod
+    
+    if px!=py || qx!=qy
+        error("Groups are not equal")
+    else
+        return X.G==Y.G
+    end
+end
 
 ### Some prime group generation algorithms. References:
 # + https://crypto.stackexchange.com/questions/820/how-does-one-calculate-a-primitive-root-for-diffie-hellman
@@ -44,7 +55,7 @@ function SophieGermainGroup(rng::AbstractRNG,g::Integer,t::Int)
         q = rngprime(rng,2*t)
         p = 2*q + 1
         if g!=p-1 && isprime(p)
-            return PrimeGroup(g,p,q,t)
+            return PrimeGroup(g,p,2*q,t)
         end
     end
 end

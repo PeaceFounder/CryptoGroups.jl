@@ -10,8 +10,6 @@ function testgroup(G)
     @test G^(order(G) + 1) == G
 end
 
-
-
 G = PrimeGroup(5,23,totient(23),4)
 @show G^2
 @show value(G)
@@ -40,18 +38,24 @@ testgroup(G)
 
 CryptoGroups.FirstOakleyGroup()
 CryptoGroups.SecondOakleyGroup()
-CryptoGroups.MODP160Group()
-CryptoGroups.MODP224Group()
-CryptoGroups.MODP256Group()
+
+G = CryptoGroups.MODP160Group()
+testgroup(G)
+
+G = CryptoGroups.MODP224Group()
+testgroup(G)
+
+G = CryptoGroups.MODP256Group()
+#testgroup(G)
 
 ### Group generation algorithms
 
 using Paillier
 rng = Paillier.default_rng()
 
-#G = CryptoGroups.SophieGermainGroup(rng,2,5)
-#testgroup(G)
+G = CryptoGroups.SophieGermainGroup(rng,2,100)
+testgroup(G)
 
 ### Seems to be problem with large numbers
-CryptoGroups.DSAStandartGroup(rng,10,10)
+G = CryptoGroups.DSAStandartGroup(rng,10,10)
 testgroup(G)
