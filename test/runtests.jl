@@ -17,6 +17,7 @@ G = PrimeGroup(5,23,totient(23),4)
 @show order(G)
 
 @test PrimeGroup(binary(G^2),G)==G^2
+@test typeof(G)(binary(G^2),G)==G^2
 
 testgroup(G)
 
@@ -29,6 +30,7 @@ G = CryptoGroups.Scep256k1Group()
 @show order(G)
 
 @test EllipticGroup(binary(G^2),G)==G^2
+@test typeof(G)(binary(G^2),G)==G^2
 
 testgroup(G)
 

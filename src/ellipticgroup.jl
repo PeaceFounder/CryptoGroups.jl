@@ -7,7 +7,8 @@ struct EllipticGroup{T} <: CyclicGroup
     t::Int
 end
 
-EllipticGroup(sec,G::EllipticGroup{T}) where T <: S256Point = EllipticGroup(sec2point(sec),G.q,G.t)
+EllipticGroup{T}(sec,G::EllipticGroup{T}) where T <: S256Point = EllipticGroup(sec2point(sec),G.q,G.t)
+EllipticGroup(sec,G::EllipticGroup) = typeof(G)(sec,G)
 
 binary(G::EllipticGroup{T}) where T <: S256Point = point2sec(G.G)
 value(G::EllipticGroup{T}) where T <: S256Point = G.G.𝑥.𝑛
