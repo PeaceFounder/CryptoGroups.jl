@@ -1,17 +1,19 @@
 ### Wrapping elliptic group from ECC
 using ECC
 
-struct EllipticGroup <: CyclicGroup 
-    G
+struct EllipticGroup{T} <: CyclicGroup 
+    G::T
     q
     t::Int
 end
 
-#EllipticGroup(val::Integer,G::EllipticGroup) = EllipticGroup(val,,G.q,G.t)
+EllipticGroup(sec,G::EllipticGroup{T}) where T <: S256Point = EllipticGroup(sec2point(sec),G.q,G.t)
 
-value(G::EllipticGroup) = G.G.𝑥.𝑛
+binary(G::EllipticGroup{T}) where T <: S256Point = point2sec(G.G)
+value(G::EllipticGroup{T}) where T <: S256Point = G.G.𝑥.𝑛
 security(G::EllipticGroup) = G.t
 order(G::EllipticGroup) = G.q
+
 
 function Scep256k1Group()
     G = ECC.G # G the scep256k1 generator point
