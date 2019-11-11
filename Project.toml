@@ -1,7 +1,7 @@
 name = "CryptoGroups"
 uuid = "bc997328-bedd-407e-bcd3-5758e064a52d"
 authors = ["akels <akels14@gmail.com>"]
-version = "0.1.3"
+version = "0.1.1"
 
 [deps]
 ECC = "a99b485a-c5c8-540e-ab00-7a7265134077"
