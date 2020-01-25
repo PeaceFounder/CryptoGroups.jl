@@ -3,6 +3,11 @@
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
+[[BitConverter]]
+git-tree-sha1 = "5274a781a2e71cfb9a2083dfcd2ca5318716a660"
+uuid = "3a3ce9e8-98e7-11e9-0fa0-055639f146d3"
+version = "0.1.1"
+
 [[Distributed]]
 deps = ["Random", "Serialization", "Sockets"]
 uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
@@ -45,9 +50,9 @@ version = "0.2.4"
 
 [[Polynomials]]
 deps = ["LinearAlgebra", "RecipesBase"]
-git-tree-sha1 = "f7c0c07e82798aef542d60a6e6e85e39f4590750"
+git-tree-sha1 = "ae71c2329790af97b7682b11241b3609e4d48626"
 uuid = "f27b6e38-b328-58d1-80ce-0feddd5e7a45"
-version = "0.5.3"
+version = "0.6.0"
 
 [[Primes]]
 deps = ["Test"]

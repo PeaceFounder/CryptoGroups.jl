@@ -25,7 +25,7 @@ include("primegroup.jl")
 include("rfc.jl")
 include("ellipticgroup.jl")
 
-export PrimeGroup, EllipticGroup, AbstractGroup, CyclicGroup, value, security, order, binary
+export PrimeGroup, EllipticGroup, AbstractGroup, CyclicGroup, value, security, order #, binary
 
 end # module
 

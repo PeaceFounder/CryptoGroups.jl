@@ -16,8 +16,8 @@ G = PrimeGroup(5,23,totient(23),4)
 @show security(G)
 @show order(G)
 
-@test PrimeGroup(binary(G^2),G)==G^2
-@test typeof(G)(binary(G^2),G)==G^2
+@test PrimeGroup(value(G^2),G)==G^2
+@test typeof(G)(value(G^2),G)==G^2
 
 testgroup(G)
 
@@ -26,11 +26,12 @@ testgroup(G)
 G = CryptoGroups.Scep256k1Group()
 @show G^2
 @show value(G)
+
 @show security(G)
 @show order(G)
 
-@test EllipticGroup(binary(G^2),G)==G^2
-@test typeof(G)(binary(G^2),G)==G^2
+@test EllipticGroup(value(G^2),G)==G^2
+@test typeof(G)(value(G^2),G)==G^2
 
 testgroup(G)
 
@@ -46,7 +47,7 @@ G = CryptoGroups.MODP224Group()
 testgroup(G)
 
 G = CryptoGroups.MODP256Group()
-#testgroup(G)
+testgroup(G)
 
 ### Group generation algorithms
 

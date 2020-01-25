@@ -4,6 +4,7 @@ authors = ["akels <akels14@gmail.com>"]
 version = "0.1.1"
 
 [deps]
+BitConverter = "3a3ce9e8-98e7-11e9-0fa0-055639f146d3"
 ECC = "a99b485a-c5c8-540e-ab00-7a7265134077"
 Mods = "7475f97c-0381-53b1-977b-4c60186c8d62"
 Paillier = "84e01822-a062-59e4-8289-aa032edeecdd"
@@ -11,11 +12,11 @@ Primes = "27ebfcd6-29c5-5fa9-bf4b-fb8fc14df3ae"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [compat]
-julia = "1"
 ECC = "0.2"
 Mods = "0.1"
 Paillier = "0.2"
 Primes = "0.4"
+julia = "1"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
