@@ -1,7 +1,7 @@
 name = "CryptoGroups"
 uuid = "bc997328-bedd-407e-bcd3-5758e064a52d"
 authors = ["akels <akels14@gmail.com>"]
-version = "0.1.1"
+version = "0.1.2"
 
 [deps]
 BitConverter = "3a3ce9e8-98e7-11e9-0fa0-055639f146d3"
@@ -16,6 +16,7 @@ ECC = "0.2"
 Mods = "0.1"
 Paillier = "0.2"
 Primes = "0.4"
+BitConverter = "0.1"
 julia = "1"
 
 [extras]
