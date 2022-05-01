@@ -1,0 +1,146 @@
+using Test
+using CryptoGroups
+
+import CryptoGroups: Reducer, F2PB, F2GNB, print_poly, red!, mul, mul_gnb, construct_integer_order_prime, gn_basis_exist, gn_basis_representation_rule, FP, order, specialize
+
+
+#poly = Reducer([10, 2, 1])
+#x = 𝔽₂_Reducer{poly}(bin"101")
+
+
+f = reverse(bin"10011")
+c = reverse(bin"1100101")
+@test red!(c, f) == bin"1111" # I already changed rem and order functions and that this is the result
+
+### Additional test for multiplication
+
+@test mul(bin"0100", bin"0100") == bin"00100000"
+
+
+a = reverse(bin"1101")
+b = reverse(bin"1001")
+
+c = mul(a, b)
+
+@test red!(c, f) == bin"1111"
+
+
+### Reduction
+#R = Reducer(f)
+#@test F2PB{R}(reverse(bin"1100101")) == F2PB{R}(bin"1111")
+
+#### Multiplication
+R = Reducer(f)
+
+a = F2PB{R}(bin"1011")
+b = F2PB{R}(bin"1001")
+
+c = F2PB{R}(bin"1111")
+
+@test a*b == c
+
+### Testing generation of basis elements
+
+α = F2PB{R}(bin"0100")
+
+@test α^(order(α) + 1) == α
+
+@test α^8 * α^8 == α^16
+@test α * α * α * α * α == α^5
+@test α^14 * α == α^15
+
+@test inv(α) * α == one(α)
+
+
+@test zero(F2GNB{5, 1}) == F2GNB{5, 1}(bin"00000")
+@test one(F2GNB{5, 1}) == F2GNB{5, 1}(bin"11111")
+
+a = F2GNB{4, 1}(bin"1101")
+b = F2GNB{4, 1}(bin"1011")
+
+@test a + b == F2GNB{4, 1}(bin"0110")
+
+
+@test construct_integer_order_prime(3, 3*4 + 1) in [3, 9, 1]
+
+### Now the last bit of getting multiplication right 
+
+@test mul_gnb(bin"1000", bin"1101", 3) == bin"0010"
+
+
+@test gn_basis_exist(4, 3) == true
+
+# C.1 Table of GNB in X9.62
+@test gn_basis_representation_rule(161) == 6
+@test gn_basis_representation_rule(185) == 8
+@test gn_basis_representation_rule(186) == 2
+@test gn_basis_representation_rule(190) == 10
+@test gn_basis_representation_rule(300) == 19
+@test gn_basis_representation_rule(487) == 4
+@test gn_basis_representation_rule(628) == 7
+@test gn_basis_representation_rule(1380) == 1
+@test gn_basis_representation_rule(1703) == 2
+
+### 
+
+a = F2GNB{4, 3}(bin"1000")
+b = F2GNB{4, 3}(bin"1101")
+
+c = F2GNB{4, 3}(bin"0010")
+
+@test a * b == c
+
+@test c^(order(c) + 1) == c
+@test inv(c) * c == one(c)
+
+
+a = FP{23}(17)
+b = FP{23}(3)
+
+@test a * b == FP{23}(5)
+
+@test b^11 == FP{23}(1)
+
+
+#### More diligent testing for polynomial basis
+
+function field2poly(z::BitVector)
+    poly = Int[]
+    for (i, b) in enumerate(z)
+        if b==true
+            push!(poly, i - 1)
+        end
+    end
+    return poly
+end
+
+field2poly(z) = field2poly(z.x)
+
+let
+
+    R = Reducer([163, 7, 6, 3, 0])
+    F = F2PB{R}
+
+    f = convert(BitVector, R)
+
+    x19 = F(BitVector(i==20 for i in 1:163))
+    @test findfirst(x -> x== 1, mul(x19.x, x19.x)) == 39
+
+    x38 = F(BitVector(i==39 for i in 1:163))
+    @test findfirst(x -> x==1, red!(x38.x, f)) == 39
+
+    @test field2poly(x19 * x19) == [38]
+
+    x144 = F(BitVector(i==145 for i in 1:163))
+    x145 = F(BitVector(i==146 for i in 1:163))
+    @test field2poly(x145 * x144) == [126, 129, 132, 133]
+
+    x160 = F(BitVector(i==161 for i in 1:163))
+    x159 = F(BitVector(i==160 for i in 1:163))
+
+    @test field2poly(x160 * x159) == [0, 3, 6, 7, 156, 159, 162] 
+
+    _x319 = BitVector(i==320 for i in 1:163*2)
+    @test field2poly(red!(_x319, f)) == [0, 3, 6, 7, 156, 159, 162]
+
+end

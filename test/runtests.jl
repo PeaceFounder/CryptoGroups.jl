@@ -1,62 +1,28 @@
-using CryptoGroups
 using Test
 
-### Testing prime groups
-using Primes
-
-function testgroup(G)
-    @test G*G^2 == G^3
-    @test (G^2)^2 == G^4
-    @test G^(order(G) + 1) == G
+@testset "Galois field tests" begin
+    include("galois_fields.jl")
 end
 
-G = PrimeGroup(5,23,totient(23),4)
-@show G^2
-@show v = value(G)
-@show security(G)
-@show order(G)
+@testset "Elliptic curve primitive tests" begin
+    include("elliptic_curves.jl")
+end
 
-@test PrimeGroup(value(G^2),G)==G^2
-@test typeof(G)(value(G^2),G)==G^2
+@testset "Testing NIST elliptic curves" begin
+    include("curve_specs.jl")
+end
 
-testgroup(G)
+@testset "Testing external fields" begin
+    include("../examples/external_fields.jl")
+end
 
-### Testing EllitpicGroup
+@testset "Testing groups and ElGamal" begin
+    include("groups.jl")
+    include("elgamal.jl")
+end
 
-G = CryptoGroups.Scep256k1Group()
-@show G^2
-@show value(G)
+@testset "Testing independent basis generation" begin
+    include("gbasis.jl")
+end
 
-@show security(G)
-@show order(G)
 
-@test EllipticGroup(value(G^2),G)==G^2
-@test typeof(G)(value(G^2),G)==G^2
-
-testgroup(G)
-
-###  RFC standart
-
-CryptoGroups.FirstOakleyGroup()
-CryptoGroups.SecondOakleyGroup()
-
-G = CryptoGroups.MODP160Group()
-testgroup(G)
-
-G = CryptoGroups.MODP224Group()
-testgroup(G)
-
-G = CryptoGroups.MODP256Group()
-testgroup(G)
-
-### Group generation algorithms
-
-using Paillier
-rng = Paillier.default_rng()
-
-G = CryptoGroups.SophieGermainGroup(rng,2,100)
-testgroup(G)
-
-### Seems to be problem with large numbers
-G = CryptoGroups.DSAStandartGroup(rng,10,10)
-testgroup(G)

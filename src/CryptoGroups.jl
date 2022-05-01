@@ -1,31 +1,25 @@
 module CryptoGroups
 
-using Random: AbstractRNG
-
-abstract type AbstractGroup end
-abstract type CyclicGroup <: AbstractGroup end
-
-import Base.^
-^(G::AbstractGroup,n) = typeof(G)(G.G^n,G.q,G.t)
-
-"""
-The value of the group element.
-"""
-value(G::AbstractGroup) = error("Must be implemented by Group.")
-
-"""
-The number of bits one should use for the secret a and b in Diffie-Hellman key exchange.
-"""
-security(G::AbstractGroup) = error("Must be implemented by Group.")
-order(G::AbstractGroup) = error("Must be implemented by Group.")
-binary(G::AbstractGroup) = value(G) ### Default
+using Infiltrator
 
 include("utils.jl")
-include("primegroup.jl")
-include("rfc.jl")
-include("ellipticgroup.jl")
 
-export PrimeGroup, EllipticGroup, AbstractGroup, CyclicGroup, value, security, order #, binary
+include("elliptic_curves/abstract_fields.jl")
+include("elliptic_curves/galois_fields.jl")
+include("elliptic_curves/elliptic_curves.jl")
+include("elliptic_curves/basis_specs.jl")
+include("elliptic_curves/ecpoint.jl")
 
-end # module
 
+include("groups/groups.jl")
+include("groups/elgamal.jl")
+include("groups/primitives.jl")
+include("groups/legacy.jl")
+
+
+include("specs/Specs.jl")
+
+
+export @bin_str
+
+end
