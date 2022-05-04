@@ -130,7 +130,7 @@ end
 Base.show(io::IO, x::StaticBitVector) = print(io, join(i ? "1" : "0" for i in convert(BitVector, x)))
 
 
-modinv(s, q) = gcdx(s, q)[2]
+modinv(s, q) = mod(gcdx(s, q)[2], q)
 
 
 

@@ -5,6 +5,11 @@ Base.broadcasted(f::Function, x::Group, y::AbstractVector{<:Integer}) = f.((x fo
 Base.broadcasted(::typeof(*), x::G, y::Vector{G}) where G <: Group = (x for i in 1:length(y)) .* y 
 Base.broadcasted(::typeof(*), x::Vector{G}, y::G) where G <: Group =  x .* (y for i in 1:length(x))
 
+order(x::G) where G <: Group = order(G)
+
+import Base./
+/(x::G, y::G) where G <: Group = x * inv(y)
+
 
 struct ECGroup{P<:ECPoint} <: Group
     x::P
@@ -15,21 +20,23 @@ end
 Base.:*(x::G, y::G) where G <: ECGroup = G(x.x + y.x)
 
 function Base.:^(x::G, n::Integer) where G <: ECGroup
-    if n > 0
-        return G(n * x.x)
-    elseif n < 0
-        m = order(G) + n #+ 1
-        return G(m * x.x)
-    elseif mod(n, order(G)) == 0
-        error("Power leads to a point at infinity")
-    end
+    n_mod = mod(n, order(G))
+
+    @assert n_mod != 0 "A bad exponent"
+
+    return G(n_mod * x.x)
+    # elseif n < 0
+    #     m = order(G) + n #+ 1
+    #     return G(m * x.x)
+    # elseif mod(n, order(G)) == 0
+    #     error("Power leads to a point at infinity")
+    # end
 end
 
 Base.inv(g::G) where G <: ECGroup = g^(order(G) - 1)
 
 
 order(::Type{ECGroup{P}}) where P = order(P)
-order(x::G) where G <: ECGroup = order(G)
 
 validate(x::ECGroup) = validate(x.x)
 
@@ -40,6 +47,16 @@ gx(p::ECGroup) = gx(p.x)
 gy(p::ECGroup) = gy(p.x)
 
 Base.isless(x::G, y::G) where G <: ECGroup = gx(x) == gx(y) ? gx(x) < gx(y) : gy(x) < gy(y)
+
+
+function Base.show(io::IO, g::G) where G <: ECGroup
+    show(io, G)
+    print(io, " <| (")
+    show(io, gx(g))
+    print(io, ", ")
+    show(io, gy(g))
+    print(io, ")")
+end
 
 
 # Static fields for PGroup
@@ -67,7 +84,10 @@ struct PGroup{S} <: Group
     g::BigInt
 
     function PGroup{S}(x::BigInt) where S
-        @assert 1 < x < S.p "Not in range"
+        #@assert 1 < x < S.p "Not in range"
+        # Relaxing a little so that group products could happen propeerly
+        # But is a presence of 1 in multiplicative products a vulnerability?
+        @assert 0 < x < S.p "Not in range" 
         new{S}(x)
     end
 
@@ -83,8 +103,9 @@ specialize(::Type{PGroup}, q::Integer, name::Symbol) = specialize(PGroup, 2*q + 
 
 
 modulus(::Type{PGroup{S}}) where S = BigInt(S.p)
-order(::Type{PGroup{S}}) where S = BigInt(S.q)
+modulus(::G) where G <: PGroup = modulus(G)
 
+order(::Type{PGroup{S}}) where S = BigInt(S.q)
 
 name(::Type{PGroup}) = nothing
 
@@ -137,14 +158,18 @@ import Base.*
 
 
 import Base.^
-^(x::G, n::Integer) where G <: PGroup = G(powermod(value(x), n, modulus(G)))
+function ^(x::G, n::Integer) where G <: PGroup 
+
+    n_mod = mod(n, order(G))
+    @assert n_mod != 0 "A bad exponent"
+    @assert value(x) != 1 "A value 1 is not part of prime group"
+
+    return G(powermod(value(x), n_mod, modulus(G)))
+end
 
 
 import Base.inv
 inv(x::G) where G <: PGroup = G(modinv(value(x), modulus(G)))
-
-import Base./
-/(x::G, y::G) where G <: PGroup = x * inv(y)
 
 
 Base.:(==)(x::G, y::G) where G <: PGroup = x.g == y.g
@@ -153,3 +178,15 @@ Base.:(==)(x::G, y::G) where G <: PGroup = x.g == y.g
 Base.isless(x::G, y::G) where G <: PGroup = value(x) < value(y)
 
 Base.convert(::Type{G}, x::Integer) where G <: PGroup = G(x)
+
+# function Base.prod(x::Vector{G}) where G <: PGroup
+
+#     p = modulus(G)
+#     s = value(x[1])
+    
+#     for i in x[2:end]
+#         s = mod(s * value(i), p)
+#     end
+    
+#     return G(s)
+# end

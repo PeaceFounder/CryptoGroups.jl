@@ -119,3 +119,6 @@ end
 (dec::Dec)(e::ElGamal) = [dec(ei) for ei in e]
 
 Base.isless(x::Tuple{G, G}, y::Tuple{G, G}) where G <: Group = x[1] == y[1] ? x[2] < y[2] : x[1] < y[1]
+
+
+Base.prod(e::ElGamal{G}) where G <: Group = (prod(e.a), prod(e.b))

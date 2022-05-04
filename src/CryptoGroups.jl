@@ -1,6 +1,6 @@
 module CryptoGroups
 
-using Infiltrator
+#using Infiltrator
 
 include("utils.jl")
 

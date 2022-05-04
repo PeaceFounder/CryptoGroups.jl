@@ -43,26 +43,27 @@ function name(::Type{ECPoint{P, S}}) where {P <: AbstractPoint, S}
 end
 
 
+
 ### May need to do epoint seperatelly
 function Base.show(io::IO, ::Type{P}) where P <: ECPoint
-    try
+    if @isdefined P
         if name(P) == nothing
             Base._show_type(io, P)
         else
             print(io, name(P))
         end
-    catch e
-        @warn "An odd kind of error: $e"  # UndefVarError(:P)
+    else
         print(io, "ECPoint")
     end
 end
 
+
 function Base.show(io::IO, p::P) where P <: ECPoint
     show(io, P)
     print(io, " <| (")
-    show(io, p.p.x)
+    show(io, gx(p))
     print(io, ", ")
-    show(io, p.p.y)
+    show(io, gy(p))
     print(io, ")")
 end
 

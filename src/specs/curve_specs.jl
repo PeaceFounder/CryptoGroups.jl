@@ -256,7 +256,7 @@ function specialize(::Type{AffinePoint{Weierstrass, F}}, curve::ECP) where F <: 
 end
 
 specialize(::Type{AffinePoint}, spec::ECP) = specialize(AffinePoint{Weierstrass, FP}, spec)
-specialize(::Type{ECPoint}, spec::ECP; name = nothing) = specialize(ECPoint{AffinePoint}, spec; name)
+#specialize(::Type{ECPoint}, spec::ECP; name = nothing) = specialize(ECPoint{AffinePoint}, spec; name)
 
 
 function specialize(::Type{F}, curve::BEC_PB) where F <: BinaryField
@@ -282,18 +282,6 @@ specialize(::Type{AffinePoint}, curve::BEC_PB) = specialize(AffinePoint{BinaryCu
 specialize(::Type{AffinePoint{BinaryCurve, F}}, curve::Koblitz_GNB) where F <: BinaryField = specialize(AffinePoint{BinaryCurve, F}, BEC_GNB(curve))
 specialize(::Type{AffinePoint{BinaryCurve, F}}, curve::Koblitz_PB) where F <: BinaryField = specialize(AffinePoint{BinaryCurve, F}, BEC_PB(curve))
 
-
-function specialize(::Type{ECPoint{P}}, curve::Spec; name=nothing) where P <: AbstractPoint
-    
-    Q = specialize(P, curve)
-
-    _order = order(curve)
-    _cofactor = 1 # Need to update this one
-    
-    R = specialize(ECPoint{Q}, _order, _cofactor, name)
-
-    return R
-end
 
 ################################ Constants #################
 

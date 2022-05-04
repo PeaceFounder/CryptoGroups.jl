@@ -22,6 +22,7 @@ end
 end
 
 @testset "Testing independent basis generation" begin
+    include("primitives.jl")
     include("gbasis.jl")
 end
 

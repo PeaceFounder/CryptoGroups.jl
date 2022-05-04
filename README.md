@@ -3,7 +3,7 @@
 
 Cryptographic groups are a fundamental building block for digital signatures, key exhange algorithm, assymetric encryption and many other exciting algorithms of practical importance. 
 
-
+![](./doc/assets/CryptoGroups types.svg) 
 
 ## ToDo
 
@@ -28,7 +28,7 @@ Cryptographic groups are a fundamental building block for digital signatures, ke
       * [ ] Add a square root function for elliptic curves
       * [ ] Add point, field, integer conversions as specified in X9.62 section 4.3 (necessary for square root tests)
       * [ ] Make a prg iterator for numbers
-  * [ ] Fix the `UndefVarError(:P)` in the show method
+  * [x] Fix the `UndefVarError(:P)` in the show method
   * [ ] Specify cofactors in the elliptic curve specs and encode cofactor assertions in `ECPoint`
   * [ ] Does order needs to be computed from `n` by divifing with cofactor `h`?
   * [ ] Add some docs

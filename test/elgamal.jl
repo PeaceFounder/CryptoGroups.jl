@@ -76,14 +76,13 @@ end
 
 # This one gives the UndefVarError(:P) error
 
-# let
-#     spec = CryptoGroups.Curve_B_163_PB
+let
+    spec = CryptoGroups.Curve_B_163_PB
+    G = specialize(ECGroup, spec; name = :B_163_PB)
+    g = G <| generator(spec)
 
-#     G = specialize(ECGroup, spec; name = :B_163_PB)
-#     g = G <| generator(spec)
-
-#     elgamal_test(g)
-# end
+    elgamal_test(g)
+end
 
 
 
