@@ -3,7 +3,7 @@
 
 Cryptographic groups are a fundamental building block for digital signatures, key exhange algorithm, assymetric encryption and many other exciting algorithms of practical importance. 
 
-![](./doc/assets/CryptoGroups types.svg) 
+![](https://raw.githubusercontent.com/PeaceFounder/CryptoGroups.jl/b7e6d4b8be1807e124422229428bb4c289523769/doc/assets/CryptoGroups%20types.svg) 
 
 ## ToDo
 
