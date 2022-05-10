@@ -24,11 +24,11 @@ Cryptographic groups are a fundamental building block for digital signatures, ke
   This may be addressed at constructor level, but requires to know the cofactor. 
 
   * [x] Adding accessor methods to `AffinePoint` as `_a` and `_b` and acessor methods to curves `a` and `b`
-  * [ ] Implement independent basis generation for elliptic curves
-      * [ ] Add a square root function for elliptic curves
-      * [ ] Add point, field, integer conversions as specified in X9.62 section 4.3 (necessary for square root tests)
-      * [ ] Make a prg iterator for numbers
+  * [x] Implement independent basis generation for elliptic curves
+      * [x] Add a square root function for elliptic curves (Imported from CryptoUtils)
+  * [ ] Make a prg iterator for numbers
   * [x] Fix the `UndefVarError(:P)` in the show method
+  * [ ] Add point, field, integer conversions as specified in X9.62 section 4.3 
   * [ ] Specify cofactors in the elliptic curve specs and encode cofactor assertions in `ECPoint`
   * [ ] Does order needs to be computed from `n` by divifing with cofactor `h`?
   * [ ] Add some docs

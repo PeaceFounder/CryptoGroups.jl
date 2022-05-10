@@ -1,9 +1,10 @@
 name = "CryptoGroups"
 uuid = "bc997328-bedd-407e-bcd3-5758e064a52d"
 authors = ["Janis Erdmanis <akels14@gmail.com>"]
-version = "0.2.0"
+version = "0.2.1"
 
 [deps]
+CryptoUtils = "04afed74-ac16-11e9-37b6-1352e3e05830"
 Nettle = "49dea1ee-f6fa-5aa6-9a11-8816cee7d4b9"
 Primes = "27ebfcd6-29c5-5fa9-bf4b-fb8fc14df3ae"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"

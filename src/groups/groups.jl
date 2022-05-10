@@ -25,12 +25,6 @@ function Base.:^(x::G, n::Integer) where G <: ECGroup
     @assert n_mod != 0 "A bad exponent"
 
     return G(n_mod * x.x)
-    # elseif n < 0
-    #     m = order(G) + n #+ 1
-    #     return G(m * x.x)
-    # elseif mod(n, order(G)) == 0
-    #     error("Power leads to a point at infinity")
-    # end
 end
 
 Base.inv(g::G) where G <: ECGroup = g^(order(G) - 1)
@@ -42,9 +36,10 @@ validate(x::ECGroup) = validate(x.x)
 
 Base.:(==)(x::G, y::G) where G <: ECGroup = x.x == y.x
 
-
 gx(p::ECGroup) = gx(p.x)
 gy(p::ECGroup) = gy(p.x)
+
+modulus(::Type{ECGroup{P}}) where P <: ECPoint = modulus(P)
 
 Base.isless(x::G, y::G) where G <: ECGroup = gx(x) == gx(y) ? gx(x) < gx(y) : gy(x) < gy(y)
 
@@ -67,13 +62,11 @@ struct static_PGroup{N} ### Type parameter is essential to ensure it to be bitst
 
     static_PGroup(p::StaticBigInt{N}, q::StaticBigInt{N}, name::Symbol) where N = new{N}(p, q, string2uint(string(name)))
     function static_PGroup(p::Integer, q::Integer, name::Symbol) 
-        # Need to resolve padding to make them equal
 
         n = bitlength(p)
 
         _p = StaticBigInt(p; n)
         _q = StaticBigInt(q; n)
-        #new(_p, _q, name)
         static_PGroup(_p, _q, name)
     end
 

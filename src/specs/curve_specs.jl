@@ -8,26 +8,69 @@ _parse_bits(x::BitVector, m::Int) = x
 _parse_bits(x::Nothing, m::Int) = x
 
 
+_parse_int(x::String) = parse(BigInt, x, base=16)
+_parse_int(x::Integer) = BigInt(x)
+
+
+function spec(::Type{P}; kwargs...) where P <: AbstractPoint
+
+    n = hasmethod(order, Tuple{Type{P}}) ? order(P) : nothing
+    h = hasmethod(cofactor, Tuple{Type{P}}) ? cofactor(P) : nothing
+
+    EQ = eq(P)
+    F = field(P)
+
+    return spec(EQ, F; n, h, kwargs...)
+end
+
+spec(p::P) where P <: AbstractPoint = spec(P; Gx=value(gx(p)), Gy=value(gy(p)))
+
+
+spec(::Type{ECGroup{P}}) where P = spec(P)
+spec(g::ECGroup) = spec(g.p)
+
+
+
 @kwdef struct ECP <: Spec
     p::BigInt
-    n::BigInt
+    n::Union{BigInt, Nothing} = nothing
+    a::BigInt = -3
     b::BigInt
-    Gx::BigInt
-    Gy::BigInt
+    Gx::Union{BigInt, Nothing} = nothing
+    Gy::Union{BigInt, Nothing} = nothing
 end
 
 order(curve::ECP) = curve.n
 generator(curve::ECP) = (curve.Gx, curve.Gy)
 
+modulus(curve::ECP) = curve.p
 
-function ECP(p::BigInt, n::BigInt, b::String, Gx::String, Gy::String)
+
+
+function ECP(p, n, a, b, Gx, Gy)
     
-    _b = parse(BigInt, b, base=16)
-    _Gx = parse(BigInt, Gx, base=16)
-    _Gy = parse(BigInt, Gy, base=16)
+    _a = mod(_parse_int(a), p) # taking mod as conventually a=-3
+    _b = _parse_int(b)
+    _Gx = _parse_int(Gx)
+    _Gy = _parse_int(Gy)
 
-    return ECP(p, n, _b, _Gx, _Gy)
+    return ECP(p, n, _a, _b, _Gx, _Gy)
 end
+
+# I could always add a field for equation to be used
+
+function spec(::Type{EQ}, ::Type{F}; n=nothing, h=nothing, Gx=nothing, Gy=nothing) where {EQ <: Weierstrass, F <: PrimeField}
+    
+    _a = a(EQ)
+    _b = b(EQ)
+
+    p = modulus(F)
+
+    return ECP(p, n, _a, _b, Gx, Gy) # I will need to add H in the end here
+end
+
+
+Base.:(==)(x::ECP, y::ECP) = x.p == y.p && x.n == y.n && x.a == y.a && x.b == y.b && x.Gx == y.Gx && x.Gy == y.Gy
 
 
 abstract type EC2N <: Spec end
@@ -247,8 +290,7 @@ end
 
 function specialize(::Type{AffinePoint{Weierstrass, F}}, curve::ECP) where F <: PrimeField
 
-    (; p, b) = curve
-    a = p - 3
+    (; p, a, b) = curve
 
     P = AffinePoint{specialize(Weierstrass, a, b), specialize(F, p)}
     

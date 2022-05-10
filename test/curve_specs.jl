@@ -1,7 +1,7 @@
 using Test
 
 import CryptoGroups
-import CryptoGroups: generator, order, oncurve, FP, Weierstrass, BinaryCurve, F2PB, F2GNB, @def, specialize, <|, validate, ECPoint, AffinePoint
+import CryptoGroups: generator, order, oncurve, FP, Weierstrass, BinaryCurve, F2PB, F2GNB, @def, specialize, <|, validate, ECPoint, AffinePoint, spec
 
 const FULL_TEST = false
 
@@ -56,3 +56,5 @@ end
 @def P_192 ECPoint{AffinePoint{Weierstrass, FP}} CryptoGroups.Curve_P_192
 
 @test oncurve(P_192 <| generator(CryptoGroups.Curve_P_192))
+
+@test spec(P_192 <| generator(CryptoGroups.Curve_P_192)) == CryptoGroups.Curve_P_192

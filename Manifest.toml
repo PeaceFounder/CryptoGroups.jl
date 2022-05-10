@@ -12,6 +12,12 @@ uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 [[deps.Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
+[[deps.CryptoUtils]]
+deps = ["Primes"]
+git-tree-sha1 = "5cf33e96d18c8aa607bc45b9c0db0e19367ad24c"
+uuid = "04afed74-ac16-11e9-37b6-1352e3e05830"
+version = "0.1.1"
+
 [[deps.Dates]]
 deps = ["Printf"]
 uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"

@@ -13,12 +13,17 @@ end
 AffinePoint{E, F}(x, y) where {E <: EllipticCurve, F <: Field} = AffinePoint{E, F}(F <| x, F <| y)
 
 
+eq(::Type{AffinePoint{EQ, F}}) where {EQ <: EllipticCurve, F <: Field} = EQ
+field(::Type{AffinePoint{EQ, F}}) where {EQ <: EllipticCurve, F <: Field} = F
+
+
 <|(::Type{P}, x::Tuple{BigInt, BigInt}) where P <: AffinePoint = P(x...)
 <|(::Type{P}, x::Tuple{BitVector, BitVector}) where P <: AffinePoint = P(x...)
 
 gx(p::AffinePoint) = p.x
 gy(p::AffinePoint) = p.y
 
+modulus(::Type{AffinePoint{<:EllipticCurve, F}}) where F <: PrimeField = modulus(F)
 
 Base.zero(::Type{AffinePoint{E, F}}) where {E <: EllipticCurve, F <: Field} = AffinePoint{E , F}(zero(F), zero(F))
 Base.zero(x::P) where P <: AffinePoint = zero(P)
@@ -191,5 +196,3 @@ function oncurve(u::P) where P <: AffinePoint{<:BinaryCurve, <:Field}
 
     return y^2 + x*y == x^3 + a*x^2 + b
 end
-
-

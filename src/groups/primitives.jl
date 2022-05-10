@@ -1,5 +1,7 @@
 using Nettle
 using Random: AbstractRNG
+using CryptoUtils: is_quadratic_residue, sqrt_mod_prime
+
 
 struct Hash
     spec::String
@@ -175,12 +177,58 @@ function Base.rand(prg::PRG, ::Type{G}, N::Integer; nr::Integer = 0) where G <: 
 end
 
 
-# leaf(x::String) = encode(Leaf(x))
 
-# function crs(𝓖, N::Integer, prghash::Hash, rohash::Hash; nr::Integer = 0, ρ = UInt8[], d = [ρ..., leaf("generators")...])
-    
-#     roprg = ROPRG(d, rohash, prghash)
-#     prg = roprg(UInt8[]) # d is a better argument than x
-    
-#     return crs(𝓖, N, prg; nr)
-# end
+function Base.rand(prg::PRG, spec::ECP, N::Integer; nr::Integer = 0) 
+
+    (; a, b) = spec
+
+    p = modulus(spec)
+    q = order(spec)
+
+
+    np = bitlength(p) # 1
+
+    𝐭 = rand(prg, BigInt, N*10; n = np + nr)  # OPTIMIZE
+
+    𝐭′ = mod.(𝐭, big(2)^(np + nr))
+
+    𝐳 = mod.(𝐭′, p)
+
+    𝐡 = Vector{Tuple{BigInt, BigInt}}(undef, N)
+
+    l = 1
+
+    f(x) = x^3 + a*x + b 
+
+    for zi in 𝐳
+        y2 = mod(f(zi), p)
+
+        if is_quadratic_residue(y2, p)
+
+            x = zi
+            y = sqrt_mod_prime(y2, p)
+
+            # The smallest root is taken
+            if p - y < y
+                y = p - y
+            end
+
+            𝐡[l] = (x, y)
+
+            if l == N
+                break
+            else
+                l += 1                
+            end
+        end
+    end
+
+    if l != N
+        error("Not enough numbers for 𝐭 have been allocated")
+    end
+
+    return 𝐡
+end
+
+
+Base.rand(prg::PRG, ::Type{G}, N::Integer; nr::Integer = 0) where G <: ECGroup = G <| rand(prg, spec(G), N; nr)

@@ -73,21 +73,24 @@ testgroup(g)
 
 ### Testing ECGroup
 
-spec = CryptoGroups.Curve_P_256
+let
+    spec = CryptoGroups.Curve_P_256
 
-G = specialize(ECGroup, spec; name = :P_256)
-g = G <| generator(spec)
+    G = specialize(ECGroup, spec; name = :P_256)
+    g = G <| generator(spec)
 
-testgroup(g)
+    testgroup(g)
+end
 
 ###  RFC standart group test with PGroup
 
-spec = CryptoGroups.MODP_1024
-G = specialize(PGroup, spec)
-g = G <| generator(spec)
+let
+    spec = CryptoGroups.MODP_1024
+    G = specialize(PGroup, spec)
+    g = G <| generator(spec)
 
-testgroup(g)
-
+    testgroup(g)
+end
 ### PGroup generation algorithms for 
 
 using Random: MersenneTwister
