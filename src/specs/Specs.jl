@@ -56,3 +56,21 @@ include("curve_specs.jl")
 include("modp_specs.jl")
 
 
+### For now keeping things simple
+# Need to think about a more sustainable strategy
+function spec(x::Symbol)
+    if x == :P_192
+        return Curve_P_192
+    elseif x == :P_244
+        return Curve_P_244
+    elseif x == :P_256
+        return Curve_P_256
+    elseif x == :P_384
+        return Curve_P_384
+    elseif x == :P_521
+        return Curve_P_521
+    else
+        error("$x not implemented")
+    end
+end
+

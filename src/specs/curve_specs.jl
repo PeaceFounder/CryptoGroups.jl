@@ -27,7 +27,7 @@ spec(p::P) where P <: AbstractPoint = spec(P; Gx=value(gx(p)), Gy=value(gy(p)))
 
 
 spec(::Type{ECGroup{P}}) where P = spec(P)
-spec(g::ECGroup) = spec(g.p)
+spec(g::ECGroup) = spec(g.x)
 
 
 
@@ -38,6 +38,17 @@ spec(g::ECGroup) = spec(g.p)
     b::BigInt
     Gx::Union{BigInt, Nothing} = nothing
     Gy::Union{BigInt, Nothing} = nothing
+
+    function ECP(p, n, a, b, Gx, Gy)
+        
+        _a = mod(_parse_int(a), p) # taking mod as conventually a=-3
+        _b = _parse_int(b)
+        _Gx = _parse_int(Gx)
+        _Gy = _parse_int(Gy)
+
+        #return ECP(p, n, _a, _b, _Gx, _Gy)
+        return new(p, n, _a, _b, _Gx, _Gy)
+    end
 end
 
 order(curve::ECP) = curve.n
@@ -45,17 +56,6 @@ generator(curve::ECP) = (curve.Gx, curve.Gy)
 
 modulus(curve::ECP) = curve.p
 
-
-
-function ECP(p, n, a, b, Gx, Gy)
-    
-    _a = mod(_parse_int(a), p) # taking mod as conventually a=-3
-    _b = _parse_int(b)
-    _Gx = _parse_int(Gx)
-    _Gy = _parse_int(Gy)
-
-    return ECP(p, n, _a, _b, _Gx, _Gy)
-end
 
 # I could always add a field for equation to be used
 

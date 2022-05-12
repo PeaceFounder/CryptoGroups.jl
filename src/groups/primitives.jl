@@ -231,4 +231,7 @@ function Base.rand(prg::PRG, spec::ECP, N::Integer; nr::Integer = 0)
 end
 
 
-Base.rand(prg::PRG, ::Type{G}, N::Integer; nr::Integer = 0) where G <: ECGroup = G <| rand(prg, spec(G), N; nr)
+<|(::Type{Vector{G}}, x::Vector) where G <: Group = G[ G <| i for i in x]
+
+
+Base.rand(prg::PRG, ::Type{G}, N::Integer; nr::Integer = 0) where G <: ECGroup = Vector{G} <| rand(prg, spec(G), N; nr)

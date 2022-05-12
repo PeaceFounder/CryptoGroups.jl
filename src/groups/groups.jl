@@ -10,6 +10,7 @@ order(x::G) where G <: Group = order(G)
 import Base./
 /(x::G, y::G) where G <: Group = x * inv(y)
 
+name(x::G) where G <: Group = name(G)
 
 struct ECGroup{P<:ECPoint} <: Group
     x::P
@@ -40,6 +41,8 @@ gx(p::ECGroup) = gx(p.x)
 gy(p::ECGroup) = gy(p.x)
 
 modulus(::Type{ECGroup{P}}) where P <: ECPoint = modulus(P)
+
+name(::Type{ECGroup{P}}) where P <: ECPoint = name(P)
 
 Base.isless(x::G, y::G) where G <: ECGroup = gx(x) == gx(y) ? gx(x) < gx(y) : gy(x) < gy(y)
 
