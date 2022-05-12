@@ -10,6 +10,7 @@ _parse_bits(x::Nothing, m::Int) = x
 
 _parse_int(x::String) = parse(BigInt, x, base=16)
 _parse_int(x::Integer) = BigInt(x)
+_parse_int(::Nothing) = nothing
 
 
 function spec(::Type{P}; kwargs...) where P <: AbstractPoint
