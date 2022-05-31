@@ -1,329 +1,269 @@
-import Base: @kwdef
+# import Base: @kwdef
 
-_parse_seed(seed::String) = hex2bytes(seed)
-_parse_seed(seed::Vector{UInt8}) = seed
+# _parse_seed(seed::String) = hex2bytes(seed)
+# _parse_seed(seed::Vector{UInt8}) = seed
 
-_parse_bits(x::String, N::Int) = hex2bits(x)[end - N + 1:end]
-_parse_bits(x::BitVector, m::Int) = x
-_parse_bits(x::Nothing, m::Int) = x
-
-
-_parse_int(x::String) = parse(BigInt, x, base=16)
-_parse_int(x::Integer) = BigInt(x)
-_parse_int(::Nothing) = nothing
+# _parse_bits(x::String, N::Int) = hex2bits(x)[end - N + 1:end]
+# _parse_bits(x::BitVector, m::Int) = x
+# _parse_bits(x::Nothing, m::Int) = x
 
 
-function spec(::Type{P}; kwargs...) where P <: AbstractPoint
-
-    n = hasmethod(order, Tuple{Type{P}}) ? order(P) : nothing
-    h = hasmethod(cofactor, Tuple{Type{P}}) ? cofactor(P) : nothing
-
-    EQ = eq(P)
-    F = field(P)
-
-    return spec(EQ, F; n, h, kwargs...)
-end
-
-spec(p::P) where P <: AbstractPoint = spec(P; Gx=value(gx(p)), Gy=value(gy(p)))
-
-
-spec(::Type{ECGroup{P}}) where P = spec(P)
-spec(g::ECGroup) = spec(g.x)
+# _parse_int(x::String) = parse(BigInt, x, base=16)
+# _parse_int(x::Integer) = BigInt(x)
+# _parse_int(::Nothing) = nothing
 
 
 
-@kwdef struct ECP <: Spec
-    p::BigInt
-    n::Union{BigInt, Nothing} = nothing
-    a::BigInt = -3
-    b::BigInt
-    Gx::Union{BigInt, Nothing} = nothing
-    Gy::Union{BigInt, Nothing} = nothing
 
-    function ECP(p, n, a, b, Gx, Gy)
+
+# @kwdef struct ECP <: Spec
+#     p::BigInt
+#     n::Union{BigInt, Nothing} = nothing
+#     a::BigInt = -3
+#     b::BigInt
+#     Gx::Union{BigInt, Nothing} = nothing
+#     Gy::Union{BigInt, Nothing} = nothing
+
+#     function ECP(p, n, a, b, Gx, Gy)
         
-        _a = mod(_parse_int(a), p) # taking mod as conventually a=-3
-        _b = _parse_int(b)
-        _Gx = _parse_int(Gx)
-        _Gy = _parse_int(Gy)
+#         _a = mod(_parse_int(a), p) # taking mod as conventually a=-3
+#         _b = _parse_int(b)
+#         _Gx = _parse_int(Gx)
+#         _Gy = _parse_int(Gy)
 
-        #return ECP(p, n, _a, _b, _Gx, _Gy)
-        return new(p, n, _a, _b, _Gx, _Gy)
-    end
-end
+#         #return ECP(p, n, _a, _b, _Gx, _Gy)
+#         return new(p, n, _a, _b, _Gx, _Gy)
+#     end
+# end
 
-order(curve::ECP) = curve.n
-generator(curve::ECP) = (curve.Gx, curve.Gy)
+# order(curve::ECP) = curve.n
+# generator(curve::ECP) = (curve.Gx, curve.Gy)
 
-modulus(curve::ECP) = curve.p
+# modulus(curve::ECP) = curve.p
 
 
 # I could always add a field for equation to be used
 
-function spec(::Type{EQ}, ::Type{F}; n=nothing, h=nothing, Gx=nothing, Gy=nothing) where {EQ <: Weierstrass, F <: PrimeField}
-    
-    _a = a(EQ)
-    _b = b(EQ)
-
-    p = modulus(F)
-
-    return ECP(p, n, _a, _b, Gx, Gy) # I will need to add H in the end here
-end
 
 
-Base.:(==)(x::ECP, y::ECP) = x.p == y.p && x.n == y.n && x.a == y.a && x.b == y.b && x.Gx == y.Gx && x.Gy == y.Gy
+# Base.:(==)(x::ECP, y::ECP) = x.p == y.p && x.n == y.n && x.a == y.a && x.b == y.b && x.Gx == y.Gx && x.Gy == y.Gy
 
 
-abstract type EC2N <: Spec end
+# abstract type EC2N <: Spec end
 
-order(curve::EC2N) = curve.n
-generator(curve::EC2N) = (curve.Gx, curve.Gy)
+# order(curve::EC2N) = curve.n
+# generator(curve::EC2N) = (curve.Gx, curve.Gy)
 
-a(curve::EC2N) = curve.a
-b(curve::EC2N) = curve.b 
+# a(curve::EC2N) = curve.a
+# b(curve::EC2N) = curve.b 
 
 
-@kwdef struct Koblitz_GNB <: EC2N
-    m::Int
-    T::Int
-    n::BigInt
-    a::Int
-    Gx::BitVector
-    Gy::BitVector
+# @kwdef struct Koblitz{GNB} <: EC2N
+#     m::Int
+#     T::Int
+#     n::BigInt
+#     a::Int
+#     Gx::BitVector
+#     Gy::BitVector
 
-    function Koblitz_GNB(m::Int, T::Int, n::BigInt, a::Int, Gx::BitVector, Gy::BitVector)
+#     function Koblitz{GNB}(m::Int, T::Int, n::BigInt, a::Int, Gx::BitVector, Gy::BitVector)
         
-        @assert a in [0, 1]
-        @assert length(Gx) == length(Gy) == m
+#         @assert a in [0, 1]
+#         @assert length(Gx) == length(Gy) == m
         
-        new(m, T, n, a, Gx, Gy)
-    end
-end
+#         new(m, T, n, a, Gx, Gy)
+#     end
+# end
 
-function Koblitz_GNB(m, T, n, a, Gx, Gy)
+# function Koblitz{GNB}(m, T, n, a, Gx, Gy)
 
-    _m = convert(Int, m)
-    _T = convert(Int, T)
-    _a = convert(Int, a)
-    _n = convert(BigInt, n)
-    _Gx = _parse_bits(Gx, _m)
-    _Gy = _parse_bits(Gy, _m)
+#     _m = convert(Int, m)
+#     _T = convert(Int, T)
+#     _a = convert(Int, a)
+#     _n = convert(BigInt, n)
+#     _Gx = _parse_bits(Gx, _m)
+#     _Gy = _parse_bits(Gy, _m)
 
-    return Koblitz_GNB(_m, _T, _n, _a, _Gx, _Gy)
-end
+#     return Koblitz{GNB}(_m, _T, _n, _a, _Gx, _Gy)
+# end
 
 
-function b(curve::Koblitz_GNB)
+# function b(curve::Koblitz{GNB})
     
-    (; m) = curve
+#     (; m) = curve
 
-    _b = 1
-    b′ = _parse_bits_gnb(_b, m)
+#     _b = 1
+#     b′ = _parse_bits_gnb(_b, m)
 
-    return b′
-end
+#     return b′
+# end
 
 
-@kwdef struct Koblitz_PB <: EC2N
-    f::Vector{Int}
-    n::BigInt
-    a::Int
-    Gx::BitVector
-    Gy::BitVector
+# @kwdef struct Koblitz_PB <: EC2N
+#     f::Vector{Int}
+#     n::BigInt
+#     a::Int
+#     Gx::BitVector
+#     Gy::BitVector
 
-    function Koblitz_PB(f::Vector{Int}, n::BigInt, a::Int, Gx::BitVector, Gy::BitVector)
+#     function Koblitz_PB(f::Vector{Int}, n::BigInt, a::Int, Gx::BitVector, Gy::BitVector)
         
-        m = maximum(f)
+#         m = maximum(f)
 
-        @assert a in [0, 1]
-        @assert length(Gx) == length(Gy) == m
+#         @assert a in [0, 1]
+#         @assert length(Gx) == length(Gy) == m
 
-        new(f, n, a, Gx, Gy)
-    end
-end
+#         new(f, n, a, Gx, Gy)
+#     end
+# end
 
-function Koblitz_PB(f, n, a, Gx, Gy)
+# function Koblitz_PB(f, n, a, Gx, Gy)
 
-    _f = convert(Vector{Int}, f)
+#     _f = convert(Vector{Int}, f)
 
-    m = maximum(_f)
+#     m = maximum(_f)
 
-    _n = convert(BigInt, n)
-    _a = convert(Int, a)
-    _Gx = _parse_bits(Gx, m)
-    _Gy = _parse_bits(Gy, m)
+#     _n = convert(BigInt, n)
+#     _a = convert(Int, a)
+#     _Gx = _parse_bits(Gx, m)
+#     _Gy = _parse_bits(Gy, m)
 
-    return Koblitz_PB(_f, _n, _a, _Gx, _Gy)
-end
+#     return Koblitz_PB(_f, _n, _a, _Gx, _Gy)
+# end
 
 
-function b(curve::Koblitz_PB) 
+# function b(curve::Koblitz_PB) 
 
-    (; f) = curve
+#     (; f) = curve
 
-    m = maximum(f)
+#     m = maximum(f)
 
-    _b = 1
-    b′ = _parse_bits_pb(_b, m)
+#     _b = 1
+#     b′ = _parse_bits_pb(_b, m)
     
-    return b′
-end
+#     return b′
+# end
 
 
 
-function _int2bits_gnb(x::Int, m::Int)
-    if x == 0
-        return BitVector(0 for i in 1:m)
-    elseif x == 1
-        return BitVector(1 for i in 1:m)
-    else
-        error("Conversion of $x not possible")
-    end
-end
+# function _int2bits_gnb(x::Int, m::Int)
+#     if x == 0
+#         return BitVector(0 for i in 1:m)
+#     elseif x == 1
+#         return BitVector(1 for i in 1:m)
+#     else
+#         error("Conversion of $x not possible")
+#     end
+# end
 
-_parse_bits_gnb(x::BitVector, m::Int) = x
-_parse_bits_gnb(x::String, m::Int) = _parse_bits(x, m)
-_parse_bits_gnb(x::Int, m::Int) = _int2bits_gnb(x, m)
+# _parse_bits_gnb(x::BitVector, m::Int) = x
+# _parse_bits_gnb(x::String, m::Int) = _parse_bits(x, m)
+# _parse_bits_gnb(x::Int, m::Int) = _int2bits_gnb(x, m)
 
-#abstract type BinaryCurveSpec <: EllipticCurveSpec end
+# #abstract type BinaryCurveSpec <: EllipticCurveSpec end
 
-@kwdef struct BEC_GNB <: EC2N  #BinaryCurveSpec
-    m::Int
-    T::Int
-    n::BigInt
-    a::BitVector
-    b::BitVector
-    Gx::BitVector
-    Gy::BitVector
+# @kwdef struct BEC_GNB <: EC2N  #BinaryCurveSpec
+#     m::Int
+#     T::Int
+#     n::BigInt
+#     a::BitVector
+#     b::BitVector
+#     Gx::BitVector
+#     Gy::BitVector
 
-    function BEC_GNB(m::Int, T::Int, n::BigInt, a::BitVector, b::BitVector, Gx::BitVector, Gy::BitVector)
+#     function BEC_GNB(m::Int, T::Int, n::BigInt, a::BitVector, b::BitVector, Gx::BitVector, Gy::BitVector)
         
-        @assert m == length(a) == length(b) == length(Gx) == length(Gy)
+#         @assert m == length(a) == length(b) == length(Gx) == length(Gy)
 
-        new(m, T, n, a, b, Gx, Gy)
-    end
-end
+#         new(m, T, n, a, b, Gx, Gy)
+#     end
+# end
 
-function BEC_GNB(m, T, n, a, b, Gx, Gy)
+# function BEC_GNB(m, T, n, a, b, Gx, Gy)
     
-    _m = convert(Int, m)
-    _T = convert(Int, T)
-    _n = convert(BigInt, n)
-    _a = _parse_bits_gnb(a, _m)
-    _b = _parse_bits_gnb(b, _m)
-    _Gx = _parse_bits(Gx, _m)
-    _Gy = _parse_bits(Gy, _m)
+#     _m = convert(Int, m)
+#     _T = convert(Int, T)
+#     _n = convert(BigInt, n)
+#     _a = _parse_bits_gnb(a, _m)
+#     _b = _parse_bits_gnb(b, _m)
+#     _Gx = _parse_bits(Gx, _m)
+#     _Gy = _parse_bits(Gy, _m)
 
-    return BEC_GNB(_m, _T, _n, _a, _b, _Gx, _Gy)
-end
+#     return BEC_GNB(_m, _T, _n, _a, _b, _Gx, _Gy)
+# end
 
 
-function BEC_GNB(curve::Koblitz_GNB)
+# function BEC_GNB(curve::Koblitz{GNB})
     
-    (; m, T, n, a, Gx, Gy) = curve
+#     (; m, T, n, a, Gx, Gy) = curve
 
-    _b = b(curve)
+#     _b = b(curve)
 
-    return BEC_GNB(m, T, n, a, _b, Gx, Gy)
-end
-
-
-function _int2bits_pb(x::Int, m::Int)
-    if x == 0
-        return BitVector(0 for i in 1:m)
-    elseif x == 1
-        return BitVector(((0 for i in 1:m-1)..., 1))
-    else
-        error("Conversion of $x not possible")
-    end
-end
-
-_parse_bits_pb(x::BitVector, m::Int) = x
-_parse_bits_pb(x::String, m::Int) = _parse_bits(x, m)
-_parse_bits_pb(x::Int, m::Int) = _int2bits_pb(x, m)
+#     return BEC_GNB(m, T, n, a, _b, Gx, Gy)
+# end
 
 
-@kwdef struct BEC_PB <: EC2N  #BinaryCurveSpec
-    f::Vector{Int}
-    n::BigInt
-    a::BitVector   
-    b::BitVector
-    Gx::BitVector
-    Gy::BitVector
+# function _int2bits_pb(x::Int, m::Int)
+#     if x == 0
+#         return BitVector(0 for i in 1:m)
+#     elseif x == 1
+#         return BitVector(((0 for i in 1:m-1)..., 1))
+#     else
+#         error("Conversion of $x not possible")
+#     end
+# end
 
-    function BEC_PB(f::Vector{Int}, n::BigInt, a::BitVector, b::BitVector, Gx::BitVector, Gy::BitVector)
+# _parse_bits_pb(x::BitVector, m::Int) = x
+# _parse_bits_pb(x::String, m::Int) = _parse_bits(x, m)
+# _parse_bits_pb(x::Int, m::Int) = _int2bits_pb(x, m)
+
+
+# @kwdef struct BEC_PB <: EC2N  #BinaryCurveSpec
+#     f::Vector{Int}
+#     n::BigInt
+#     a::BitVector   
+#     b::BitVector
+#     Gx::BitVector
+#     Gy::BitVector
+
+#     function BEC_PB(f::Vector{Int}, n::BigInt, a::BitVector, b::BitVector, Gx::BitVector, Gy::BitVector)
         
-        m = maximum(f)
+#         m = maximum(f)
 
-        @assert length(a) == length(b) == length(Gx) == length(Gy) == m
+#         @assert length(a) == length(b) == length(Gx) == length(Gy) == m
 
-        new(f, n, a, b, Gx, Gy)
-    end
-end
+#         new(f, n, a, b, Gx, Gy)
+#     end
+# end
 
 
-function BEC_PB(f, n, a, b, Gx, Gy)
+# function BEC_PB(f, n, a, b, Gx, Gy)
     
-    _f = convert(Vector{Int}, f)
-    _m = maximum(_f)
-    _n = convert(BigInt, n)
+#     _f = convert(Vector{Int}, f)
+#     _m = maximum(_f)
+#     _n = convert(BigInt, n)
     
-    _a = _parse_bits_pb(a, _m)
-    _b = _parse_bits_pb(b, _m)
-    _Gx = _parse_bits(Gx, _m)
-    _Gy = _parse_bits(Gy, _m)
+#     _a = _parse_bits_pb(a, _m)
+#     _b = _parse_bits_pb(b, _m)
+#     _Gx = _parse_bits(Gx, _m)
+#     _Gy = _parse_bits(Gy, _m)
 
-    return BEC_PB(_f, _n, _a, _b, _Gx, _Gy)
-end
+#     return BEC_PB(_f, _n, _a, _b, _Gx, _Gy)
+# end
 
 
 
-function BEC_PB(curve::Koblitz_PB)
+# function BEC_PB(curve::Koblitz_PB)
     
-    (; f, n, a, Gx, Gy) = curve
+#     (; f, n, a, Gx, Gy) = curve
 
-    _b = b(curve)
+#     _b = b(curve)
 
-    return BEC_PB(f, n, a, _b, Gx, Gy)
-end
+#     return BEC_PB(f, n, a, _b, Gx, Gy)
+# end
 
 ### Methods for making a concrete AffinePoint type from given elliptic curve spec
 
-function specialize(::Type{AffinePoint{Weierstrass, F}}, curve::ECP) where F <: PrimeField
-
-    (; p, a, b) = curve
-
-    P = AffinePoint{specialize(Weierstrass, a, b), specialize(F, p)}
-    
-    return P
-end
-
-specialize(::Type{AffinePoint}, spec::ECP) = specialize(AffinePoint{Weierstrass, FP}, spec)
-#specialize(::Type{ECPoint}, spec::ECP; name = nothing) = specialize(ECPoint{AffinePoint}, spec; name)
-
-
-function specialize(::Type{F}, curve::BEC_PB) where F <: BinaryField
-    (; f) = curve
-    return specialize(F, f)
-end
-
-function specialize(::Type{F}, curve::BEC_GNB) where F <: BinaryField
-    (; m, T) = curve
-    return specialize(F, m, T)
-end
-
-specialize(::Type{BinaryCurve}, curve::EC2N) = specialize(BinaryCurve, a(curve), b(curve))
-
-function specialize(::Type{AffinePoint{BinaryCurve, F}}, curve) where F <: BinaryField
-    P = AffinePoint{specialize(BinaryCurve, curve), specialize(F, curve)}
-    return P
-end
-
-specialize(::Type{AffinePoint}, curve::BEC_GNB) = specialize(AffinePoint{BinaryCurve, F2GNB}, curve)
-specialize(::Type{AffinePoint}, curve::BEC_PB) = specialize(AffinePoint{BinaryCurve, F2PB}, curve)
-
-specialize(::Type{AffinePoint{BinaryCurve, F}}, curve::Koblitz_GNB) where F <: BinaryField = specialize(AffinePoint{BinaryCurve, F}, BEC_GNB(curve))
-specialize(::Type{AffinePoint{BinaryCurve, F}}, curve::Koblitz_PB) where F <: BinaryField = specialize(AffinePoint{BinaryCurve, F}, BEC_PB(curve))
 
 
 ################################ Constants #################
@@ -383,7 +323,7 @@ const Curve_P_521 = ECP(
 
 ############### Koblitz curves ################
 
-const Curve_K_163_PB = Koblitz_PB(
+const Curve_K_163_PB = Koblitz{PB}(
     f = [163, 7, 6, 3, 0],
     a = 1,
     n = 5846006549323611672814741753598448348329118574063,
@@ -391,7 +331,7 @@ const Curve_K_163_PB = Koblitz_PB(
     Gy = "2 89070fb0 5d38ff58 321f2e80 0536d538 ccdaa3d9"
 )
 
-const Curve_K_163_GNB = Koblitz_GNB(
+const Curve_K_163_GNB = Koblitz{GNB}(
     n = 5846006549323611672814741753598448348329118574063,
     a = 1,
     m = 163,
@@ -401,7 +341,7 @@ const Curve_K_163_GNB = Koblitz_GNB(
 )
 
 
-const Curve_K_233_PB = Koblitz_PB(
+const Curve_K_233_PB = Koblitz{PB}(
     f = [233, 74, 0],
     a = 0,
     n = 3450873173395281893717377931138512760570940988862252126328087024741343,
@@ -409,7 +349,7 @@ const Curve_K_233_PB = Koblitz_PB(
     Gy = "1db 537dece8 19b7f70f 555a67c4 27a8cd9b f18aeb9b 56e0c110 56fae6a3"
 )
 
-const Curve_K_233_GNB = Koblitz_GNB(
+const Curve_K_233_GNB = Koblitz{GNB}(
     m = 233,
     T = 2,
     a = 0,
@@ -418,7 +358,7 @@ const Curve_K_233_GNB = Koblitz_GNB(
     Gy = "064 3e317633 155c9e04 47ba8020 a3c43177 450ee036 d6335014 34cac978"
 )
 
-const Curve_K_283_PB = Koblitz_PB(
+const Curve_K_283_PB = Koblitz{PB}(
     f = [283, 12, 7, 5, 0],
     a = 0,
     n = 3885337784451458141838923813647037813284811733793061324295874997529815829704422603873,
@@ -426,7 +366,7 @@ const Curve_K_283_PB = Koblitz_PB(
     Gy = "1ccda38 0f1c9e31 8d90f95d 07e5426f e87e45c0 e8184698 e4596236 4e341161 77dd2259"
 )
 
-const Curve_K_283_GNB = Koblitz_GNB(
+const Curve_K_283_GNB = Koblitz{GNB}(
     m = 283,
     T = 6,
     a = 0,
@@ -435,7 +375,7 @@ const Curve_K_283_GNB = Koblitz_GNB(
     Gy = "2118c47 55e7345c d8f603ef 93b98b10 6fe8854f feb9a3b3 04634cc8 3a0e759f 0c2686b1"
 )
 
-const Curve_K_409_PB = Koblitz_PB(
+const Curve_K_409_PB = Koblitz{PB}(
     f = [409, 87, 0],
     a = 0,
      n = 330527984395124299475957654016385519914202341482140609642324395022880711289249191050673258457777458014096366590617731358671,
@@ -443,7 +383,7 @@ const Curve_K_409_PB = Koblitz_PB(
     Gy = "1e36905 0b7c4e42 acba1dac bf04299c 3460782f 918ea427 e6325165 e9ea10e3 da5f6c42 e9c55215 aa9ca27a 5863ec48 d8e0286b"
 )
 
-const Curve_K_409_GNB = Koblitz_GNB(
+const Curve_K_409_GNB = Koblitz{GNB}(
     m = 409,
     T = 4,
     a = 0,
@@ -452,7 +392,7 @@ const Curve_K_409_GNB = Koblitz_GNB(
     Gy = "16d8c42 052f07e7 713e7490 eff318ba 1abd6fef 8a5433c8 94b24f5c 817aeb79 852496fb ee803a47 bc8a2038 78ebf1c4 99afd7d6"
 )
 
-const Curve_K_571_PB = Koblitz_PB(
+const Curve_K_571_PB = Koblitz{PB}(
     f = [571, 10, 5, 2, 0],
     n = 1932268761508629172347675945465993672149463664853217499328617625725759571144780212268133978522706711834706712800825351461273674974066617311929682421617092503555733685276673,
     a = 0,
@@ -460,7 +400,7 @@ const Curve_K_571_PB = Koblitz_PB(
     Gy = "349dc80 7f4fbf37 4f4aeade 3bca9531 4dd58cec 9f307a54 ffc61efc 006d8a2c 9d4979c0 ac44aea7 4fbebbb9 f772aedc b620b01a 7ba7af1b 320430c8 591984f6 01cd4c14 3ef1c7a3"
 )
 
-const Curve_K_571_GNB = Koblitz_GNB(
+const Curve_K_571_GNB = Koblitz{GNB}(
     m = 571,
     T = 10,
     a = 0,
@@ -473,7 +413,7 @@ const Curve_K_571_GNB = Koblitz_GNB(
 ##################### Binary curves ############################
 
 
-const Curve_B_163_PB = BEC_PB(
+const Curve_B_163_PB = EC2N{PB}(
     f = [163, 7, 6, 3, 0],
     a = 1,
     b = "2 0a601907 b8c953ca 1481eb10 512f7874 4a3205fd",
@@ -482,7 +422,7 @@ const Curve_B_163_PB = BEC_PB(
     Gy = "0 d51fbc6c 71a0094f a2cdd545 b11c5c0c 797324f1"    
 )
 
-const Curve_B_163_GNB = BEC_GNB(
+const Curve_B_163_GNB = EC2N{GNB}(
     m = 163,
     T = 4,
     a = 1,
@@ -493,7 +433,7 @@ const Curve_B_163_GNB = BEC_GNB(
 )
 
 
-const Curve_B_233_PB = BEC_PB(
+const Curve_B_233_PB = EC2N{PB}(
     f = [233, 74, 0],
     a = 1,
     b = "066 647ede6c 332c7f8c 0923bb58 213b333b 20e9ce42 81fe115f 7d8f90ad",
@@ -502,7 +442,7 @@ const Curve_B_233_PB = BEC_PB(
     Gy = "100 6a08a419 03350678 e58528be bf8a0bef f867a7ca 36716f7e 01f81052"
 )
 
-const Curve_B_233_GNB = BEC_GNB(
+const Curve_B_233_GNB = EC2N{GNB}(
     m = 233,
     T = 2,
     a = 1,
@@ -512,7 +452,7 @@ const Curve_B_233_GNB = BEC_GNB(
     Gy = "049 25df77bd 8b8ff1a5 ff519417 822bfedf 2bbd7526 44292c98 c7af6e02"
 )
 
-const Curve_B_283_PB = BEC_PB(
+const Curve_B_283_PB = EC2N{PB}(
     f = [283, 12, 7, 5, 0],
     n = 770675568902916283677847627294075626569625924376904889109196526770044277787378692871,
     a = 1,
@@ -521,7 +461,7 @@ const Curve_B_283_PB = BEC_PB(
     Gy = "3676854 fe24141c b98fe6d4 b20d02b4 516ff702 350eddb0 826779c8 13f0df45 be8112f4"
 )
 
-const Curve_B_283_GNB = BEC_GNB(
+const Curve_B_283_GNB = EC2N{GNB}(
     m = 283,
     T = 6,
     a = 1,
@@ -531,7 +471,7 @@ const Curve_B_283_GNB = BEC_GNB(
     Gy = "62968bd 3b489ac5 c9b859da 68475c31 5bafcdc4 ccd0dc90 5b70f624 46f49c05 2f49c08c"
 )
 
-const Curve_B_409_PB = BEC_PB(
+const Curve_B_409_PB = EC2N{PB}(
     f = [409, 87, 0],
     n = 661055968790248598951915308032771039828404682964281219284648798304157774827374805208143723762179110965979867288366567526771,
     a = 1,
@@ -540,7 +480,7 @@ const Curve_B_409_PB = BEC_PB(
     Gy = "061b1cf ab6be5f3 2bbfa783 24ed106a 7636b9c5 a7bd198d 0158aa4f 5488d08f 38514f1f df4b4f40 d2181b36 81c364ba 0273c706"
 )
 
-const Curve_B_409_GNB = BEC_GNB(
+const Curve_B_409_GNB = EC2N{GNB}(
     m = 409,
     T = 4,
     a = 1,
@@ -550,7 +490,7 @@ const Curve_B_409_GNB = BEC_GNB(
     Gy = "199d64b a8f089c6 db0e0b61 e80bb959 34afd0ca f2e8be76 d1c5e9af fc7476df 49142691 ad303902 88aa09bc c59c1573 aa3c009a"
 )
 
-const Curve_B_571_PB = BEC_PB(
+const Curve_B_571_PB = EC2N{PB}(
     f = [571, 10, 5, 2, 0],
     n = 3864537523017258344695351890931987344298927329706434998657235251451519142289560424536143999389415773083133881121926944486246872462816813070234528288303332411393191105285703,
     a = 1,
@@ -559,7 +499,7 @@ const Curve_B_571_PB = BEC_PB(
     Gy = "37bf273 42da639b 6dccfffe b73d69d7 8c6c27a6 009cbbca 1980f853 3921e8a6 84423e43 bab08a57 6291af8f 461bb2a8 b3531d2f 0485c19b 16e2f151 6e23dd3c 1a4827af 1b8ac15b"
 )
 
-const Curve_B_571_GNB = BEC_GNB(
+const Curve_B_571_GNB = EC2N{GNB}(
     m = 571,
     T = 10,
     a = 1,

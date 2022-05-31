@@ -1,22 +1,6 @@
 ### https://tools.ietf.org/html/rfc2409#section-6.2
 
-tobint(x::String) = parse(BigInt, x, base=16)
-tobint(x::BigInt) = x
-tobint(x::Integer) = BigInt(x)
-tobint(x::Nothing) = nothing
 
-struct MODP <: Spec
-    p::BigInt
-    g::BigInt
-    q::Union{BigInt, Nothing}
-    
-    MODP(p, g, q) = new(tobint(p), tobint(g), tobint(q))    
-    MODP(p, g) = MODP(p, g, nothing)
-end
-
-
-generator(spec::MODP) = spec.g
-specialize(::Type{PGroup}, spec::MODP; name = nothing) = isnothing(name) ? specialize(PGroup, spec.p, spec.q) : specialize(PGroup, spec.p, spec.q, name)
 
 # Another method can be added for calculating order. That can generally be done by providing an r as an argument.
 

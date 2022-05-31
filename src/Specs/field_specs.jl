@@ -10,6 +10,22 @@ function _isprime(p)
     return true
 end
 
+function compute_integer_order(g::T, p::T) where T <: Integer
+    
+    @assert 1 < g < p
+
+    b = g
+
+    j = 1 ### Could there be an error?
+
+    while b > 1
+        b = mod(g*b, p)
+        j += 1
+    end
+
+    return j
+end
+
 
 function gn_basis_exist(m, T)
 
@@ -57,20 +73,5 @@ end
 
 
 
-function specialize(::Type{F2GNB}, N::Int)
-
-    @assert div(N, 8) != 0 "Out of X9.62 spec"
-    T = gn_basis_representation_rule(m)
-
-    return F2GNB{N, T}
-end
-
-function F2GNB(x::BitVector)
-
-    N = length(x)
-    F = specialize(F2GNB, N)
-
-    return F(x)
-end
 
 

@@ -101,6 +101,8 @@ binary_order(::Type{F2PB{R}}) where R = length(R) - 1
 binary_order(::F) where F <: F2PB = binary_order(F)
 
 
+
+
 function frombits(::Type{F}, bits::BitVector) where F <: F2PB
     m = binary_order(F)
     truncated = reverse(bits)[1:m] 
@@ -238,6 +240,7 @@ function first_coordinate_product(a::BitVector, b::BitVector, T::P, F::Vector{P}
 
 end
 
+# Is a dublicate, I could import it from Specs when dust settles
 function compute_integer_order(g::T, p::T) where T <: Integer
     
     @assert 1 < g < p

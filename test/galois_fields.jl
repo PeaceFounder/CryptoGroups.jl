@@ -1,7 +1,7 @@
 using Test
 using CryptoGroups
 
-import CryptoGroups: Reducer, F2PB, F2GNB, print_poly, red!, mul, mul_gnb, construct_integer_order_prime, gn_basis_exist, gn_basis_representation_rule, FP, order, specialize
+import CryptoGroups: Reducer, F2PB, F2GNB, print_poly, red!, mul, mul_gnb, construct_integer_order_prime, FP, order, specialize
 
 
 #poly = Reducer([10, 2, 1])
@@ -67,19 +67,6 @@ b = F2GNB{4, 1}(bin"1011")
 
 @test mul_gnb(bin"1000", bin"1101", 3) == bin"0010"
 
-
-@test gn_basis_exist(4, 3) == true
-
-# C.1 Table of GNB in X9.62
-@test gn_basis_representation_rule(161) == 6
-@test gn_basis_representation_rule(185) == 8
-@test gn_basis_representation_rule(186) == 2
-@test gn_basis_representation_rule(190) == 10
-@test gn_basis_representation_rule(300) == 19
-@test gn_basis_representation_rule(487) == 4
-@test gn_basis_representation_rule(628) == 7
-@test gn_basis_representation_rule(1380) == 1
-@test gn_basis_representation_rule(1703) == 2
 
 ### 
 

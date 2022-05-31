@@ -1,6 +1,6 @@
 using Test
-import CryptoGroups: ECGroup, Hash, specialize, value, ROPRG
-import CryptoGroups
+import CryptoGroups: ECGroup, Hash, specialize, value, ROPRG, Specs
+#import CryptoGroups
 
 
 tobig(x) = parse(BigInt, bytes2hex(reverse(x)), base=16)
@@ -61,9 +61,9 @@ d = [ρ..., leaf("generators")...]
 roprg = ROPRG(d, rohash, prghash)
 prg = roprg(UInt8[]) # d is a better argument than x
 
-G = specialize(ECGroup, CryptoGroups.Curve_P_192)
+G = specialize(ECGroup, Specs.Curve_P_192)
 
 
-𝐡′ = rand(prg, CryptoGroups.Curve_P_256, 10; nr)
+𝐡′ = rand(prg, Specs.Curve_P_256, 10; nr)
 
 @test 𝐡 == 𝐡′

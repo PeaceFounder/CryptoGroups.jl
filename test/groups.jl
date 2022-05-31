@@ -49,7 +49,7 @@ h = g^7
 ################################ Legacy ##################################
 
 import CryptoGroups
-import CryptoGroups: <|, PGroup, specialize, value, order, ECGroup, sophie_germain_group, dsa_standart_group, Group, modulus, generator
+import CryptoGroups: <|, PGroup, specialize, value, order, ECGroup, sophie_germain_group, dsa_standart_group, Group, modulus, generator, Specs
 
 using Test
 
@@ -74,7 +74,7 @@ testgroup(g)
 ### Testing ECGroup
 
 let
-    spec = CryptoGroups.Curve_P_256
+    spec = Specs.Curve_P_256
 
     G = specialize(ECGroup, spec; name = :P_256)
     g = G <| generator(spec)
@@ -85,7 +85,7 @@ end
 ###  RFC standart group test with PGroup
 
 let
-    spec = CryptoGroups.MODP_1024
+    spec = Specs.MODP_1024
     G = specialize(PGroup, spec)
     g = G <| generator(spec)
 

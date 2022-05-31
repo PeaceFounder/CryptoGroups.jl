@@ -57,6 +57,14 @@ function Base.show(io::IO, g::G) where G <: ECGroup
 end
 
 
+spec(::Type{ECGroup{P}}) where P = spec(P)
+spec(g::ECGroup) = spec(g.x)
+
+specialize(::Type{ECGroup{P}}, spec::Spec; name = nothing) where P <: ECPoint = ECGroup{specialize(P, spec; name)}
+specialize(::Type{ECGroup}, spec::Spec; name = nothing) = ECGroup{specialize(ECPoint, spec; name)}
+
+
+
 # Static fields for PGroup
 struct static_PGroup{N} ### Type parameter is essential to ensure it to be bitstype
     p::StaticBigInt{N}
@@ -174,6 +182,8 @@ Base.:(==)(x::G, y::G) where G <: PGroup = x.g == y.g
 Base.isless(x::G, y::G) where G <: PGroup = value(x) < value(y)
 
 Base.convert(::Type{G}, x::Integer) where G <: PGroup = G(x)
+
+specialize(::Type{PGroup}, spec::MODP; name = nothing) = isnothing(name) ? specialize(PGroup, spec.p, spec.q) : specialize(PGroup, spec.p, spec.q, name)
 
 # function Base.prod(x::Vector{G}) where G <: PGroup
 

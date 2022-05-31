@@ -52,11 +52,11 @@ end
 
 
 import CryptoGroups
-import CryptoGroups: specialize, <|, generator, PGroup, ECGroup
+import CryptoGroups: specialize, <|, generator, PGroup, ECGroup, Specs
 
 
 let
-    spec = CryptoGroups.MODP_1024
+    spec = Specs.MODP_1024
     G = specialize(PGroup, spec)
     g = G <| generator(spec)
 
@@ -65,7 +65,7 @@ end
 
 
 let
-    spec = CryptoGroups.Curve_P_256
+    spec = Specs.Curve_P_256
 
     G = specialize(ECGroup, spec; name = :P_256)
     g = G <| generator(spec)
@@ -77,7 +77,7 @@ end
 # This one gives the UndefVarError(:P) error
 
 let
-    spec = CryptoGroups.Curve_B_163_PB
+    spec = Specs.Curve_B_163_PB
     G = specialize(ECGroup, spec; name = :B_163_PB)
     g = G <| generator(spec)
 
