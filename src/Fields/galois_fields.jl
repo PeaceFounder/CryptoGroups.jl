@@ -1,13 +1,17 @@
+using ..CryptoGroups: static
+
 struct FP{P} <: PrimeField
     x::BigInt # Instead of BigInt I could use BitIntegers here. Need to check performance of powermod...
     FP{P}(x::Integer) where P = new{P}(BigInt(x))
 end
 
-specialize(::Type{FP}, p::Integer) = FP{StaticBigInt(p)} # A workaround to store BigInt as type argument
+specialize(::Type{FP}, p::Integer) = FP{static(p)} # A workaround to store BigInt as type argument
 
 value(x::FP) = x.x
 modulus(::FP{P}) where P = BigInt(P)
 modulus(::Type{FP{P}}) where P = BigInt(P)
+
+# Why order and modulus is the same thing here?
 order(::FP{P}) where P = BigInt(P)
 order(::Type{FP{P}}) where P = BigInt(P)
 
@@ -44,7 +48,7 @@ Reducer(x::Vector{Int}) = Reducer(BitVector(i in x for i in 0:maximum(x)))
 
 Base.length(x::Reducer) = x.len
 
-binary_order(R::Reducer) = length(R) - 1
+bitlength(R::Reducer) = length(R) - 1
 
 
 function Base.convert(::Type{BitVector}, x::Reducer)
@@ -82,42 +86,46 @@ print_poly(x::Any) = print_poly(Base.stdout, x)
 Base.show(io::IO, x::Reducer) = print_poly(io, x)
 
 
+@enum Endian big little
+
+
 struct F2PB{R} <: BinaryField ### R is reducer
     x::BitVector
 
-    function F2PB{R}(x::BitVector) where R
-        @assert length(x) == length(R) - 1
-        new(x)
-    end
-end
+    function F2PB{R}(x::BitVector, e::Endian) where R
 
+        @assert length(x) == length(R) - 1
+        
+        if e == big
+            new(x)
+        elseif e == little
+            new(reverse(x))
+        end
+    end 
+
+    F2PB{R}(x::BitVector; e::Endian = big) where R = F2PB{R}(x, e)
+
+
+    F2PB(f) = F2PB{Reducer(f)} # Perhaps I could get rid of Reducer in favour of a StaticBitVector
+    F2PB(f, x) = F2PB(f)(x)
+end
 
 F2PB(x::F2PB) = x
 
-specialize(::Type{F2PB}, f::Vector{Int}) = F2PB{Reducer(f)}
+bitlength(::Type{F2PB{R}}) where R = length(R) - 1
+bitlength(::F) where F <: F2PB = bitlength(F)
 
+Base.convert(::Type{F}, x::BitVector) where F <: F2PB = F(x, little)
 
-binary_order(::Type{F2PB{R}}) where R = length(R) - 1
-binary_order(::F) where F <: F2PB = binary_order(F)
-
-
-
-
-function frombits(::Type{F}, bits::BitVector) where F <: F2PB
-    m = binary_order(F)
-    truncated = reverse(bits)[1:m] 
-    return F(truncated)
-end
-
+# This function is necessary in differetn contexts so I could keep it as is. 
 tobits(x::F2PB) = reverse(x.x)
-
 
 Base.zero(::Type{F2PB{R}}) where R = F2PB{R}(BitVector(0 for i in 1:length(R)-1))
 Base.one(::Type{F2PB{R}}) where R = F2PB{R}(BitVector((1, (0 for i in 2:length(R)-1 )...)))
 
 Base.:+(x::F, y::F) where F <: F2PB = F(xor.(x.x, y.x))
 
-order(::Type{F}) where F <: F2PB = BigInt(2)^binary_order(F) - 1
+order(::Type{F}) where F <: F2PB = BigInt(2)^bitlength(F) - 1
 order(x::F) where F <: F2PB = order(F)    
 
 
@@ -182,17 +190,14 @@ struct F2GNB{N, T} <: BinaryField
 
 end
 
-specialize(::Type{F2GNB}, N::Int, T::Int) = F2GNB{N, T} 
+Base.convert(::Type{F2GNB{N, T}}, bits::BitVector) where {N, T} = F2GNB{N, T}(bits)
 
-### Theese two methods are essential for the field so that a field element would be possible to be iitialized 
-### from external sources
-frombits(::Type{F2GNB{N, T}}, bits::BitVector) where {N, T} = F2GNB{N, T}(bits[end - N + 1:end])
 tobits(x::F2GNB) = x.x
 
-binary_order(::Type{F2GNB{N, T}}) where {N, T} = N
-binary_order(::F) where F <: F2GNB = binary_order(F)
+bitlength(::Type{F2GNB{N, T}}) where {N, T} = N
+bitlength(::F) where F <: F2GNB = bitlength(F)
 
-order(::Type{F}) where F <: F2GNB = BigInt(2)^binary_order(F) - 1
+order(::Type{F}) where F <: F2GNB = BigInt(2)^bitlength(F) - 1
 order(x::F) where F <: F2GNB = order(F)    
 
 

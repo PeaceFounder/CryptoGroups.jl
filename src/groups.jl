@@ -1,3 +1,8 @@
+using .Curves: ECPoint
+using .Specs: PRG
+
+
+
 abstract type Group end
 
 Base.broadcasted(f::Function, x::Group, y::AbstractVector{<:Integer}) = f.((x for i in 1:length(y)), y)
@@ -11,6 +16,17 @@ import Base./
 /(x::G, y::G) where G <: Group = x * inv(y)
 
 name(x::G) where G <: Group = name(G)
+
+
+
+
+<|(::Type{Vector{G}}, x::Vector) where G <: Group = G[ G <| i for i in x]
+
+Base.rand(prg::PRG, ::Type{G}, N::Integer; nr::Integer = 0) where G <: Group = Vector{G} <| rand(prg, spec(G), N; nr)
+
+
+
+
 
 struct ECGroup{P<:ECPoint} <: Group
     x::P
@@ -37,8 +53,8 @@ validate(x::ECGroup) = validate(x.x)
 
 Base.:(==)(x::G, y::G) where G <: ECGroup = x.x == y.x
 
-gx(p::ECGroup) = gx(p.x)
-gy(p::ECGroup) = gy(p.x)
+#gx(p::ECGroup) = gx(p.x)
+#gy(p::ECGroup) = gy(p.x)
 
 modulus(::Type{ECGroup{P}}) where P <: ECPoint = modulus(P)
 

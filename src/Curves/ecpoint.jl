@@ -1,47 +1,35 @@
-# Static fields for ECPoint
-struct static_ECPoint{N}
-    order::StaticBigInt{N}
-    cofactor::Int
-    name::UInt128
-
-    static_ECPoint(order::StaticBigInt{N}, cofactor::Int, name::Symbol) where N = new{N}(order, cofactor, string2uint(string(name)))
-    static_ECPoint(order::Integer, cofactor::Integer, name::Symbol) = static_ECPoint(StaticBigInt(order), Int(cofactor), name)
-    static_ECPoint(order::Integer, cofactor::Integer, ::Nothing) = static_ECPoint(StaticBigInt(order), Int(cofactor), Symbol(""))
-end
+using ..CryptoGroups: static
 
 struct ECPoint{P<:AbstractPoint, S} <: AbstractPoint # The same contract is satisfied thus a subtype
     p::P
+
+    function ECPoint{P}(order::Integer, cofactor::Integer; name=nothing) where P <: AbstractPoint
+        svars = static(; order, cofactor, name)
+        return ECPoint{P, svars}
+    end
 
     function ECPoint{P, S}(x::P) where {P <: AbstractPoint, S}
         
         @assert oncurve(x) "Point is not in curve"
         # A test with cofactor also here
-
         new{P, S}(x)
+    end
+
+    function ECPoint(p::P, order::Integer, cofactor::Integer; name=nothing) where P <: AbstractPoint
+        EP = ECPoint{P}(order, cofactor; name)
+        return EP(p)
     end
 end
 
-specialize(::Type{ECPoint{P}}, order::Integer, cofactor::Integer, name::Union{Symbol, Nothing}) where P <: AbstractPoint = ECPoint{P, static_ECPoint(order, cofactor, name)}
-
-order(::Type{ECPoint{P, S}}) where {P <: AbstractPoint, S} = BigInt(S.order)
-
-cofactor(::Type{ECPoint{P, S}}) where {P <: AbstractPoint, S} = S.cofactor
+order(::Type{ECPoint{P, S}}) where {P <: AbstractPoint, S} = convert(Integer, S.order) 
+cofactor(::Type{ECPoint{P, S}}) where {P <: AbstractPoint, S} = convert(Integer, S.cofactor) 
 
 modulus(::Type{ECPoint{P}}) where P <: AbstractPoint = modulus(P) # Only makes sense for point in prime fields!
 
 name(::Type{ECPoint}) = nothing
 name(::Type{ECPoint{P}}) where P <: AbstractPoint = nothing
+name(::Type{ECPoint{P, S}}) where {P <: AbstractPoint, S} = convert(Symbol, S.name)
 
-function name(::Type{ECPoint{P, S}}) where {P <: AbstractPoint, S}
-    
-    str = uint2string(S.name)
-
-    if str == ""
-        return nothing
-    else
-        return Symbol(str)
-    end
-end
 
 eq(::Type{ECPoint{P, S}}) where {P <: AbstractPoint, S} = eq(P)
 field(::Type{ECPoint{P, S}}) where {P <: AbstractPoint, S} = field(P)

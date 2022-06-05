@@ -2,13 +2,20 @@
 
 module Specs
 
+import ..CryptoGroups: order, a, b, cofactor
+
 
 include("spec.jl")
 
 include("field_specs.jl")
 
+
+include("legacy.jl")
+include("primitives.jl")
+
 include("curve_constants.jl")
 include("modp_constants.jl")
+
 
 
 ### For now keeping things simple

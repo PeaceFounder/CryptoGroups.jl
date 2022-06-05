@@ -1,8 +1,6 @@
 using Test
-using CryptoGroups
-
-import CryptoGroups: Reducer, F2PB, F2GNB, print_poly, red!, mul, mul_gnb, construct_integer_order_prime, FP, order, specialize
-
+import CryptoGroups.Fields: Reducer, F2PB, F2GNB, print_poly, red!, mul, mul_gnb, construct_integer_order_prime, FP, order
+import CryptoGroups: @bin_str
 
 #poly = Reducer([10, 2, 1])
 #x = 𝔽₂_Reducer{poly}(bin"101")

@@ -44,6 +44,9 @@ end
 
 
 Base.convert(::Type{BigInt}, x::StaticBigInt) = tobig(x.x)
+Base.convert(::Type{Integer}, x::StaticBigInt) = convert(BigInt, x)
+
+
 Base.BigInt(x::StaticBigInt) = tobig(x.x)
 
 
@@ -56,37 +59,7 @@ end
 Base.display(x::StaticBigInt) = show(x)
 
 
-
-nbits(x::UInt8) = 8
-nbits(x::UInt64) = 64
-nbits(x::UInt32) = 32
-nbits(x::BigInt) = 64 * x.size
-
-nbits(x::Int64) = 64
-nbits(x::Int32) = 32
-nbits(x::Int128) = 128
-
-function tobin(a::Integer) 
-    s = BitVector(a << -i % Bool for i in 0:(nbits(a)-1))
-    n = findlast(x->x==1, s)
-    if n == nothing
-        n = 0
-    end
-    return reverse(s[1:n])
-end
-
-
-function tobin(a::Integer, n::Integer) 
-    s = BitVector(a << -i % Bool for i in 0:(nbits(a)-1))
-    
-    if length(s) < n
-        resize!(s, n)
-        return reverse(s)
-    else
-        return reverse(s[1:n])
-    end
-end
-
+#######################
 
 function _hex2bytes(x::String)
     
@@ -109,6 +82,38 @@ end
 
 hex2bits(x::String) = bytes2bits(_hex2bytes(x))
 
+
+tobits(x::String) = hex2bits(x)
+tobits(x::Vector{UInt8}) = bytes2bits(x)
+tobits(x) = convert(BitVector, x)
+
+
+nbits(x::Integer) = sizeof(x) * 8
+nbits(x::BigInt) = x.size * 64
+
+function tobits(a::Integer) # I could still associate keyword arguments
+    s = BitVector(a << -i % Bool for i in 0:(nbits(a)-1))
+    n = findlast(x->x==1, s)
+    if n == nothing
+        n = 0
+    end
+    return reverse(s[1:n])
+end
+
+
+function tobits(a::Integer, n::Integer) 
+    s = BitVector(a << -i % Bool for i in 0:(nbits(a)-1))
+    
+    if length(s) < n
+        resize!(s, n)
+        return reverse(s)
+    else
+        return reverse(s[1:n])
+    end
+end
+
+
+#####################
 
 
 struct StaticBitVector{N}
@@ -133,23 +138,48 @@ Base.show(io::IO, x::StaticBitVector) = print(io, join(i ? "1" : "0" for i in co
 modinv(s, q) = mod(gcdx(s, q)[2], q)
 
 
+########################
 
-function uint2string(x::Unsigned)
+static(x::BitVector) = StaticBitVector(x)
+static(x::BigInt) = StaticBigInt(x)
+static(x::Integer) = x # BigInt is the only exception
+static(::Nothing) = nothing
+
+
+struct StaticSymbol
+    x::UInt128
+
+    function StaticSymbol(s::Symbol)
+        x = string(s)
+        bytes = Vector{UInt8}(x)
+        padded_bytes = append!(bytes, UInt8[0 for i in 1:16-length(bytes)])
+        uint = reinterpret(UInt128, padded_bytes)
+        return new(uint[1])
+    end
+end
+
+function Base.convert(::Type{Symbol}, s::StaticSymbol) 
+    
+    x = s.x
+
     bytes = reinterpret(UInt8, [x])
 
     N = findlast(x->x!=0, bytes)
     
     if N == nothing
-        return String("") 
+        #return String("") 
+        error("Nothing encoded")
+        #return nothing
     else
-        return String(bytes[1:N]) 
+        #return String(bytes[1:N]) 
+        return Symbol(String(bytes[1:N]))
     end
     #trimmed = bytes[1:findlast(x->x!=0, bytes)]
 end
 
-function string2uint(x::String)
-    bytes = Vector{UInt8}(x)
-    padded_bytes = append!(bytes, UInt8[0 for i in 1:16-length(bytes)])
-    uint = reinterpret(UInt128, padded_bytes)
-    return uint[1]
-end
+static(x::Symbol) = StaticSymbol(x)
+
+
+# Goeas through the keyword arguments and returns a coresponding namedtuple where on each argument static is being called
+static(; kwargs...) = NamedTuple((key, static(value)) for (key, value) in pairs(kwargs))
+

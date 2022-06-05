@@ -1,4 +1,22 @@
 # Need to introduce ECSpec to exclude MODP
+using .Fields: F2GNB, F2PB, FP, Field, PrimeField, BinaryField, tobits, value
+using .Curves: AbstractPoint, ECPoint, AffinePoint, Weierstrass, BinaryCurve, gx, gy, field, eq
+using .Specs: MODP, Koblitz, ECP, EC2N, Spec, PB, GNB
+
+
+specialize(::Type{BinaryCurve}, a::BitVector, b::BitVector) = BinaryCurve{StaticBitVector(a), StaticBitVector(b)}
+specialize(::Type{BinaryCurve}, a::F, b::F) where F <: BinaryField = specialize(BinaryCurve, tobits(a), tobits(b)) 
+
+
+static_int(x::Integer) = x
+static_int(x::BigInt) = StaticBigInt(x)
+
+specialize(::Type{Weierstrass}, a::Integer, b::Integer) = Weierstrass{static_int(a), static_int(b)}
+
+specialize(::Type{Weierstrass}, a::BitVector, b::BitVector) = Weierstrass{StaticBitVector(a), StaticBitVector(b)}
+specialize(::Type{Weierstrass}, a::F, b::F) where F <: BinaryField = specialize(Weierstrass, tobits(a), tobits(b))
+
+
 
 function specialize(::Type{ECPoint{P}}, curve::Spec; name=nothing) where P <: AbstractPoint
     
@@ -7,7 +25,10 @@ function specialize(::Type{ECPoint{P}}, curve::Spec; name=nothing) where P <: Ab
     _order = order(curve)
     _cofactor = 1 # Need to update this one
     
-    R = specialize(ECPoint{Q}, _order, _cofactor, name)
+    #R = specialize(ECPoint{Q}, _order, _cofactor, name)
+
+    R = ECPoint{Q}(_order, _cofactor; name)
+
 
     return R
 end
@@ -78,17 +99,21 @@ end
 
 specialize(::Type{AffinePoint}, spec::ECP) = specialize(AffinePoint{Weierstrass, FP}, spec)
 
+
 function specialize(::Type{F}, basis::PB) where F <: BinaryField
     (; f) = basis
-    return specialize(F, f)
+    #return specialize(F, f)
+    return F(f)
 end
 
 
 function specialize(::Type{F}, basis::GNB) where F <: BinaryField
     (; m, T) = basis
-    return specialize(F, m, T)
+    #return specialize(F, m, T)
+    return F{m, T}
 end
 
+specialize(::Type{F}, basis::Integer) where F <: FP = F{static(basis)}
 
 
 specialize(::Type{BinaryCurve}, curve::EC2N) = specialize(BinaryCurve, a(curve), b(curve))

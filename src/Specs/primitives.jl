@@ -131,35 +131,19 @@ end
 
 
 
-bitlength(::Type{T}) where T <: Integer = T.size * 8
-
-
-function bitlength(p::Integer)
-
-    bits = bitstring(p)
-    start = findfirst(x -> x == '1', bits)
-    N = length(bits) - start + 1
-
-    return N
-end
-
-
-function bitlength(p::BigInt)
-
-    bytes = int2bytes(p)
-    bits = bitstring(bytes[end])
-    start = findfirst(x -> x == '1', bits)
-    N = length(bytes) * 8  - (start - 1)
-
-    return N
-end
 
 
 
-function Base.rand(prg::PRG, ::Type{G}, N::Integer; nr::Integer = 0) where G <: PGroup
+#function Base.rand(prg::PRG, ::Type{G}, N::Integer; nr::Integer = 0) where G <: PGroup
 
-    p = modulus(G)
-    q = order(G)
+function Base.rand(prg::PRG, spec::MODP, N::Integer; nr::Integer = 0) 
+
+    #p = modulus(G)
+    #q = order(G)
+
+    p = modulus(spec)
+    q = order(spec)
+
 
     np = bitlength(p)
 
@@ -170,10 +154,11 @@ function Base.rand(prg::PRG, ::Type{G}, N::Integer; nr::Integer = 0) where G <: 
     𝐡 = powermod.(𝐭′, (p - 1) ÷ q, p)
     
     #𝐡_typed = convert(Vector{PGroup{G}}, 𝐡)
-    𝐡_typed = convert(Vector{G}, 𝐡)
+    #𝐡_typed = convert(Vector{G}, 𝐡)
 
 
-    return 𝐡_typed
+    #return 𝐡_typed
+    return 𝐡
 end
 
 
@@ -198,7 +183,7 @@ function Base.rand(prg::PRG, spec::ECP, N::Integer; nr::Integer = 0)
 
     l = 1
 
-    f(x) = x^3 + a*x + b 
+    f(x) = x^3 + a*x + b # This assumes that I do know how to do arithmetics with fields.
 
     for zi in 𝐳
         y2 = mod(f(zi), p)
@@ -231,7 +216,7 @@ function Base.rand(prg::PRG, spec::ECP, N::Integer; nr::Integer = 0)
 end
 
 
-<|(::Type{Vector{G}}, x::Vector) where G <: Group = G[ G <| i for i in x]
+#<|(::Type{Vector{G}}, x::Vector) where G <: Group = G[ G <| i for i in x]
 
 
-Base.rand(prg::PRG, ::Type{G}, N::Integer; nr::Integer = 0) where G <: ECGroup = Vector{G} <| rand(prg, spec(G), N; nr)
+#Base.rand(prg::PRG, ::Type{G}, N::Integer; nr::Integer = 0) where G <: ECGroup = Vector{G} <| rand(prg, spec(G), N; nr)

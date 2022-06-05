@@ -16,9 +16,9 @@ abstract type BinaryField <: Field end
 Base.:-(x::F, y::F) where F <: BinaryField = x + y
 
 
-<|(::Type{F}, x) where F <: BinaryField = frombits(F, x)
+<|(::Type{F}, x) where F <: BinaryField = convert(F, x)
 
-function <|(::Type{F}, x::Integer) where F <: BinaryField
+function Base.convert(::Type{F}, x::Integer) where F <: BinaryField
     if x == 0
         return zero(F)
     elseif x == 1
@@ -35,7 +35,8 @@ function Base.:^(g::F, a::Integer) where F <: BinaryField
         return one(F)
     end
 
-    e = tobin(a)
+    e = tobits(a)
+
     
     r = length(e) - 1
 
@@ -64,31 +65,35 @@ function (::Type{F})(x::Integer) where F <: BinaryField
     end
 end
 
+function Base.convert(::Type{F}, x) where F <: BinaryField 
+    
+    N = bitlength(F)
 
-frombits(::Type{F}, gx::String) where F <: BinaryField = frombits(F, _hex2bytes(gx))
-frombits(::Type{F}, gx::Vector{UInt8}) where F <: BinaryField = frombits(F, bytes2bits(gx))
-frombits(::Type{F}, gx) where F <: BinaryField = frombits(F, convert(BitVector, gx))
+    bits = tobits(x)
 
-frombits(::Type{F}, gx::BitVector) where F <: BinaryField = error("Must be implemented by field")
+    return convert(F, bits[end - N + 1:end])
+end
+
+
+Base.convert(::Type{F}, x::BinaryField) where F <: BinaryField = error("Can't be done blindly.")
+Base.convert(::Type{F}, x::F) where F <: BinaryField = x
 
 
 Base.show(io::IO, x::BinaryField) = print(io, join(i ? "1" : "0" for i in tobits(x)))
 
-# Note if it becomes a bottleneck specialized methods can be added
 Base.isless(x::F, y::F) where F <: BinaryField = tobits(x) < tobits(y)
-
 
 abstract type PrimeField <: Field end
 
-
 <|(::Type{F}, x) where F <: PrimeField = F(x)
-<|(::Type{F}, x::StaticBigInt) where F <: PrimeField = F(BigInt(x))
 
 
 function modulus end
 function value end
 
 Base.show(io::IO, x::PrimeField) = print(io, value(x))
+
+modinv(s, q) = mod(gcdx(s, q)[2], q)
 
 Base.inv(x::F) where F <: PrimeField = F(modinv(value(x), modulus(x)))
 

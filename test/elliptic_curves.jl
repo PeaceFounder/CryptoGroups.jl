@@ -1,6 +1,10 @@
 using Test
+
 using CryptoGroups
-import CryptoGroups: F2PB, F2GNB, FP, Reducer, Weierstrass, AffinePoint, double, Reducer, BinaryCurve, oncurve, specialize
+import CryptoGroups.Fields: F2PB, F2GNB, FP, Reducer
+import CryptoGroups.Curves: Weierstrass, AffinePoint, double, BinaryCurve, oncurve
+import CryptoGroups: specialize
+
 
 eq = Weierstrass{1, 1}
 
@@ -125,7 +129,9 @@ let
     #R = Reducer([163, 7, 6, 3, 0])
     #F = F2PB{R}
     
-    F = specialize(F2PB, [163, 7, 6, 3, 0])
+    #F = specialize(F2PB, [163, 7, 6, 3, 0])
+
+    F = F2PB([163, 7, 6, 3, 0])
 
     EQ = specialize(BinaryCurve, F <| a, F <| b)
 

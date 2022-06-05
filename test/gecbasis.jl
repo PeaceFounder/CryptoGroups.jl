@@ -67,3 +67,7 @@ G = specialize(ECGroup, Specs.Curve_P_192)
 𝐡′ = rand(prg, Specs.Curve_P_256, 10; nr)
 
 @test 𝐡 == 𝐡′
+
+
+
+
