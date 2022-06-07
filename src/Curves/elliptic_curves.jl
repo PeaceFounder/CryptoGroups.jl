@@ -38,6 +38,9 @@ Base.:-(u::P) where P <: AffinePoint{<:EllipticCurve, <: BinaryField} = P(u.x, u
 
 Base.:-(u::P, v::P) where P <: AffinePoint = u + (-v)
 
+Base.isless(x::P, y::P) where P <: AbstractPoint = gx(x) == gx(y) ? gx(x) < gx(y) : gy(x) < gy(y)
+
+
 
 function Base.:*(P::AffinePoint, k::Integer)
     
@@ -81,7 +84,6 @@ end
 
 validate(x::AffinePoint) = oncurve(x)
 
-
 ### Definition of some elliptic curves and coresponding operations
 
 struct Weierstrass{a, b} <: EllipticCurve end # May assume that a, b are 
@@ -90,8 +92,8 @@ struct Weierstrass{a, b} <: EllipticCurve end # May assume that a, b are
 a(::Type{Weierstrass{A, B}}) where {A, B} = A
 b(::Type{Weierstrass{A, B}}) where {A, B} = B
 
-_a(::Type{AffinePoint{W, F}}) where {W <: Weierstrass, F <: Field} = F <| a(W)
-_b(::Type{AffinePoint{W, F}}) where {W <: Weierstrass, F <: Field} = F <| b(W)
+a(::Type{AffinePoint{W, F}}) where {W <: Weierstrass, F <: Field} = F <| a(W)
+b(::Type{AffinePoint{W, F}}) where {W <: Weierstrass, F <: Field} = F <| b(W)
 
 
 function Base.:+(u::AffinePoint{E, F}, v::AffinePoint{E, F}) where {E <: Weierstrass, F <: Field}
@@ -115,9 +117,7 @@ function double(u::P) where P <: AffinePoint{<:Weierstrass, <:PrimeField}
     
     (; x, y) = u
 
-    a = _a(P)
-
-    λ = (3 * x^2 + a)/ (2 * y) 
+    λ = (3 * x^2 + a(P))/ (2 * y) 
     
     x₃ = λ^2 - 2x
     y₃ = λ*(x - x₃) - y
@@ -127,11 +127,7 @@ end
 
 function oncurve(u::P) where P <: AffinePoint{<:Weierstrass, <:Field}
     (; x, y) = u
-
-    a = _a(P)
-    b = _b(P)
-
-    return y^2 == x^3 + a*x + b
+    return y^2 == x^3 + a(P)*x + b(P)
 end
  
 
@@ -141,8 +137,8 @@ struct BinaryCurve{a, b} <: EllipticCurve end
 a(::Type{BinaryCurve{A, B}}) where {A, B} = A
 b(::Type{BinaryCurve{A, B}}) where {A, B} = B
 
-_a(::Type{AffinePoint{W, F}}) where {W <: BinaryCurve, F <: Field} = F <| a(W)
-_b(::Type{AffinePoint{W, F}}) where {W <: BinaryCurve, F <: Field} = F <| b(W)
+a(::Type{AffinePoint{W, F}}) where {W <: BinaryCurve, F <: Field} = F <| a(W)
+b(::Type{AffinePoint{W, F}}) where {W <: BinaryCurve, F <: Field} = F <| b(W)
 
 
 function Base.:+(u::AffinePoint{E, F}, v::AffinePoint{E, F}) where {E<:BinaryCurve, F<:BinaryField}
@@ -153,11 +149,11 @@ function Base.:+(u::AffinePoint{E, F}, v::AffinePoint{E, F}) where {E<:BinaryCur
 
     @assert u.x != v.x 
 
-    a = _a(AffinePoint{E, F})
+    _a = a(AffinePoint{E, F})
 
     λ = (v.y + u.y)/(v.x + u.x)
 
-    x₃ = λ^2 + λ + u.x + v.x + a
+    x₃ = λ^2 + λ + u.x + v.x + _a
     y₃ = λ * (u.x + x₃) + x₃ + u.y
 
     return AffinePoint{E, F}(x₃, y₃)
@@ -167,13 +163,12 @@ end
 function double(u::P) where P <: AffinePoint{<:BinaryCurve, <:BinaryField}
     
     (; x, y) = u
-
-    a = _a(P)
+    #a = _a(P)
     
-    λ = u.x + u.y/u.x
+    λ = x + y/x
     
-    x₃ = λ^2 + λ + a
-    y₃ = u.x^2 + (λ + one(λ))*x₃
+    x₃ = λ^2 + λ + a(P)
+    y₃ = x^2 + (λ + one(λ))*x₃
 
     return P(x₃, y₃)
 end
@@ -182,8 +177,8 @@ end
 function oncurve(u::P) where P <: AffinePoint{<:BinaryCurve, <:Field}
     (; x, y) = u
 
-    a = _a(P)
-    b = _b(P)
+    #a = _a(P)
+    #b = _b(P)
 
-    return y^2 + x*y == x^3 + a*x^2 + b
+    return y^2 + x*y == x^3 + a(P)*x^2 + b(P)
 end

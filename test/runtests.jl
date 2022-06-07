@@ -12,19 +12,23 @@ end
     include("curve_specs.jl")
 end
 
-# @testset "Testing external fields" begin
-#     include("../examples/external_fields.jl")
-# end
+@testset "Testing external fields" begin
+    include("../examples/external_fields.jl")
+end
 
-# @testset "Testing groups and ElGamal" begin
-#     include("groups.jl")
-#     include("elgamal.jl")
-# end
 
-# @testset "Testing independent basis generation" begin
-#     include("primitives.jl")
-#     include("gbasis.jl")
-#     include("gecbasis.jl")
-# end
+@testset "Testing independent basis generation" begin
+    include("spec.jl")
+    include("primitives.jl")
+    include("gbasis.jl")
+    include("gecbasis.jl")
+end
+
+
+@testset "Testing groups and ElGamal" begin
+    include("groups.jl")
+    include("elgamal.jl")
+end
+
 
 

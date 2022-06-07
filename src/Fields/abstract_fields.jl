@@ -78,6 +78,7 @@ end
 Base.convert(::Type{F}, x::BinaryField) where F <: BinaryField = error("Can't be done blindly.")
 Base.convert(::Type{F}, x::F) where F <: BinaryField = x
 
+tobits(::Type{F}, x::BinaryField) where F <: BinaryField = convert(BitVector, x)
 
 Base.show(io::IO, x::BinaryField) = print(io, join(i ? "1" : "0" for i in tobits(x)))
 

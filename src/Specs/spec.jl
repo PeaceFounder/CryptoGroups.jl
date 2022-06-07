@@ -2,9 +2,6 @@ abstract type Spec end
 
 import Base: @kwdef
 
-#_parse_seed(seed::String) = hex2bytes(seed)
-#_parse_seed(seed::Vector{UInt8}) = seed
-
 # Dublicate present in utlis.jl
 function _hex2bytes(x::String)
     
@@ -53,7 +50,6 @@ _parse_int(::Nothing) = nothing
         _Gx = _parse_int(Gx)
         _Gy = _parse_int(Gy)
 
-        #return ECP(p, n, _a, _b, _Gx, _Gy)
         return new(p, n, _a, _b, _Gx, _Gy)
     end
 end
@@ -230,205 +226,17 @@ tobint(x::Nothing) = nothing
 
 struct MODP <: Spec
     p::BigInt
-    g::BigInt
+    g::Union{BigInt, Nothing}
     q::Union{BigInt, Nothing}
     
     MODP(p, g, q) = new(tobint(p), tobint(g), tobint(q))    
     MODP(p, g) = MODP(p, g, nothing)
+
+    MODP(p::BigInt; g=nothing, q=nothing) = new(p, g, q)
+    MODP(;p::BigInt, g=nothing, q=nothing) = new(p, g, q)
 end
 
 
 generator(spec::MODP) = spec.g
-
-
-
-
-# abstract type EC2N <: Spec end
-
-# order(curve::EC2N) = curve.n
-# generator(curve::EC2N) = (curve.Gx, curve.Gy)
-
-# a(curve::EC2N) = curve.a
-# b(curve::EC2N) = curve.b 
-
-
-# @kwdef struct Koblitz_GNB <: EC2N
-#     m::Int
-#     T::Int
-#     n::BigInt
-#     a::Int
-#     Gx::BitVector
-#     Gy::BitVector
-
-#     function Koblitz_GNB(m::Int, T::Int, n::BigInt, a::Int, Gx::BitVector, Gy::BitVector)
-        
-#         @assert a in [0, 1]
-#         @assert length(Gx) == length(Gy) == m
-        
-#         new(m, T, n, a, Gx, Gy)
-#     end
-# end
-
-# function Koblitz_GNB(m, T, n, a, Gx, Gy)
-
-#     _m = convert(Int, m)
-#     _T = convert(Int, T)
-#     _a = convert(Int, a)
-#     _n = convert(BigInt, n)
-#     _Gx = _parse_bits(Gx, _m)
-#     _Gy = _parse_bits(Gy, _m)
-
-#     return Koblitz_GNB(_m, _T, _n, _a, _Gx, _Gy)
-# end
-
-
-# function b(curve::Koblitz_GNB)
-    
-#     (; m) = curve
-
-#     _b = 1
-#     b′ = _parse_bits_gnb(_b, m)
-
-#     return b′
-# end
-
-
-# @kwdef struct Koblitz_PB <: EC2N
-#     f::Vector{Int}
-#     n::BigInt
-#     a::Int
-#     Gx::BitVector
-#     Gy::BitVector
-
-#     function Koblitz_PB(f::Vector{Int}, n::BigInt, a::Int, Gx::BitVector, Gy::BitVector)
-        
-#         m = maximum(f)
-
-#         @assert a in [0, 1]
-#         @assert length(Gx) == length(Gy) == m
-
-#         new(f, n, a, Gx, Gy)
-#     end
-# end
-
-# function Koblitz_PB(f, n, a, Gx, Gy)
-
-#     _f = convert(Vector{Int}, f)
-
-#     m = maximum(_f)
-
-#     _n = convert(BigInt, n)
-#     _a = convert(Int, a)
-#     _Gx = _parse_bits(Gx, m)
-#     _Gy = _parse_bits(Gy, m)
-
-#     return Koblitz_PB(_f, _n, _a, _Gx, _Gy)
-# end
-
-
-# function b(curve::Koblitz_PB) 
-
-#     (; f) = curve
-
-#     m = maximum(f)
-
-#     _b = 1
-#     b′ = _parse_bits_pb(_b, m)
-    
-#     return b′
-# end
-
-
-
-
-# #abstract type BinaryCurveSpec <: EllipticCurveSpec end
-
-# @kwdef struct BEC_GNB <: EC2N  #BinaryCurveSpec
-#     m::Int
-#     T::Int
-#     n::BigInt
-#     a::BitVector
-#     b::BitVector
-#     Gx::BitVector
-#     Gy::BitVector
-
-#     function BEC_GNB(m::Int, T::Int, n::BigInt, a::BitVector, b::BitVector, Gx::BitVector, Gy::BitVector)
-        
-#         @assert m == length(a) == length(b) == length(Gx) == length(Gy)
-
-#         new(m, T, n, a, b, Gx, Gy)
-#     end
-# end
-
-# function BEC_GNB(m, T, n, a, b, Gx, Gy)
-    
-#     _m = convert(Int, m)
-#     _T = convert(Int, T)
-#     _n = convert(BigInt, n)
-#     _a = _parse_bits_gnb(a, _m)
-#     _b = _parse_bits_gnb(b, _m)
-#     _Gx = _parse_bits(Gx, _m)
-#     _Gy = _parse_bits(Gy, _m)
-
-#     return BEC_GNB(_m, _T, _n, _a, _b, _Gx, _Gy)
-# end
-
-
-# function BEC_GNB(curve::Koblitz_GNB)
-    
-#     (; m, T, n, a, Gx, Gy) = curve
-
-#     _b = b(curve)
-
-#     return BEC_GNB(m, T, n, a, _b, Gx, Gy)
-# end
-
-
-
-
-
-# @kwdef struct BEC_PB <: EC2N  #BinaryCurveSpec
-#     f::Vector{Int}
-#     n::BigInt
-#     a::BitVector   
-#     b::BitVector
-#     Gx::BitVector
-#     Gy::BitVector
-
-#     function BEC_PB(f::Vector{Int}, n::BigInt, a::BitVector, b::BitVector, Gx::BitVector, Gy::BitVector)
-        
-#         m = maximum(f)
-
-#         @assert length(a) == length(b) == length(Gx) == length(Gy) == m
-
-#         new(f, n, a, b, Gx, Gy)
-#     end
-# end
-
-
-# function BEC_PB(f, n, a, b, Gx, Gy)
-    
-#     _f = convert(Vector{Int}, f)
-#     _m = maximum(_f)
-#     _n = convert(BigInt, n)
-    
-#     _a = _parse_bits_pb(a, _m)
-#     _b = _parse_bits_pb(b, _m)
-#     _Gx = _parse_bits(Gx, _m)
-#     _Gy = _parse_bits(Gy, _m)
-
-#     return BEC_PB(_f, _n, _a, _b, _Gx, _Gy)
-# end
-
-
-
-# function BEC_PB(curve::Koblitz_PB)
-    
-#     (; f, n, a, Gx, Gy) = curve
-
-#     _b = b(curve)
-
-#     return BEC_PB(f, n, a, _b, Gx, Gy)
-# end
-
-
+modulus(spec::MODP) = spec.p
+order(spec::MODP) = spec.q

@@ -1,7 +1,5 @@
 ### https://tools.ietf.org/html/rfc2409#section-6.2
 
-
-
 # Another method can be added for calculating order. That can generally be done by providing an r as an argument.
 
 """

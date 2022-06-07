@@ -130,20 +130,10 @@ end
 
 
 
-
-
-
-
-#function Base.rand(prg::PRG, ::Type{G}, N::Integer; nr::Integer = 0) where G <: PGroup
-
 function Base.rand(prg::PRG, spec::MODP, N::Integer; nr::Integer = 0) 
-
-    #p = modulus(G)
-    #q = order(G)
 
     p = modulus(spec)
     q = order(spec)
-
 
     np = bitlength(p)
 
@@ -153,11 +143,6 @@ function Base.rand(prg::PRG, spec::MODP, N::Integer; nr::Integer = 0)
 
     𝐡 = powermod.(𝐭′, (p - 1) ÷ q, p)
     
-    #𝐡_typed = convert(Vector{PGroup{G}}, 𝐡)
-    #𝐡_typed = convert(Vector{G}, 𝐡)
-
-
-    #return 𝐡_typed
     return 𝐡
 end
 
@@ -215,8 +200,3 @@ function Base.rand(prg::PRG, spec::ECP, N::Integer; nr::Integer = 0)
     return 𝐡
 end
 
-
-#<|(::Type{Vector{G}}, x::Vector) where G <: Group = G[ G <| i for i in x]
-
-
-#Base.rand(prg::PRG, ::Type{G}, N::Integer; nr::Integer = 0) where G <: ECGroup = Vector{G} <| rand(prg, spec(G), N; nr)

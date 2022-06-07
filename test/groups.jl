@@ -1,13 +1,10 @@
 using Test
-import CryptoGroups: PGroup, validate, order, Enc, Dec, modulus, value, specialize
-
+import CryptoGroups: PGroup, validate, order, Enc, Dec, modulus, value, specialize, Specs, generator, <|
 
 q = 11
 p = 2*q + 1
 
-
-G = specialize(PGroup, p, q, :G)
-
+G = PGroup(p, q; name=:G)
 
 @test validate(G(3)) == true
 @test validate(G(11)) == false
@@ -21,12 +18,7 @@ n = let
 end
 @test n == q - 1
 
-
-
 g = G(3)
-
-#q = 17
-#g = PrimeGenerator(3, q)
 
 @test g*g^2 == g^3
 @test (g^2)^2 == g^4
@@ -45,11 +37,10 @@ h = g^7
 @test g^2/g == g
 
 
-
 ################################ Legacy ##################################
 
 import CryptoGroups
-import CryptoGroups: <|, PGroup, specialize, value, order, ECGroup, sophie_germain_group, dsa_standart_group, Group, modulus, generator, Specs
+import CryptoGroups: <|, PGroup, specialize, value, order, ECGroup, Group, modulus, generator, Specs
 
 using Test
 
@@ -62,7 +53,7 @@ function testgroup(g::G) where G <: Group
     @test g^(order(G) + 1) == g
 end
 
-G = specialize(PGroup, 23, 11)
+G = PGroup(23, 11)
 g = G(3)
 
 @test value(g) == 3
@@ -97,11 +88,20 @@ using Random: MersenneTwister
 rng = MersenneTwister(0)
 
 # Broken
-#g = sophie_germain_group(rng, 2, 100)
+let 
+modp_spec = Specs.sophie_germain_group(rng, 2, 100)
+G = specialize(PGroup, modp_spec)
+g = G <| generator(modp_spec)
+
 #testgroup(g)
+end
 
-### Seems to be problem with large numbers
-g = dsa_standart_group(rng, 10, 10)
+### Seems to have an issue with large numbers
+let
+modp_spec = Specs.dsa_standart_group(rng, 10, 10)
+G = specialize(PGroup, modp_spec)
+g = G <| generator(modp_spec)
+
 testgroup(g)
-
+end
 

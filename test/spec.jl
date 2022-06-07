@@ -1,7 +1,5 @@
 using Test
-import CryptoGroups: Specs
-import Specs: gn_basis_exist, gn_basis_representation_rule
-
+import CryptoGroups.Specs: gn_basis_exist, gn_basis_representation_rule
 
 
 @test gn_basis_exist(4, 3) == true

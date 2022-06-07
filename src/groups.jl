@@ -1,6 +1,5 @@
-using .Curves: ECPoint
+using .Curves: ECPoint, gx, gy
 using .Specs: PRG
-
 
 
 abstract type Group end
@@ -18,14 +17,9 @@ import Base./
 name(x::G) where G <: Group = name(G)
 
 
-
-
 <|(::Type{Vector{G}}, x::Vector) where G <: Group = G[ G <| i for i in x]
 
 Base.rand(prg::PRG, ::Type{G}, N::Integer; nr::Integer = 0) where G <: Group = Vector{G} <| rand(prg, spec(G), N; nr)
-
-
-
 
 
 struct ECGroup{P<:ECPoint} <: Group
@@ -53,14 +47,14 @@ validate(x::ECGroup) = validate(x.x)
 
 Base.:(==)(x::G, y::G) where G <: ECGroup = x.x == y.x
 
-#gx(p::ECGroup) = gx(p.x)
-#gy(p::ECGroup) = gy(p.x)
-
 modulus(::Type{ECGroup{P}}) where P <: ECPoint = modulus(P)
 
 name(::Type{ECGroup{P}}) where P <: ECPoint = name(P)
 
-Base.isless(x::G, y::G) where G <: ECGroup = gx(x) == gx(y) ? gx(x) < gx(y) : gy(x) < gy(y)
+Base.isless(x::G, y::G) where G <: ECGroup = isless(x.x, y.x)
+
+Curves.gx(g::ECGroup) = gx(g.x)
+Curves.gy(g::ECGroup) = gy(g.x)
 
 
 function Base.show(io::IO, g::G) where G <: ECGroup
@@ -73,35 +67,12 @@ function Base.show(io::IO, g::G) where G <: ECGroup
 end
 
 
-spec(::Type{ECGroup{P}}) where P = spec(P)
-spec(g::ECGroup) = spec(g.x)
-
-specialize(::Type{ECGroup{P}}, spec::Spec; name = nothing) where P <: ECPoint = ECGroup{specialize(P, spec; name)}
-specialize(::Type{ECGroup}, spec::Spec; name = nothing) = ECGroup{specialize(ECPoint, spec; name)}
-
-
-
-# Static fields for PGroup
-struct static_PGroup{N} ### Type parameter is essential to ensure it to be bitstype
-    p::StaticBigInt{N}
-    q::StaticBigInt{N} # for the cases where order is unkown I could have a 0 here. 
-    name::UInt128
-
-    static_PGroup(p::StaticBigInt{N}, q::StaticBigInt{N}, name::Symbol) where N = new{N}(p, q, string2uint(string(name)))
-    function static_PGroup(p::Integer, q::Integer, name::Symbol) 
-
-        n = bitlength(p)
-
-        _p = StaticBigInt(p; n)
-        _q = StaticBigInt(q; n)
-        static_PGroup(_p, _q, name)
-    end
-
-    static_PGroup(p::Integer, q::Integer) where N = static_PGroup(p, q, Symbol(""))
-end
-
 struct PGroup{S} <: Group
     g::BigInt
+
+
+    PGroup(p::Integer, q::Integer; name=nothing) = PGroup{static(; p, q, name)}
+
 
     function PGroup{S}(x::BigInt) where S
         #@assert 1 < x < S.p "Not in range"
@@ -112,15 +83,8 @@ struct PGroup{S} <: Group
     end
 
     PGroup{S}(x::Integer) where S = PGroup{S}(BigInt(x))
+
 end
-
-
-specialize(::Type{PGroup}, p::Integer, q::Integer) = PGroup{static_PGroup(p, q)}
-specialize(::Type{PGroup}, q::Integer) = specialize(PGroup, 2*q + 1, q) # Safe prime constructor
-
-specialize(::Type{PGroup}, p::Integer, q::Integer, name::Symbol) = PGroup{static_PGroup(p, q, name)}
-specialize(::Type{PGroup}, q::Integer, name::Symbol) = specialize(PGroup, 2*q + 1, q, name) # Safe prime constructor
-
 
 modulus(::Type{PGroup{S}}) where S = BigInt(S.p)
 modulus(::G) where G <: PGroup = modulus(G)
@@ -199,7 +163,6 @@ Base.isless(x::G, y::G) where G <: PGroup = value(x) < value(y)
 
 Base.convert(::Type{G}, x::Integer) where G <: PGroup = G(x)
 
-specialize(::Type{PGroup}, spec::MODP; name = nothing) = isnothing(name) ? specialize(PGroup, spec.p, spec.q) : specialize(PGroup, spec.p, spec.q, name)
 
 # function Base.prod(x::Vector{G}) where G <: PGroup
 

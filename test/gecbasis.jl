@@ -1,7 +1,5 @@
 using Test
 import CryptoGroups: ECGroup, Hash, specialize, value, ROPRG, Specs
-#import CryptoGroups
-
 
 tobig(x) = parse(BigInt, bytes2hex(reverse(x)), base=16)
 interpret(::Type{BigInt}, x::Vector{UInt8}) = tobig(reverse(x))
@@ -19,7 +17,6 @@ function interpret(::Type{T}, x::AbstractString) where T
 
     return interpret(T, bytes)
 end
-
 
 
 function leaf(x::Vector{UInt8})

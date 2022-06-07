@@ -8,7 +8,6 @@ function spec end
 function specialize end
 function order end
 function bitlength end
-#function modulus end # This is unnecessary as Specs already imports 
 function <| end
 function tobits end
 
@@ -21,20 +20,8 @@ function cofactor end
 function a end
 function b end
 
-
-# nbits(x::UInt8) = 8
-# nbits(x::UInt64) = 64
-# nbits(x::UInt32) = 32
-# nbits(x::BigInt) = 64 * x.size
-
-# nbits(x::Int64) = 64
-# nbits(x::Int32) = 32
-# nbits(x::Int128) = 128
-
-
 # In most cases probably using sizeof directly is more appropriate
 bitlength(::Type{T}) where T <: Integer = sizeof(T) * 8
-
 
 function bitlength(p::Integer)
 
@@ -57,19 +44,14 @@ function bitlength(p::BigInt)
 end
 
 
-
-
-
-
 include("Fields/Fields.jl")
 include("Curves/Curves.jl")
 include("Specs/Specs.jl")
 
 
-include("spec.jl")
 include("groups.jl")
 include("elgamal.jl")
-
+include("spec.jl")
 
 export @bin_str
 
@@ -79,10 +61,11 @@ import .Fields: Field, BinaryField, FP, F2GNB, F2PB, PrimeField
 export Field, FP, F2GNB, F2PB # frombits and tobits method shall be dealt with convert
 
 import .Curves: AbstractPoint, ECPoint, AffinePoint, BinaryCurve, validate, gx, gy, a, b, oncurve
-export AbstractPoint, ECPoint, AffinePoint, BinaryCurve, validate, gx, gy, a, b, oncurve
+export AbstractPoint, ECPoint, AffinePoint, BinaryCurve, validate #, gx, gy, a, b, oncurve
 
 import .Specs: MODP, Koblitz, ECP, EC2N, PB, GNB, generator, Hash, PRG, RO, ROPRG
 export MODP, Koblitz, ECP, EC2N, PB, GNB, generator, Hash, PRG, RO, ROPRG
 
+export ElGamal
 
 end

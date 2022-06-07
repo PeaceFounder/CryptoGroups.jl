@@ -34,8 +34,7 @@ function sophie_germain_group(rng::AbstractRNG, g::Integer, t::Int)
         q = rngprime(rng, 2*t)
         p = 2*q + 1
         if g!=p-1 && isprime(p)
-            G = specialize(PGroup, p, q, Symbol("G_$t"))
-            return G(g)
+            return MODP(; p, g, q)
         end
     end
 end
@@ -59,9 +58,7 @@ function dsa_standart_group(rng::AbstractRNG, tp::Int, tg::Int)
         g = powermod(u, div((p-1), q), p)
 
         if g!=1 || g!=0
-
-            G = specialize(PGroup, p, q, Symbol("G"))
-            return G(g)
+            return MODP(; p, g, q)
         end
     end
 end

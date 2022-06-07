@@ -5,7 +5,7 @@ struct FP{P} <: PrimeField
     FP{P}(x::Integer) where P = new{P}(BigInt(x))
 end
 
-specialize(::Type{FP}, p::Integer) = FP{static(p)} # A workaround to store BigInt as type argument
+specialize(::Type{FP}, p::Integer) = FP{static(p)} 
 
 value(x::FP) = x.x
 modulus(::FP{P}) where P = BigInt(P)

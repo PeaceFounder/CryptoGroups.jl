@@ -44,7 +44,7 @@ let
     q = 11
     p = 2*q + 1
 
-    G = specialize(PGroup, p, q, :G)
+    G = PGroup(p, q)
     g = G(3)
 
     elgamal_test(g)
@@ -73,8 +73,6 @@ let
     elgamal_test(g)
 end
 
-
-# This one gives the UndefVarError(:P) error
 
 let
     spec = Specs.Curve_B_163_PB

@@ -20,22 +20,12 @@ struct StaticBigInt{N} <: Integer
     x::NTuple{N, UInt8}
 end
 
-# function StaticBigInt(x::Integer)
-#     bytes = int2bytes(x)
-#     N = length(bytes)
-#     sv = NTuple{N, UInt8}(bytes)
-#     return StaticBigInt(sv)
-# end
-
-
 function StaticBigInt(x::Integer; n = bitlength(x))
     bytes = int2bytes(x)
     
     N = div(n, 8, RoundUp)
 
     append!(bytes, UInt8[0 for i in 1:N-length(bytes)])
-
-    #N = length(bytes)
 
     sv = NTuple{N, UInt8}(bytes)
     return StaticBigInt(sv)
@@ -167,18 +157,13 @@ function Base.convert(::Type{Symbol}, s::StaticSymbol)
     N = findlast(x->x!=0, bytes)
     
     if N == nothing
-        #return String("") 
         error("Nothing encoded")
-        #return nothing
     else
-        #return String(bytes[1:N]) 
         return Symbol(String(bytes[1:N]))
     end
-    #trimmed = bytes[1:findlast(x->x!=0, bytes)]
 end
 
 static(x::Symbol) = StaticSymbol(x)
-
 
 # Goeas through the keyword arguments and returns a coresponding namedtuple where on each argument static is being called
 static(; kwargs...) = NamedTuple((key, static(value)) for (key, value) in pairs(kwargs))

@@ -120,13 +120,7 @@ end
 
 
 <|(::Type{Vector{UInt8}}, x::BinaryField) = bits2octet(tobits(x))
-
-# binary_order is abad name. Better would be to use already existing name nbits; Also applicable to field element
-<|(::Type{F}, x::Vector{UInt8}) where F <: BinaryField = F <| octet2bits(x, binary_order(F))
-
-
-#<|(::Type{F}, x::String) where F <: Field = F <| _hex2bytes(x) # 
-
+<|(::Type{F}, x::Vector{UInt8}) where F <: BinaryField = F <| octet2bits(x, bitlength(F))
 
 
 function <|(::Type{P}, po::Vector{UInt8}) where P <: AbstractPoint
@@ -157,18 +151,6 @@ function <|(::Type{P}, po::Vector{UInt8}) where P <: AbstractPoint
 
 end
 
-
-### Should pass :hybrid as optional argument
-### I could add similar arguments for integers
-# F <|(:big) x or F <|(:little) x 
-# 
-#Vector{UInt8} <|(:hybrid) po
-#Vector{UInt8} <|(:compressed) po
-#Vector{UInt8} <|(:uncompressed) po
-
-#Vector{UInt8} <| po % :uncompressed
-
-###
 
 function <|(::Type{Vector{UInt8}}, p::AbstractPoint; option::Symbol=:uncompressed)
 

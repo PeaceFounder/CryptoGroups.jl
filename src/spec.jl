@@ -1,4 +1,3 @@
-# Need to introduce ECSpec to exclude MODP
 using .Fields: F2GNB, F2PB, FP, Field, PrimeField, BinaryField, tobits, value
 using .Curves: AbstractPoint, ECPoint, AffinePoint, Weierstrass, BinaryCurve, gx, gy, field, eq
 using .Specs: MODP, Koblitz, ECP, EC2N, Spec, PB, GNB
@@ -34,8 +33,6 @@ function specialize(::Type{ECPoint{P}}, curve::Spec; name=nothing) where P <: Ab
 end
 
 specialize(::Type{ECPoint}, spec::Spec; name = nothing) = specialize(ECPoint{AffinePoint}, spec; name)
-
-
 
 
 ##################### Macro for defining curve as also a group ###################
@@ -102,14 +99,12 @@ specialize(::Type{AffinePoint}, spec::ECP) = specialize(AffinePoint{Weierstrass,
 
 function specialize(::Type{F}, basis::PB) where F <: BinaryField
     (; f) = basis
-    #return specialize(F, f)
     return F(f)
 end
 
 
 function specialize(::Type{F}, basis::GNB) where F <: BinaryField
     (; m, T) = basis
-    #return specialize(F, m, T)
     return F{m, T}
 end
 
@@ -153,3 +148,32 @@ function spec(::Type{EQ}, ::Type{F}; n=nothing, h=nothing, Gx=nothing, Gy=nothin
 
     return ECP(p, n, _a, _b, Gx, Gy) # I will need to add H in the end here
 end
+
+
+spec(::Type{ECGroup{P}}) where P = spec(P)
+spec(g::ECGroup) = spec(g.x)
+
+specialize(::Type{ECGroup{P}}, spec::Spec; name = nothing) where P <: ECPoint = ECGroup{specialize(P, spec; name)}
+specialize(::Type{ECGroup}, spec::Spec; name = nothing) = ECGroup{specialize(ECPoint, spec; name)}
+
+
+specialize(::Type{PGroup}, spec::MODP; name = nothing) = PGroup(spec.p, spec.q; name)
+
+
+function spec(x::Symbol)
+    if x == :P_192
+        return Curve_P_192
+    elseif x == :P_244
+        return Curve_P_244
+    elseif x == :P_256
+        return Curve_P_256
+    elseif x == :P_384
+        return Curve_P_384
+    elseif x == :P_521
+        return Curve_P_521
+    else
+        error("$x not implemented")
+    end
+end
+
+specialize(::Type{PGroup}, p, q) = PGroup(p, q)
