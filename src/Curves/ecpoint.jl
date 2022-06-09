@@ -28,7 +28,7 @@ cofactor(::Type{ECPoint{P, S}}) where {P <: AbstractPoint, S} = convert(Integer,
 
 name(::Type{ECPoint}) = nothing
 name(::Type{ECPoint{P}}) where P <: AbstractPoint = nothing
-name(::Type{ECPoint{P, S}}) where {P <: AbstractPoint, S} = convert(Symbol, S.name)
+name(::Type{ECPoint{P, S}}) where {P <: AbstractPoint, S} = isnothing(S.name) ? nothing : convert(Symbol, S.name)
 
 
 eq(::Type{ECPoint{P, S}}) where {P <: AbstractPoint, S} = eq(P)
@@ -58,12 +58,14 @@ function Base.show(io::IO, p::P) where P <: ECPoint
     print(io, ")")
 end
 
-
 function Base.display(::Type{P}) where P <: ECPoint
     show(P)
     ### I could be more precise on the Point
     ### Like ECPoint{AffinePoint{<:Weierstrass, <:F2GNB}, S}
-    if name(P) != nothing
+    #if name(P) != nothing
+
+    if !isnothing(name(P))
+
         print(" (alias for ECPoint{<:AffinePoint, ::static_ECPoint})") 
     end
 end
@@ -79,7 +81,10 @@ Base.:*(x::P, n::Integer) where P <: ECPoint = P(x.p * n)
 Base.:*(n::Integer, x::ECPoint) = x * n
 
 
-<|(::Type{ECPoint{P, S}}, x) where {P <: AbstractPoint, S} = ECPoint{P, S}(P <| x)
+Base.convert(::Type{ECPoint{P, S}}, x) where {P <: AbstractPoint, S} = ECPoint{P, S}(P <| x)
+Base.convert(::Type{P}, x::P) where P <: ECPoint = x 
+
+
 validate(p::P) where P <: ECPoint = order(P) * p.p == zero(p.p) 
 
 oncurve(p::ECPoint) = oncurve(p.p)

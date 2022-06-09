@@ -4,17 +4,19 @@ using CryptoUtils: sqrt_mod_prime
 
 # Field element to integer. Does not make sense for binary curves
 
-<|(::Type{AffinePoint{EQ, F}}, args::Tuple{F, F}) where {EQ <: EllipticCurve, F <: Field} = AffinePoint{EQ, F}(args...)
+#<|(::Type{AffinePoint{EQ, F}}, args::Tuple{F, F}) where {EQ <: EllipticCurve, F <: Field} = AffinePoint{EQ, F}(args...)
+
+Base.convert(::Type{AffinePoint{EQ, F}}, args::Tuple{F, F}) where {EQ <: EllipticCurve, F <: Field} = AffinePoint{EQ, F}(args...)
 
 
-function <|(::Type{P}, bytes::Tuple{Vector{UInt8}, Vector{UInt8}}) where P <: AbstractPoint
+function Base.convert(::Type{P}, bytes::Tuple{Vector{UInt8}, Vector{UInt8}}) where P <: AbstractPoint
     xb, yb = bytes
     F = field(P)
     P <| (F <| xb, F <| yb)
 end
 
 
-function <|(::Type{P}, compressed_point::Tuple{Vector{UInt8}, UInt8}) where P <: AbstractPoint
+function Base.convert(::Type{P}, compressed_point::Tuple{Vector{UInt8}, UInt8}) where P <: AbstractPoint
 
     xb, ỹb = compressed_point
     
@@ -28,7 +30,7 @@ end
 
 #
 
-function <|(::Type{AffinePoint{EQ, F}}, compressed_point::Tuple{BigInt, Bool}) where {EQ <: Weierstrass, F <: PrimeField}
+function Base.convert(::Type{AffinePoint{EQ, F}}, compressed_point::Tuple{BigInt, Bool}) where {EQ <: Weierstrass, F <: PrimeField}
 
     P = AffinePoint{EQ, F}
 
@@ -68,8 +70,8 @@ octet2int(x::Vector{UInt8}) = parse(BigInt, bytes2hex(x), base=16)
 
 
 
-<|(::Type{Vector{UInt8}}, x::PrimeField) = int2octet(value(x))
-<|(::Type{F}, x::Vector{UInt8}) where F <: PrimeField = F <| octet2int(x)
+Base.convert(::Type{Vector{UInt8}}, x::PrimeField) = int2octet(value(x))
+Base.convert(::Type{F}, x::Vector{UInt8}) where F <: PrimeField = F <| octet2int(x)
     
 
 function octet2bits(x::Vector{UInt8})
@@ -119,11 +121,11 @@ function bits2octet(_x::BitVector)
 end
 
 
-<|(::Type{Vector{UInt8}}, x::BinaryField) = bits2octet(tobits(x))
-<|(::Type{F}, x::Vector{UInt8}) where F <: BinaryField = F <| octet2bits(x, bitlength(F))
+Base.convert(::Type{Vector{UInt8}}, x::BinaryField) = bits2octet(tobits(x))
+Base.convert(::Type{F}, x::Vector{UInt8}) where F <: BinaryField = F <| octet2bits(x, bitlength(F))
 
 
-function <|(::Type{P}, po::Vector{UInt8}) where P <: AbstractPoint
+function Base.convert(::Type{P}, po::Vector{UInt8}) where P <: AbstractPoint
 
     pc = po[1]
 
@@ -151,8 +153,9 @@ function <|(::Type{P}, po::Vector{UInt8}) where P <: AbstractPoint
 
 end
 
-
-function <|(::Type{Vector{UInt8}}, p::AbstractPoint; option::Symbol=:uncompressed)
+### Could be eventually renamed to point2bytes. The option however does not change information on how the point
+# should be decoded. 
+function Base.convert(::Type{Vector{UInt8}}, p::AbstractPoint; option::Symbol=:uncompressed)
 
     if option == :uncompressed
         x = Vector{UInt8} <| gx(p)
@@ -165,7 +168,7 @@ function <|(::Type{Vector{UInt8}}, p::AbstractPoint; option::Symbol=:uncompresse
 end
 
 
-function <|(x::Tuple{DataType, Symbol}, y) where T 
+function Base.convert(x::Tuple{DataType, Symbol}, y) where T 
     return <|(x[1], y; option=x[2])
 end
 

@@ -11,22 +11,24 @@ Base.inv(x::Field) = x^(order(x) - 1)
 Base.literal_pow(::typeof(^), x::F, ::Val{2}) where F <: Field = square(x)
 Base.literal_pow(::typeof(^), x::F, ::Val{0}) where F <: Field = one(F)
 
+
 abstract type BinaryField <: Field end
 
 Base.:-(x::F, y::F) where F <: BinaryField = x + y
 
+Base.convert(::Type{F}, x::BitVector) where F <: BinaryField = F(x)
 
-<|(::Type{F}, x) where F <: BinaryField = convert(F, x)
-
-function Base.convert(::Type{F}, x::Integer) where F <: BinaryField
-    if x == 0
+###
+#function Base.convert(::Type{F}, x::Integer) where F <: BinaryField
+function Base.convert(::Type{F}, x::Bool) where F <: BinaryField
+    if x == false
         return zero(F)
-    elseif x == 1
+    elseif x == true
         return one(F)
-    else
-        error("Conversion of $x not possible")
     end
 end
+
+Base.convert(::Type{F}, x::Integer) where F <: BinaryField = convert(F, Bool(x))
 
 
 function Base.:^(g::F, a::Integer) where F <: BinaryField
@@ -86,8 +88,7 @@ Base.isless(x::F, y::F) where F <: BinaryField = tobits(x) < tobits(y)
 
 abstract type PrimeField <: Field end
 
-<|(::Type{F}, x) where F <: PrimeField = F(x)
-
+Base.convert(::Type{F}, x::Integer) where F <: PrimeField = F(x)
 
 function modulus end
 function value end

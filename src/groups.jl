@@ -17,7 +17,7 @@ import Base./
 name(x::G) where G <: Group = name(G)
 
 
-<|(::Type{Vector{G}}, x::Vector) where G <: Group = G[ G <| i for i in x]
+Base.convert(::Type{Vector{G}}, x::Vector) where G <: Group = G[ G <| i for i in x]
 
 Base.rand(prg::PRG, ::Type{G}, N::Integer; nr::Integer = 0) where G <: Group = Vector{G} <| rand(prg, spec(G), N; nr)
 
@@ -26,7 +26,8 @@ struct ECGroup{P<:ECPoint} <: Group
     x::P
 end
 
-<|(::Type{ECGroup{P}}, x) where P <: ECPoint = ECGroup{P}(P <| x)
+Base.convert(::Type{ECGroup{P}}, x) where P <: ECPoint = ECGroup{P}(P <| x)
+Base.convert(::Type{G}, x::G) where G <: ECGroup = x
 
 Base.:*(x::G, y::G) where G <: ECGroup = G(x.x + y.x)
 
@@ -144,8 +145,7 @@ end
 
 value(g::PGroup) = g.g
 
-<|(::Type{P}, x::Integer) where P <: PGroup = P(BigInt(x))
-
+Base.convert(::Type{P}, x::Integer) where P <: PGroup = P(BigInt(x))
 
 validate(g::G) where G <: PGroup = value(g) != 1 && powermod(value(g), order(G), modulus(G)) == 1
 
@@ -174,12 +174,12 @@ Base.:(==)(x::G, y::G) where G <: PGroup = x.g == y.g
 
 Base.isless(x::G, y::G) where G <: PGroup = value(x) < value(y)
 
-Base.convert(::Type{G}, x::Integer) where G <: PGroup = G(x)
+#Base.convert(::Type{G}, x::Integer) where G <: PGroup = G(x)
 
 
 # function Base.prod(x::Vector{G}) where G <: PGroup
 
-#     p = modulus(G)
+#     p = modulus(G)1
 #     s = value(x[1])
     
 #     for i in x[2:end]

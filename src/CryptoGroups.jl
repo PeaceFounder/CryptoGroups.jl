@@ -8,7 +8,11 @@ function spec end
 function specialize end
 function order end
 function bitlength end
-function <| end
+
+
+<|(x::Type, y) = convert(x, y)
+
+
 function tobits end
 
 function validate end # isvalid 

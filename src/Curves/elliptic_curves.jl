@@ -19,8 +19,13 @@ eq(::Type{AffinePoint{EQ, F}}) where {EQ <: EllipticCurve, F <: Field} = EQ
 field(::Type{AffinePoint{EQ, F}}) where {EQ <: EllipticCurve, F <: Field} = F
 
 
-<|(::Type{P}, x::Tuple{BigInt, BigInt}) where P <: AffinePoint = P(x...)
-<|(::Type{P}, x::Tuple{BitVector, BitVector}) where P <: AffinePoint = P(x...)
+#<|(::Type{P}, x::Tuple{BigInt, BigInt}) where P <: AffinePoint = P(x...)
+#<|(::Type{P}, x::Tuple{BitVector, BitVector}) where P <: AffinePoint = P(x...)
+
+### More through subtyping could be in here
+Base.convert(::Type{P}, x::Tuple{BigInt, BigInt}) where P <: AffinePoint = P(x...)
+Base.convert(::Type{P}, x::Tuple{BitVector, BitVector}) where P <: AffinePoint = P(x...)
+
 
 gx(p::AffinePoint) = p.x
 gy(p::AffinePoint) = p.y
