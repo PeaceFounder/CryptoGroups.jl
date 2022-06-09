@@ -129,11 +129,14 @@ end
 (roprg::ROPRG)(x::Symbol) = roprg(string(x))
 
 
+#using Infiltrator
 
 function Base.rand(prg::PRG, spec::MODP, N::Integer; nr::Integer = 0) 
 
     p = modulus(spec)
     q = order(spec)
+
+    @assert !isnothing(q) "Order of the group must be known"
 
     np = bitlength(p)
 

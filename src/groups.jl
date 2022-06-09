@@ -93,22 +93,35 @@ order(::Type{PGroup{S}}) where S = BigInt(S.q)
 
 name(::Type{PGroup}) = nothing
 
-function name(::Type{PGroup{S}}) where S
+name(::Type{PGroup{S}}) where S =  isnothing(S.name) ? nothing : convert(Symbol, S.name)
     
-    str = uint2string(S.name)
+#     #str = uint2string(S.name)
 
-    if str == ""
-        return nothing
-    else
-        return Symbol(str)
-    end
-end
+#     str = convert(String, S.name)
+
+#     if str == ""
+#         return nothing
+#     else
+#         return Symbol(str)
+#     end
+# end
 
 
 Base.show(io::IO, g::PGroup) = print(io, value(g))
 
 
 Base.show(io::IO, ::Type{PGroup}) = print(io, "PGroup")
+
+#dublicate at Fields. 
+function trimnumber(x::String)
+    if length(x) < 30
+        return x
+    else
+        return x[1:10] * "..." * x[end-10:end]
+    end
+end
+
+trimnumber(x::Integer) = trimnumber(string(x))
 
 groupstr(m) = "𝐙/($(trimnumber(m)))"
 

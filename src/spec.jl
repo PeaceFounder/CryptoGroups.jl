@@ -150,8 +150,6 @@ function spec(::Type{EQ}, ::Type{F}; n=nothing, h=nothing, Gx=nothing, Gy=nothin
 end
 
 
-spec(::Type{ECGroup{P}}) where P = spec(P)
-spec(g::ECGroup) = spec(g.x)
 
 specialize(::Type{ECGroup{P}}, spec::Spec; name = nothing) where P <: ECPoint = ECGroup{specialize(P, spec; name)}
 specialize(::Type{ECGroup}, spec::Spec; name = nothing) = ECGroup{specialize(ECPoint, spec; name)}
@@ -162,18 +160,25 @@ specialize(::Type{PGroup}, spec::MODP; name = nothing) = PGroup(spec.p, spec.q; 
 
 function spec(x::Symbol)
     if x == :P_192
-        return Curve_P_192
+        return Specs.Curve_P_192
     elseif x == :P_244
-        return Curve_P_244
+        return Specs.Curve_P_244
     elseif x == :P_256
-        return Curve_P_256
+        return Specs.Curve_P_256
     elseif x == :P_384
-        return Curve_P_384
+        return Specs.Curve_P_384
     elseif x == :P_521
-        return Curve_P_521
+        return Specs.Curve_P_521
     else
         error("$x not implemented")
     end
 end
 
 specialize(::Type{PGroup}, p, q) = PGroup(p, q)
+
+
+spec(::Type{ECGroup{P}}) where P = spec(P)
+spec(g::ECGroup) = spec(g.x)
+
+spec(::Type{G}) where G <: PGroup = MODP(; p = modulus(G), q = order(G))
+

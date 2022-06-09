@@ -24,7 +24,7 @@ function trimnumber(x::String)
     end
 end
 
-trimnumber(x::Integer)= trimnumber(string(x))
+trimnumber(x::Integer) = trimnumber(string(x))
 
 modulus_str(x::BigInt) = trimnumber(x)
 modulus_str(::Type{F}) where F <: FP = modulus_str(modulus(F))
