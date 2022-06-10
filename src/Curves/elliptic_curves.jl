@@ -72,7 +72,7 @@ end
 Base.:*(k::Integer, P::AffinePoint) = P * k
 
 
-function validate(::Type{P}) where P <: AffinePoint
+function Base.isvalid(::Type{P}) where P <: AffinePoint
     
     g = generator(x)
 
@@ -87,7 +87,7 @@ function validate(::Type{P}) where P <: AffinePoint
     return true
 end
 
-validate(x::AffinePoint) = oncurve(x)
+Base.isvalid(x::AffinePoint) = oncurve(x)
 
 ### Definition of some elliptic curves and coresponding operations
 

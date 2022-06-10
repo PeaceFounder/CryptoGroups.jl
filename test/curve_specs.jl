@@ -1,7 +1,7 @@
 using Test
 
 import CryptoGroups
-import CryptoGroups: generator, order, oncurve, FP, Weierstrass, BinaryCurve, F2PB, F2GNB, @def, specialize, <|, validate, ECPoint, AffinePoint, spec, Specs
+import CryptoGroups: generator, order, oncurve, FP, Weierstrass, BinaryCurve, F2PB, F2GNB, @def, specialize, <|, ECPoint, AffinePoint, spec, Specs
 
 
 const FULL_TEST = false
@@ -16,7 +16,7 @@ for C in [:P_192, :P_244, :P_256, :P_384, :P_521]
 
     @test oncurve(g)
     @test oncurve(g*3)
-    @test validate(g)
+    @test isvalid(g)
 
 end
 
@@ -33,7 +33,7 @@ for C in [:B_163_PB, :B_233_PB, :B_283_PB, :B_409_PB, :B_571_PB, :K_163_PB, :K_2
     @test oncurve(g*3)
     
     if C == :K_163_PB # Too slow to test all 
-        @test validate(g)
+        @test isvalid(g)
     end
 
 end

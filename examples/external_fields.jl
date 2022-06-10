@@ -48,7 +48,7 @@ Base.one(::Type{GF₂{F}}) where F <: ExtensionField = GF₂(one(F))
 
 ########################## This one we can test easally as follows ##################
 
-import CryptoGroups: BinaryCurve, generator, oncurve, order, @def, AffinePoint, <|, ECPoint, validate
+import CryptoGroups: BinaryCurve, generator, oncurve, order, @def, AffinePoint, <|, ECPoint
 import CryptoGroups: Specs
 import .Specs: Curve_B_163_PB, Curve_K_163_PB
 
@@ -71,5 +71,5 @@ let
 
     @test oncurve(g)
     @test oncurve(g*3)
-    @test validate(g)
+    @test isvalid(g)
 end

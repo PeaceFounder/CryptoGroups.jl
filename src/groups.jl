@@ -44,7 +44,7 @@ Base.inv(g::G) where G <: ECGroup = g^(order(G) - 1)
 
 order(::Type{ECGroup{P}}) where P = order(P)
 
-validate(x::ECGroup) = validate(x.x)
+Base.isvalid(x::ECGroup) = isvalid(x.x)
 
 Base.:(==)(x::G, y::G) where G <: ECGroup = x.x == y.x
 
@@ -147,7 +147,7 @@ value(g::PGroup) = g.g
 
 Base.convert(::Type{P}, x::Integer) where P <: PGroup = P(BigInt(x))
 
-validate(g::G) where G <: PGroup = value(g) != 1 && powermod(value(g), order(G), modulus(G)) == 1
+Base.isvalid(g::G) where G <: PGroup = value(g) != 1 && powermod(value(g), order(G), modulus(G)) == 1
 
 
 import Base.*

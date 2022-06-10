@@ -1,18 +1,18 @@
 using Test
-import CryptoGroups: PGroup, validate, order, Enc, Dec, modulus, value, specialize, Specs, generator, <|
+import CryptoGroups: PGroup, order, Enc, Dec, modulus, value, specialize, Specs, generator, <|
 
 q = 11
 p = 2*q + 1
 
 G = PGroup(p, q; name=:G)
 
-@test validate(G(3)) == true
-@test validate(G(11)) == false
+@test isvalid(G(3)) == true
+@test isvalid(G(11)) == false
 
 n = let 
     n = 0
     for i in 2:p-1
-        validate(G(i)) && (n+=1)
+        isvalid(G(i)) && (n+=1)
     end
     n
 end

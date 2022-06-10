@@ -85,7 +85,7 @@ Base.convert(::Type{ECPoint{P, S}}, x) where {P <: AbstractPoint, S} = ECPoint{P
 Base.convert(::Type{P}, x::P) where P <: ECPoint = x 
 
 
-validate(p::P) where P <: ECPoint = order(P) * p.p == zero(p.p) 
+Base.isvalid(p::P) where P <: ECPoint = order(P) * p.p == zero(p.p) 
 
 oncurve(p::ECPoint) = oncurve(p.p)
 
