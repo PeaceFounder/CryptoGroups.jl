@@ -68,7 +68,7 @@ export Field, FP, F2GNB, F2PB # frombits and tobits method shall be dealt with c
 import .Curves: AbstractPoint, ECPoint, AffinePoint, BinaryCurve, gx, gy, a, b, oncurve
 export AbstractPoint, ECPoint, AffinePoint, BinaryCurve #, gx, gy, a, b, oncurve
 
-import .Specs: MODP, Koblitz, ECP, EC2N, PB, GNB, generator, Hash, PRG, RO, ROPRG, outlen
+import .Specs: MODP, Koblitz, ECP, EC2N, PB, GNB, generator, Hash, PRG, RO, ROPRG
 export MODP, Koblitz, ECP, EC2N, PB, GNB, generator, Hash, PRG, RO, ROPRG
 
 export ElGamal

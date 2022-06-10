@@ -1,7 +1,7 @@
 using Nettle
 using Random: AbstractRNG
-using CryptoUtils: is_quadratic_residue, sqrt_mod_prime
 
+using CryptoUtils: is_quadratic_residue, sqrt_mod_prime
 
 struct Hash
     spec::String
@@ -10,7 +10,7 @@ end
 (h::Hash)(x::Vector{UInt8}) = hex2bytes(hexdigest(h.spec, x))
 
 # Dispatching on value types seems as plausable solution
-function outlen(h::Hash) 
+function bitlength(h::Hash) 
     s = h.spec
 
     if s == "sha256"
@@ -37,7 +37,7 @@ end
 function Base.getindex(prg::PRG, range)
     (; start, stop) = range
     
-    a = outlen(prg.h) ÷ 8 
+    a = bitlength(prg.h) ÷ 8 # outlength
 
     K = div(stop, a, RoundUp) - 1
 
@@ -115,7 +115,7 @@ function (roprg::ROPRG)(x::Vector{UInt8})
 
     (; ρ, rohash, prghash) = roprg
 
-    ns = outlen(prghash)
+    ns = bitlength(prghash) # outlen
     ro = RO(rohash, ns)
 
     d = UInt8[ρ..., x...]   
