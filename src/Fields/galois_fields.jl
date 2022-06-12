@@ -33,7 +33,7 @@ Base.show(io::IO, ::Type{F}) where F <: FP = print(io, "FP/$(modulus_str(F))")
 
 #########################################
 
-@enum Endian big little
+@enum Endian bige little
 
 
 struct F2PB{R} <: BinaryField ### R is reducer
@@ -43,19 +43,19 @@ struct F2PB{R} <: BinaryField ### R is reducer
 
         @assert length(x) == length(S) - 1
         
-        if e == big
+        if e == bige
             new(x)
         elseif e == little
             new(reverse(x))
         end
     end 
 
-    F2PB{R}(x::BitVector; e::Endian = big) where R = F2PB{R}(x, e)
+    F2PB{R}(x::BitVector; e::Endian = little) where R = F2PB{R}(x, e)
 
-    F2PB(f::BitVector) = F2PB{static(f)}
-    F2PB(f::Vector{Int}) = F2PB(BitVector(i in f for i in 0:maximum(f)))
+    F2PB(f::BitVector; e::Endian = little) = e == little ? F2PB{static(reverse(f))} : F2PB{static(f)}
+    F2PB(f::Vector{Int}) = F2PB(BitVector(i in f for i in 0:maximum(f)); e = bige)
 
-    F2PB(f, x) = F2PB(f)(x)
+    F2PB(f, x; e::Endian) = F2PB(f; e)(x; e)
 end
 
 F2PB(x::F2PB) = x
@@ -68,13 +68,16 @@ Base.convert(::Type{F}, x::BitVector) where F <: F2PB = F(x, little)
 # This function is necessary in differetn contexts so I could keep it as is. 
 tobits(x::F2PB) = reverse(x.x)
 
-reducer(::Type{F2PB{S}}) where S = convert(BitVector, S)
-reducer(::Type{F2PB}) = nothing
+reducer(::Type{F2PB{S}}; e::Endian = little) where S = e == little ? reverse(convert(BitVector, S)) : convert(BitVector, S)
+reducer(::Type{F2PB}; e::Endian = little) = nothing
 
-Base.zero(::Type{F2PB{R}}) where R = F2PB{R}(BitVector(0 for i in 1:length(R)-1))
-Base.one(::Type{F2PB{R}}) where R = F2PB{R}(BitVector((1, (0 for i in 2:length(R)-1 )...)))
+reducer(x::F; e::Endian = little) where F <: F2PB = reducer(F; e)
 
-Base.:+(x::F, y::F) where F <: F2PB = F(xor.(x.x, y.x))
+
+Base.zero(::Type{F2PB{R}}) where R = F2PB{R}(BitVector(0 for i in 1:length(R)-1); e = bige)
+Base.one(::Type{F2PB{R}}) where R = F2PB{R}(BitVector((1, (0 for i in 2:length(R)-1 )...)); e = bige)
+
+Base.:+(x::F, y::F) where F <: F2PB = F(xor.(x.x, y.x); e = bige)
 
 order(::Type{F}) where F <: F2PB = BigInt(2)^bitlength(F) - 1
 order(x::F) where F <: F2PB = order(F)    
@@ -125,7 +128,8 @@ function mul(a::BitVector, b::BitVector)
 end
 
 mul(a::BitVector, b::BitVector, f::BitVector) = red!(mul(a, b), f)
-Base.:*(x::F, y::F) where F <: F2PB  = F(mul(x.x, y.x, reducer(F)))
+
+Base.:*(x::F, y::F) where F <: F2PB = F(mul(x.x, y.x, reducer(F; e = bige)); e = bige)
 Base.:(==)(x::F, y::F) where F <: F2PB = x.x == y.x
 
 ### Pretty printing

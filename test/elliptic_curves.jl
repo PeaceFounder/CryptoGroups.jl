@@ -23,9 +23,7 @@ p2 = AffinePoint{eq}(x2, y2)
 @test oncurve(p1) == true
 @test oncurve(p2) == true
 
-f = reverse(bin"10011")
-#R = Reducer(f)
-
+f = bin"10011"
 α = F2PB(f)(bin"0100")
 
 a = α^4
@@ -50,13 +48,11 @@ eq = specialize(BinaryCurve, zero(α), α^3)
 
 G = AffinePoint{eq}(α^3, α^5)
 
-
 @test double(G) == AffinePoint{eq}(α^4, α^3)
 @test double(G) + G == AffinePoint{eq}(α^13, α^2)
 
 @test oncurve(G) == true
 @test oncurve(G*3) == true
-
 
 
 ### Experimenting with 𝔽₂ field in Weierstrass equation. The doubling operation though does not work and thus is type constrained.
@@ -122,11 +118,6 @@ let
     b = 1
 
     ########### Polynomial basis
-
-    #R = Reducer([163, 7, 6, 3, 0])
-    #F = F2PB{R}
-    
-    #F = specialize(F2PB, [163, 7, 6, 3, 0])
 
     F = F2PB([163, 7, 6, 3, 0])
 
