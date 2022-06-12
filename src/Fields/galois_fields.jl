@@ -3,9 +3,8 @@ using ..CryptoGroups: static
 struct FP{P} <: PrimeField
     x::BigInt # Instead of BigInt I could use BitIntegers here. Need to check performance of powermod...
     FP{P}(x::Integer) where P = new{P}(BigInt(x))
+    FP(p::Integer) = FP{static(p)}
 end
-
-specialize(::Type{FP}, p::Integer) = FP{static(p)} 
 
 value(x::FP) = x.x
 modulus(::FP{P}) where P = BigInt(P)
@@ -34,67 +33,15 @@ Base.show(io::IO, ::Type{F}) where F <: FP = print(io, "FP/$(modulus_str(F))")
 
 #########################################
 
-### StaticBitVEctor would be a better fit here
-
-struct Reducer{N}
-    len::Int
-    chunks::NTuple{N, UInt64}
-end
-
-
-Reducer(x::BitVector) = Reducer(x.len, Tuple(x.chunks))
-
-Reducer(x::Vector{Int}) = Reducer(BitVector(i in x for i in 0:maximum(x)))
-
-Base.length(x::Reducer) = x.len
-
-bitlength(R::Reducer) = length(R) - 1
-
-
-function Base.convert(::Type{BitVector}, x::Reducer)
-
-    a = BitVector(undef, x.len)
-    a.chunks = UInt64[x.chunks...]
-
-    return a
-end
-
-function xstr(i::Int)
-    if i == 0
-        return "1"
-    elseif i == 1
-        return "X"
-    else
-        return "X^$i"
-    end
-end
-
-get_powers(x::BitVector) = (0:x.len - 1)[x]
-get_powers(x::Reducer) = get_powers(convert(BitVector, x))
-
-function print_poly(io::IO, x::BitVector)
-    n = reverse(get_powers(x)) # Best to visualize dominant first
-    write(io, "$(xstr(n[1]))")
-    for i in n[2:end]
-        write(io, " + $(xstr(i))")
-    end
-end
-
-print_poly(io::IO, x::Reducer) = print_poly(io, convert(BitVector, x)) 
-print_poly(x::Any) = print_poly(Base.stdout, x)
-
-Base.show(io::IO, x::Reducer) = print_poly(io, x)
-
-
 @enum Endian big little
 
 
 struct F2PB{R} <: BinaryField ### R is reducer
     x::BitVector
 
-    function F2PB{R}(x::BitVector, e::Endian) where R
+    function F2PB{S}(x::BitVector, e::Endian) where S
 
-        @assert length(x) == length(R) - 1
+        @assert length(x) == length(S) - 1
         
         if e == big
             new(x)
@@ -105,8 +52,9 @@ struct F2PB{R} <: BinaryField ### R is reducer
 
     F2PB{R}(x::BitVector; e::Endian = big) where R = F2PB{R}(x, e)
 
+    F2PB(f::BitVector) = F2PB{static(f)}
+    F2PB(f::Vector{Int}) = F2PB(BitVector(i in f for i in 0:maximum(f)))
 
-    F2PB(f) = F2PB{Reducer(f)} # Perhaps I could get rid of Reducer in favour of a StaticBitVector
     F2PB(f, x) = F2PB(f)(x)
 end
 
@@ -119,6 +67,9 @@ Base.convert(::Type{F}, x::BitVector) where F <: F2PB = F(x, little)
 
 # This function is necessary in differetn contexts so I could keep it as is. 
 tobits(x::F2PB) = reverse(x.x)
+
+reducer(::Type{F2PB{S}}) where S = convert(BitVector, S)
+reducer(::Type{F2PB}) = nothing
 
 Base.zero(::Type{F2PB{R}}) where R = F2PB{R}(BitVector(0 for i in 1:length(R)-1))
 Base.one(::Type{F2PB{R}}) where R = F2PB{R}(BitVector((1, (0 for i in 2:length(R)-1 )...)))
@@ -174,8 +125,44 @@ function mul(a::BitVector, b::BitVector)
 end
 
 mul(a::BitVector, b::BitVector, f::BitVector) = red!(mul(a, b), f)
-Base.:*(x::F2PB{R}, y::F2PB{R}) where R = F2PB{R}(mul(x.x, y.x, convert(BitVector, R)))
+Base.:*(x::F, y::F) where F <: F2PB  = F(mul(x.x, y.x, reducer(F)))
 Base.:(==)(x::F, y::F) where F <: F2PB = x.x == y.x
+
+### Pretty printing
+
+function xstr(i::Int)
+    if i == 0
+        return "1"
+    elseif i == 1
+        return "X"
+    else
+        return "X^$i"
+    end
+end
+
+get_powers(x::BitVector) = (0:x.len - 1)[x]
+
+function print_poly(io::IO, x::BitVector)
+    n = reverse(get_powers(x)) # Best to visualize dominant first
+    write(io, "$(xstr(n[1]))")
+    for i in n[2:end]
+        write(io, " + $(xstr(i))")
+    end
+end
+
+
+function Base.show(io::IO, ::Type{F}) where F <: F2PB
+    
+    print(io, "F2PB")
+
+    r = reducer(F)
+                   
+    if !isnothing(r) #@isdefined S
+        print(io, "{")
+        print_poly(io, r)
+        print(io, "}")
+    end
+end
 
 #####################################################################################
 

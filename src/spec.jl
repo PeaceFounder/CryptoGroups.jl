@@ -2,6 +2,7 @@ using .Fields: F2GNB, F2PB, FP, Field, PrimeField, BinaryField, tobits, value
 using .Curves: AbstractPoint, ECPoint, AffinePoint, Weierstrass, BinaryCurve, gx, gy, field, eq
 using .Specs: MODP, Koblitz, ECP, EC2N, Spec, PB, GNB
 
+specialize(::Type{FP}, p::Integer) = FP{static(p)} 
 
 specialize(::Type{BinaryCurve}, a::BitVector, b::BitVector) = BinaryCurve{StaticBitVector(a), StaticBitVector(b)}
 specialize(::Type{BinaryCurve}, a::F, b::F) where F <: BinaryField = specialize(BinaryCurve, tobits(a), tobits(b)) 

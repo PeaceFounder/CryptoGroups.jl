@@ -1,5 +1,5 @@
 using Test
-import CryptoGroups.Fields: Reducer, F2PB, F2GNB, print_poly, red!, mul, mul_gnb, construct_integer_order_prime, FP, order
+import CryptoGroups.Fields: F2PB, F2GNB, print_poly, red!, mul, mul_gnb, construct_integer_order_prime, FP, order, reducer
 import CryptoGroups: @bin_str
 
 #poly = Reducer([10, 2, 1])
@@ -28,18 +28,18 @@ c = mul(a, b)
 #@test F2PB{R}(reverse(bin"1100101")) == F2PB{R}(bin"1111")
 
 #### Multiplication
-R = Reducer(f)
+#R = Reducer(f)
 
-a = F2PB{R}(bin"1011")
-b = F2PB{R}(bin"1001")
+a = F2PB(f)(bin"1011")
+b = F2PB(f)(bin"1001")
 
-c = F2PB{R}(bin"1111")
+c = F2PB(f)(bin"1111")
 
 @test a*b == c
 
 ### Testing generation of basis elements
 
-α = F2PB{R}(bin"0100")
+α = F2PB(f)(bin"0100")
 
 @test α^(order(α) + 1) == α
 
@@ -103,10 +103,9 @@ field2poly(z) = field2poly(z.x)
 
 let
 
-    R = Reducer([163, 7, 6, 3, 0])
-    F = F2PB{R}
 
-    f = convert(BitVector, R)
+    F = F2PB([163, 7, 6, 3, 0])
+    f = reducer(F)
 
     x19 = F(BitVector(i==20 for i in 1:163))
     @test findfirst(x -> x== 1, mul(x19.x, x19.x)) == 39

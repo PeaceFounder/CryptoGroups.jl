@@ -1,7 +1,7 @@
 using Test
 
 using CryptoGroups
-import CryptoGroups.Fields: F2PB, F2GNB, FP, Reducer
+import CryptoGroups.Fields: F2PB, F2GNB, FP
 import CryptoGroups.Curves: Weierstrass, AffinePoint, double, BinaryCurve, oncurve
 import CryptoGroups: specialize
 
@@ -24,9 +24,9 @@ p2 = AffinePoint{eq}(x2, y2)
 @test oncurve(p2) == true
 
 f = reverse(bin"10011")
-R = Reducer(f)
+#R = Reducer(f)
 
-α = F2PB{R}(bin"0100")
+α = F2PB(f)(bin"0100")
 
 a = α^4
 b = one(α)
@@ -45,11 +45,8 @@ p2 = AffinePoint{eq}(α^3, α^13)
 
 α = F2GNB{4, 1}(bin"1100")
 
-#eq = BEQ(zero(α), α^3)
 
 eq = specialize(BinaryCurve, zero(α), α^3)
-
-#error("here")
 
 G = AffinePoint{eq}(α^3, α^5)
 
