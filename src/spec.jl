@@ -1,4 +1,4 @@
-using .Fields: F2GNB, F2PB, FP, Field, PrimeField, BinaryField, tobits, value
+using .Fields: F2GNB, F2PB, FP, Field, PrimeField, BinaryField, tobits, value, reducer
 using .Curves: AbstractPoint, ECPoint, AffinePoint, Weierstrass, BinaryCurve, gx, gy, field, eq
 using .Specs: MODP, Koblitz, ECP, EC2N, Spec, PB, GNB
 
@@ -151,6 +151,25 @@ function spec(::Type{EQ}, ::Type{F}; n=nothing, h=nothing, Gx=nothing, Gy=nothin
 end
 
 
+spec(::Type{F}) where F <: F2PB = PB(reducer(F))
+spec(::Type{F2GNB{N, T}}) where {N, T} = GNB(N, T)
+
+
+function spec(::Type{EQ}, ::Type{F}; n=nothing, h=nothing, Gx=nothing, Gy=nothing) where {EQ <: BinaryCurve, F <: BinaryField}
+    
+    _a = convert(BitVector, a(EQ))
+    _b = convert(BitVector, b(EQ))  ### Perhaps I would be better to do conversion at acessor methods!
+
+    basis = spec(F)
+
+    #p = modulus(F)
+    if isnothing(Gx) && isnothing(Gy)
+        return EC2N(basis, n, _a, _b) # I will need to add H in the end here
+    else
+        return EC2N(basis, n, _a, _b, Gx, Gy) 
+    end
+end
+
 
 specialize(::Type{ECGroup{P}}, spec::Spec; name = nothing) where P <: ECPoint = ECGroup{specialize(P, spec; name)}
 specialize(::Type{ECGroup}, spec::Spec; name = nothing) = ECGroup{specialize(ECPoint, spec; name)}
@@ -182,4 +201,17 @@ spec(::Type{ECGroup{P}}) where P = spec(P)
 spec(g::ECGroup) = spec(g.x)
 
 spec(::Type{G}) where G <: PGroup = MODP(; p = modulus(G), q = order(G))
+
+
+### I could add conversion methods to octet and back here
+
+import .Specs: octet
+using .Specs: point
+
+
+# This won't be piracy if I let AbstractPoint to be defined here
+
+octet(p::AbstractPoint; mode::Symbol = :uncompressed) = octet(value(gx(p)), value(gy(p)), spec(p); mode)
+
+Base.convert(::Type{P}, po::Vector{UInt8}) where P <: AbstractPoint = P <| point(po, spec(P))
 

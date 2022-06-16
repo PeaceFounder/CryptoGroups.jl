@@ -24,8 +24,6 @@ end
 order(::Type{ECPoint{P, S}}) where {P <: AbstractPoint, S} = convert(Integer, S.order) 
 cofactor(::Type{ECPoint{P, S}}) where {P <: AbstractPoint, S} = convert(Integer, S.cofactor) 
 
-#modulus(::Type{ECPoint{P}}) where P <: AbstractPoint = modulus(P) # Only makes sense for point in prime fields!
-
 name(::Type{ECPoint}) = nothing
 name(::Type{ECPoint{P}}) where P <: AbstractPoint = nothing
 name(::Type{ECPoint{P, S}}) where {P <: AbstractPoint, S} = isnothing(S.name) ? nothing : convert(Symbol, S.name)
@@ -62,10 +60,8 @@ function Base.display(::Type{P}) where P <: ECPoint
     show(P)
     ### I could be more precise on the Point
     ### Like ECPoint{AffinePoint{<:Weierstrass, <:F2GNB}, S}
-    #if name(P) != nothing
 
     if !isnothing(name(P))
-
         print(" (alias for ECPoint{<:AffinePoint, ::static_ECPoint})") 
     end
 end
@@ -81,7 +77,7 @@ Base.:*(x::P, n::Integer) where P <: ECPoint = P(x.p * n)
 Base.:*(n::Integer, x::ECPoint) = x * n
 
 
-Base.convert(::Type{ECPoint{P, S}}, x) where {P <: AbstractPoint, S} = ECPoint{P, S}(P <| x)
+Base.convert(::Type{ECPoint{P, S}}, x::NTuple{2}) where {P <: AbstractPoint, S} = ECPoint{P, S}(P <| x)
 Base.convert(::Type{P}, x::P) where P <: ECPoint = x 
 
 

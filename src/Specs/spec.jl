@@ -59,17 +59,22 @@ generator(curve::ECP) = (curve.Gx, curve.Gy)
 
 modulus(curve::ECP) = curve.p
 
+bitlength(curve::ECP) = bitlength(modulus(curve))
 
 # I could always add a field for equation to be used
 
 Base.:(==)(x::ECP, y::ECP) = x.p == y.p && x.n == y.n && x.a == y.a && x.b == y.b && x.Gx == y.Gx && x.Gy == y.Gy
 
+a(curve::ECP) = curve.a
+b(curve::ECP) = curve.b
 
 
 abstract type BinaryBasis end
 
 struct PB <: BinaryBasis
     f::Vector{Int}
+    PB(f::Vector{Int}) = new(f)
+    PB(f::BitVector) = PB((0:f.len - 1)[f])
 end
 
 bitlength(x::PB) = maximum(x.f) #- 1
@@ -119,6 +124,7 @@ end
 
 _parse_bits(x::Int, basis::GNB) = _int2bits_gnb(x, bitlength(basis))
 
+bitlength(x::EC2N) = bitlength(x.basis)
 
 
 function _int2bits_pb(x::Int, m::Int)

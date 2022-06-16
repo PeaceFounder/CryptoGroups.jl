@@ -15,7 +15,6 @@ function bitlength end
 
 function tobits end
 
-#function validate end # isvalid 
 function value end
 function modulus end
 function cofactor end
@@ -63,12 +62,12 @@ export @bin_str
 export spec, specialize, order, bitlength
 
 import .Fields: Field, BinaryField, FP, F2GNB, F2PB, PrimeField
-export Field, FP, F2GNB, F2PB # frombits and tobits method shall be dealt with convert
+export Field, FP, F2GNB, F2PB 
 
 import .Curves: AbstractPoint, ECPoint, AffinePoint, BinaryCurve, gx, gy, a, b, oncurve
-export AbstractPoint, ECPoint, AffinePoint, BinaryCurve #, gx, gy, a, b, oncurve
+export AbstractPoint, ECPoint, AffinePoint, BinaryCurve 
 
-import .Specs: MODP, Koblitz, ECP, EC2N, PB, GNB, generator, Hash, PRG, RO, ROPRG
+import .Specs: MODP, Koblitz, ECP, EC2N, PB, GNB, generator, Hash, PRG, RO, ROPRG, point, octet
 export MODP, Koblitz, ECP, EC2N, PB, GNB, generator, Hash, PRG, RO, ROPRG
 
 export ElGamal

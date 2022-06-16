@@ -16,14 +16,13 @@ end
     include("../examples/external_fields.jl")
 end
 
-
-@testset "Testing independent basis generation" begin
+@testset "Testing Specs module" begin
     include("spec.jl")
     include("primitives.jl")
     include("gbasis.jl")
     include("gecbasis.jl")
+    include("conversions.jl")
 end
-
 
 @testset "Testing groups and ElGamal" begin
     include("groups.jl")

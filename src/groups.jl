@@ -96,17 +96,6 @@ name(::Type{PGroup}) = nothing
 
 name(::Type{PGroup{S}}) where S =  isnothing(S.name) ? nothing : convert(Symbol, S.name)
     
-#     #str = uint2string(S.name)
-
-#     str = convert(String, S.name)
-
-#     if str == ""
-#         return nothing
-#     else
-#         return Symbol(str)
-#     end
-# end
-
 
 Base.show(io::IO, g::PGroup) = print(io, value(g))
 

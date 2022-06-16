@@ -129,8 +129,6 @@ end
 (roprg::ROPRG)(x::Symbol) = roprg(string(x))
 
 
-#using Infiltrator
-
 function Base.rand(prg::PRG, spec::MODP, N::Integer; nr::Integer = 0) 
 
     p = modulus(spec)
@@ -148,8 +146,6 @@ function Base.rand(prg::PRG, spec::MODP, N::Integer; nr::Integer = 0)
     
     return 𝐡
 end
-
-
 
 function Base.rand(prg::PRG, spec::ECP, N::Integer; nr::Integer = 0) 
 

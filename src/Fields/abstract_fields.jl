@@ -18,8 +18,6 @@ Base.:-(x::F, y::F) where F <: BinaryField = x + y
 
 Base.convert(::Type{F}, x::BitVector) where F <: BinaryField = F(x)
 
-###
-#function Base.convert(::Type{F}, x::Integer) where F <: BinaryField
 function Base.convert(::Type{F}, x::Bool) where F <: BinaryField
     if x == false
         return zero(F)
@@ -86,6 +84,8 @@ Base.show(io::IO, x::BinaryField) = print(io, join(i ? "1" : "0" for i in tobits
 
 Base.isless(x::F, y::F) where F <: BinaryField = tobits(x) < tobits(y)
 
+value(x::BinaryField) = tobits(x)
+
 abstract type PrimeField <: Field end
 
 Base.convert(::Type{F}, x::Integer) where F <: PrimeField = F(x)
@@ -117,4 +117,5 @@ Base.:^(x::F, n::Integer) where F <: PrimeField = F(powermod(value(x), n, modulu
 Base.:(==)(x::F, y::F) where F <: PrimeField = value(x) == value(y)
 
 Base.isless(x::F, y::F) where F <: PrimeField = value(x) < value(y)
+
 
