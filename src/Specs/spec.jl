@@ -44,8 +44,14 @@ _parse_int(::Nothing) = nothing
     Gy::Union{BigInt, Nothing} = nothing
 
     function ECP(p, n, a, b, Gx, Gy)
-        
-        _a = mod(_parse_int(a), p) # taking mod as conventually a=-3
+
+        #_a = mod(_parse_int(a), p) # taking mod as conventually a=-3
+        _a = _parse_int(a) # taking mod as conventually a=-3
+
+        if _a < 0
+            _a = mod(_a, p)
+        end
+
         _b = _parse_int(b)
         _Gx = _parse_int(Gx)
         _Gy = _parse_int(Gy)
@@ -246,3 +252,5 @@ end
 generator(spec::MODP) = spec.g
 modulus(spec::MODP) = spec.p
 order(spec::MODP) = spec.q
+
+

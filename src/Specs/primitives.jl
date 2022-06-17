@@ -8,6 +8,9 @@ struct Hash
 end
 
 (h::Hash)(x::Vector{UInt8}) = hex2bytes(hexdigest(h.spec, x))
+#(h::Hash)(x::String) = h(Vector{UInt8}(copy(x)))
+(h::Hash)(x::String) = h(Vector{UInt8}(x))
+
 
 # Dispatching on value types seems as plausable solution
 function bitlength(h::Hash) 

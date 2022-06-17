@@ -22,6 +22,7 @@ end
     include("gbasis.jl")
     include("gecbasis.jl")
     include("conversions.jl")
+    include("ecdsa_prime.jl")
 end
 
 @testset "Testing groups and ElGamal" begin

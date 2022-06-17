@@ -82,13 +82,15 @@ function bits2octet(_x::BitVector)
     return bytes
 end
 
-
+#using Infiltrator
 
 function decompress(x::BigInt, ỹ::Bool, spec::ECP)
 
     p = modulus(spec)
 
     α = mod(x^3 + a(spec) * x + b(spec), p)
+
+#    @infiltrate
 
     β = sqrt_mod_prime(α, p)
 
@@ -109,6 +111,7 @@ function decompress(x::BitVector, ỹ::Bool, spec::EC2N)
     @warn "Not implemented, returning nothing..."
     return nothing
 end
+
 
 function point(x_octet::Vector{UInt8}, ỹ::Bool, spec::ECP)
     x = octet2int(x_octet)
@@ -295,3 +298,13 @@ end
 
 
 octet(x::BitVector, y::BitVector, spec::EC2N; mode::Symbol = :uncompressed) = octet(x, y, spec.basis; mode)
+
+
+
+
+###
+
+PB(x::Vector{UInt8}, N::Int) = PB(octet2bits(x, N))
+
+
+

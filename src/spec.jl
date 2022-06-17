@@ -205,13 +205,13 @@ spec(::Type{G}) where G <: PGroup = MODP(; p = modulus(G), q = order(G))
 
 ### I could add conversion methods to octet and back here
 
-import .Specs: octet
-using .Specs: point
+# import .Specs: octet
+# using .Specs: point
 
 
-# This won't be piracy if I let AbstractPoint to be defined here
+# # This won't be piracy if I let AbstractPoint to be defined here
 
-octet(p::AbstractPoint; mode::Symbol = :uncompressed) = octet(value(gx(p)), value(gy(p)), spec(p); mode)
+# octet(p::AbstractPoint; mode::Symbol = :uncompressed) = octet(value(gx(p)), value(gy(p)), spec(p); mode)
 
-Base.convert(::Type{P}, po::Vector{UInt8}) where P <: AbstractPoint = P <| point(po, spec(P))
+# Base.convert(::Type{P}, po::Vector{UInt8}) where P <: AbstractPoint = P <| point(po, spec(P))
 

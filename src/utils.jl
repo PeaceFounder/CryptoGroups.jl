@@ -64,6 +64,12 @@ function _hex2bytes(x::String)
     return hex2bytes(normalized)
 end
 
+macro hex_str(x)
+    return _hex2bytes(x)
+end
+
+
+
 function bytes2bits(x::Vector{UInt8})
     bv = BitVector(u << -i % Bool for u in x for i in 7:-1:0)
     return bv
