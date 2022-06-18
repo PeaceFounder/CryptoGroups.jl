@@ -304,7 +304,7 @@ octet(x::BitVector, y::BitVector, spec::EC2N; mode::Symbol = :uncompressed) = oc
 
 ###
 
-PB(x::Vector{UInt8}, N::Int) = PB(octet2bits(x, N))
+PB(x::Vector{UInt8}, N::Int) = PB(octet2bits(x, N + 1))
 
 
 

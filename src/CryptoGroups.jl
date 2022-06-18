@@ -67,7 +67,7 @@ using .Specs: point
 octet(p::AbstractPoint; mode::Symbol = :uncompressed) = octet(value(gx(p)), value(gy(p)), spec(p); mode)
 Base.convert(::Type{P}, po::Vector{UInt8}) where P <: AbstractPoint = P <| point(po, spec(P))
 
-using .Specs: int2octet, bits2octet, BinaryBasis, octet2int
+using .Specs: int2octet, bits2octet, BinaryBasis, octet2int, octet2bits
 using .Fields: PrimeField, BinaryField
 
 octet(x::BinaryField) = bits2octet(tobits(x))
@@ -93,14 +93,18 @@ end
 function ec2n(basis::BinaryBasis; a::Vector{UInt8}, b::Vector{UInt8}, G::Vector{UInt8}, n::BigInt, h::Int)
     
     a_ = octet2bits(a, bitlength(basis))
-    b_ = octet2bits(b, bitlnegth(basis))
+    b_ = octet2bits(b, bitlength(basis))
     
-    sp = EC2N(basis; a_, b_, n)
+    sp = EC2N(basis; a = a_, b = b_, n)
 
     (Gx, Gy) = point(G, sp)
 
+    #(Gx, Gy) = reverse(Gx), reverse(Gy)
+
     return EC2N(basis, n, a_, b_, Gx, Gy)
 end
+
+
 
 
 export @bin_str

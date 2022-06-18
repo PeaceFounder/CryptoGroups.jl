@@ -80,7 +80,7 @@ abstract type BinaryBasis end
 struct PB <: BinaryBasis
     f::Vector{Int}
     PB(f::Vector{Int}) = new(f)
-    PB(f::BitVector) = PB((0:f.len - 1)[f])
+    PB(f::BitVector) = PB(((f.len - 1):-1:0)[f])
 end
 
 bitlength(x::PB) = maximum(x.f) #- 1

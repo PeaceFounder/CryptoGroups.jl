@@ -1,5 +1,3 @@
-### Some parts which should now be possible
-
 using CryptoGroups: @bin_str, @hex_str, EC2N, PB, specialize, ECPoint, <|, generator, octet, octet2int, ec2n
 
 # Elliptic Curve Domain Parameter Setup
@@ -14,7 +12,6 @@ curve_spec = ec2n(basis;   ### Need to think about adding a proper methods
                   h = 2
 )
 
-
 P = specialize(ECPoint, curve_spec)
 G = P <| generator(curve_spec) 
 
@@ -24,13 +21,12 @@ d = 1275552191113212300012030439187146164646146646466749494799
 Q = d*G
 
 
-@test octet(Q) == hex"04 5DE37E75 CE28A2E7 55C0E0E0 03125BA1. 6BD55D72 2F5FB132 E3768CB3 96F1-1396 2614DEA4 CAF416EF 85B229BB B8E13520"
-
+@test octet(Q) == hex"04 5DE37E75 6BD55D72 E3768CB3 96FFEB96 2614DEA4 CE28A2E7 55C0E0E0 2F5FB132 CAF416EF 85B229BB B8E13520 03125BA1"
 
 # Signature Generation
 
 M = "abc"
-H = Hash("sha256")
+H = Hash("SHA1")
 e = octet2int(H(M))
 
 ## Elliptic curve computaion
@@ -41,16 +37,16 @@ R = k*G
 x = octet(gx(R)) # Instead I could have octet(gx(R))
 y = octet(gy(R))
 
-@test x = hex"438E5A11 FB55E4C6 5471DCD4 9E266142 A3BDF2BF 9D5772D5"
-@test y = hex"2AD603A0 5BD1D177 649F9167 E6F475B7 E2FF590C 85AF15DA"
+@test x == hex"438E5A11 FB55E4C6 5471DCD4 9E266142 A3BDF2BF 9D5772D5"
+@test y == hex"2AD603A0 5BD1D177 649F9167 E6F475B7 E2FF590C 85AF15DA"
 
 x̄ = octet2int(x)
 ȳ = octet2int(y)
 
-@test x̄ == 16469817011541734314669640730254878828443186986697061077
+@test x̄ == 1656469817011541734314669640730254878828443186986697061077
 
 n = order(P)
-r = x % n
+r = x̄ % n
 
 @test r == 87194383164871543355722284926904419997237591535066528048
 
@@ -92,7 +88,7 @@ x₁ = octet(gx(W))
 y₁ = octet(gy(W))
 
 @test x₁ == hex"438E5A11 FB55E4C6 5471DCD4 9E266142 A3BDF2BF 9D5772D5"
-@test y₁ == hex"2AD603A0 5BD1D177 649F9167 E6F475B7 E2rF590C 85AF15DA"
+@test y₁ == hex"2AD603A0 5BD1D177 649F9167 E6F475B7 E2FF590C 85AF15DA"
 
 x̄₁ = octet2int(x₁)
 ν = x̄₁ % n

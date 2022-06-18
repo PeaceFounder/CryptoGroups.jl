@@ -22,7 +22,9 @@ end
     include("gbasis.jl")
     include("gecbasis.jl")
     include("conversions.jl")
-    include("ecdsa_prime.jl")
+    include("ecdsa/ecdsa_prime.jl")
+    include("ecdsa/ecdsa_pb.jl")
+    # It would be great to have a gaussian normal basis
 end
 
 @testset "Testing groups and ElGamal" begin
