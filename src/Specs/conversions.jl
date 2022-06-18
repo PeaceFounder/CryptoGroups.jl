@@ -1,5 +1,3 @@
-###################
-
 using ..CryptoGroups.Fields: F2PB, F2GNB, tobits
 using CryptoUtils: sqrt_mod_prime
 
@@ -16,7 +14,6 @@ end
 
 
 function int2octet(x::Integer, N::Int)
-    #@warn "Padding not yet implemented"
     k = div(N, 8, RoundUp)
 
 
@@ -82,15 +79,12 @@ function bits2octet(_x::BitVector)
     return bytes
 end
 
-#using Infiltrator
 
 function decompress(x::BigInt, ỹ::Bool, spec::ECP)
 
     p = modulus(spec)
 
     α = mod(x^3 + a(spec) * x + b(spec), p)
-
-#    @infiltrate
 
     β = sqrt_mod_prime(α, p)
 
@@ -296,15 +290,4 @@ function octet(x::BitVector, y::BitVector, basis::BinaryBasis; mode::Symbol = :u
     end
 end
 
-
 octet(x::BitVector, y::BitVector, spec::EC2N; mode::Symbol = :uncompressed) = octet(x, y, spec.basis; mode)
-
-
-
-
-###
-
-PB(x::Vector{UInt8}, N::Int) = PB(octet2bits(x, N + 1))
-
-
-

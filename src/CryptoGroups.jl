@@ -67,44 +67,11 @@ using .Specs: point
 octet(p::AbstractPoint; mode::Symbol = :uncompressed) = octet(value(gx(p)), value(gy(p)), spec(p); mode)
 Base.convert(::Type{P}, po::Vector{UInt8}) where P <: AbstractPoint = P <| point(po, spec(P))
 
-using .Specs: int2octet, bits2octet, BinaryBasis, octet2int, octet2bits
+using .Specs: int2octet, bits2octet, BinaryBasis
 using .Fields: PrimeField, BinaryField
 
 octet(x::BinaryField) = bits2octet(tobits(x))
 octet(x::PrimeField) = int2octet(value(x), bitlength(modulus(x)))
-
-# This for now is a temporary function
-
-function ecp(; p::BigInt, n::BigInt, h::Int, a::Vector{UInt8}, b::Vector{UInt8}, G::Vector{UInt8})
-    
-    a_ = octet2int(a)
-    b_ = octet2int(b)
-    
-    sp = ECP(p, n, a_, b_, nothing, nothing)
-
-    #@infiltrate
-
-    (Gx, Gy) = point(G, sp)
-
-    return ECP(p, n, a_, b_, Gx, Gy)
-end
-
-
-function ec2n(basis::BinaryBasis; a::Vector{UInt8}, b::Vector{UInt8}, G::Vector{UInt8}, n::BigInt, h::Int)
-    
-    a_ = octet2bits(a, bitlength(basis))
-    b_ = octet2bits(b, bitlength(basis))
-    
-    sp = EC2N(basis; a = a_, b = b_, n)
-
-    (Gx, Gy) = point(G, sp)
-
-    #(Gx, Gy) = reverse(Gx), reverse(Gy)
-
-    return EC2N(basis, n, a_, b_, Gx, Gy)
-end
-
-
 
 
 export @bin_str

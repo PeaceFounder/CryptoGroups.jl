@@ -23,8 +23,6 @@ end
 
 hex2bits(x::String) = bytes2bits(_hex2bytes(x))
 
-
-
 _parse_bits(x::String, N::Int) = hex2bits(x)[end - N + 1:end]
 _parse_bits(x::BitVector, m::Int) = x
 _parse_bits(x::Nothing, m::Int) = x
@@ -33,24 +31,19 @@ _parse_bits(x::Nothing, m::Int) = x
 _parse_int(x::String) = parse(BigInt, x, base=16)
 _parse_int(x::Integer) = BigInt(x)
 _parse_int(::Nothing) = nothing
+_parse_int(x::Vector{UInt8}) = octet2int(x)
 
-
-@kwdef struct ECP <: Spec
+struct ECP <: Spec
     p::BigInt
-    n::Union{BigInt, Nothing} = nothing
-    a::BigInt = -3
+    n::Union{BigInt, Nothing} # = nothing
+    a::BigInt # = -3
     b::BigInt
-    Gx::Union{BigInt, Nothing} = nothing
-    Gy::Union{BigInt, Nothing} = nothing
+    Gx::Union{BigInt, Nothing} # = nothing
+    Gy::Union{BigInt, Nothing} # = nothing
 
     function ECP(p, n, a, b, Gx, Gy)
 
-        #_a = mod(_parse_int(a), p) # taking mod as conventually a=-3
-        _a = _parse_int(a) # taking mod as conventually a=-3
-
-        if _a < 0
-            _a = mod(_a, p)
-        end
+        _a = mod(_parse_int(a), p) # taking mod as conventually a=-3
 
         _b = _parse_int(b)
         _Gx = _parse_int(Gx)
@@ -58,7 +51,19 @@ _parse_int(::Nothing) = nothing
 
         return new(p, n, _a, _b, _Gx, _Gy)
     end
+
 end
+
+function ECP(; p, n::Union{BigInt, Nothing} = nothing, a = -3, b, h = 1, G=nothing, Gx=nothing, Gy=nothing)
+    
+    if !isnothing(G) 
+        ecp = ECP(p, n, a, b, nothing, nothing)
+        (Gx, Gy) = point(G, ecp) # Note that the method is defined later in conversions.jl
+    end
+
+    return ECP(p, n, a, b, Gx, Gy)
+end
+
 
 order(curve::ECP) = curve.n
 generator(curve::ECP) = (curve.Gx, curve.Gy)
@@ -83,6 +88,8 @@ struct PB <: BinaryBasis
     PB(f::BitVector) = PB(((f.len - 1):-1:0)[f])
 end
 
+PB(x::Vector{UInt8}, N::Int) = PB(octet2bits(x, N + 1))
+
 bitlength(x::PB) = maximum(x.f) #- 1
 
 struct GNB <: BinaryBasis
@@ -95,7 +102,7 @@ bitlength(x::GNB) = x.m
 
 struct EC2N{B<:BinaryBasis} <: Spec
     basis::B
-    n::BigInt
+    n::Union{BigInt, Nothing}
     a::BitVector
     b::BitVector
     Gx::Union{BitVector, Nothing}
@@ -107,9 +114,14 @@ struct EC2N{B<:BinaryBasis} <: Spec
         new{B}(basis, n, a, b, Gx, Gy)
     end
     
-    function EC2N(basis::B, n::BigInt, a::BitVector, b::BitVector) where B <: BinaryBasis
+    function EC2N(basis::B, n::Union{BigInt, Nothing}, a::BitVector, b::BitVector) where B <: BinaryBasis
         @assert bitlength(basis) == length(a) == length(b) 
         new{B}(basis, n, a, b, nothing, nothing)
+    end
+
+    function EC2N(basis::B, a::BitVector, b::BitVector) where B <: BinaryBasis
+        @assert bitlength(basis) == length(a) == length(b) 
+        new{B}(basis, nothing, a, b, nothing, nothing)
     end
 end
 
@@ -144,17 +156,25 @@ function _int2bits_pb(x::Int, m::Int)
 end
 
 _parse_bits(x::Int, basis::PB) = _int2bits_pb(x, bitlength(basis))
-
-
+_parse_bits(x::Vector{UInt8}, basis::BinaryBasis) = octet2bits(x, bitlength(basis))
 
 # Basis could be nonoptional argument here
-function EC2N(basis::BinaryBasis; n, a, b, Gx=nothing, Gy=nothing) 
+function EC2N(basis::BinaryBasis; n=nothing, a, b, h=nothing, G=nothing, Gx=nothing, Gy=nothing) 
 
-    _n = convert(BigInt, n)
+    #_n = convert(BigInt, n)
+    _n = _parse_int(n)
     _a = _parse_bits(a, basis)
     _b = _parse_bits(b, basis)
-    _Gx = _parse_bits(Gx, bitlength(basis))
-    _Gy = _parse_bits(Gy, bitlength(basis))
+
+
+    if !isnothing(G)
+        sp = EC2N(basis, _a, _b)
+        _Gx, _Gy = point(G, sp) # The method is defined in conversions.jl
+    else
+        _Gx = _parse_bits(Gx, bitlength(basis))
+        _Gy = _parse_bits(Gy, bitlength(basis))
+    end
+
 
     if isnothing(_Gx) && isnothing(_Gy)
         return EC2N(basis, _n, _a, _b)
