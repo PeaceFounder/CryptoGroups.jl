@@ -57,13 +57,12 @@ include("groups.jl")
 include("elgamal.jl")
 include("spec.jl")
 
-
-### Some type piracy here
+# Some type piracy here
+# Though this one can can be avoided if AbstractPoint would be defined in this module as well as BinaryField and primeField.
 
 import .Specs: octet
 using .Specs: point
 
-# Though this one can can be avoided if AbstractPoint would be defined in this module
 octet(p::AbstractPoint; mode::Symbol = :uncompressed) = octet(value(gx(p)), value(gy(p)), spec(p); mode)
 Base.convert(::Type{P}, po::Vector{UInt8}) where P <: AbstractPoint = P <| point(po, spec(P))
 
@@ -72,7 +71,6 @@ using .Fields: PrimeField, BinaryField
 
 octet(x::BinaryField) = bits2octet(tobits(x))
 octet(x::PrimeField) = int2octet(value(x), bitlength(modulus(x)))
-
 
 export @bin_str
 

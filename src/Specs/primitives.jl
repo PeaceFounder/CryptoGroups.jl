@@ -8,7 +8,6 @@ struct Hash
 end
 
 (h::Hash)(x::Vector{UInt8}) = hex2bytes(hexdigest(h.spec, x))
-#(h::Hash)(x::String) = h(Vector{UInt8}(copy(x)))
 (h::Hash)(x::String) = h(Vector{UInt8}(x))
 
 
@@ -26,8 +25,6 @@ function bitlength(h::Hash)
         error("No corepsonding mapping for $x implemented")
     end
 end
-
-#using Random: AbstractRNG
 
 struct PRG <: AbstractRNG
     h::Hash
