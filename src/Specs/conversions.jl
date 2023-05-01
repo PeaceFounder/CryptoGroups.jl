@@ -291,3 +291,7 @@ function octet(x::BitVector, y::BitVector, basis::BinaryBasis; mode::Symbol = :u
 end
 
 octet(x::BitVector, y::BitVector, spec::EC2N; mode::Symbol = :uncompressed) = octet(x, y, spec.basis; mode)
+
+
+octet(x::BigInt, spec::MODP) = int2octet(x, bitlength(modulus(spec)))
+

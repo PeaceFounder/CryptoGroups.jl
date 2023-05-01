@@ -65,12 +65,23 @@ using .Specs: point
 
 octet(p::AbstractPoint; mode::Symbol = :uncompressed) = octet(value(gx(p)), value(gy(p)), spec(p); mode)
 Base.convert(::Type{P}, po::Vector{UInt8}) where P <: AbstractPoint = P <| point(po, spec(P))
+Base.rem(p::AbstractPoint, q::Integer) = rem(gx(p), q)
 
-using .Specs: int2octet, bits2octet, BinaryBasis
+
+using .Specs: int2octet, bits2octet, BinaryBasis, octet2int
 using .Fields: PrimeField, BinaryField
 
 octet(x::BinaryField) = bits2octet(tobits(x))
+Base.rem(x::BinaryField, q::Integer) = rem(octet(x) |> octet2int, q)
+
 octet(x::PrimeField) = int2octet(value(x), bitlength(modulus(x)))
+Base.rem(x::PrimeField, q::Integer) = rem(value(x), q)
+
+
+Base.convert(group::Type{<:PGroup}, element::Vector{UInt8}) = group <| (element |> Specs.octet2int)
+octet(x::PGroup) = Specs.int2octet(value(x), bitlength(modulus(x)))
+Base.rem(x::PGroup, q::Integer) = rem(value(x), q)
+
 
 export @bin_str
 
