@@ -31,6 +31,8 @@ struct PRG <: AbstractRNG
     s::Vector{UInt8}
 end
 
+PRG(hasher::String; s = Vector{UInt8}("SEED")) = PRG(Hash(hasher), s)
+
 (prg::PRG)(i::UInt32) = prg.h([prg.s..., reverse(reinterpret(UInt8, UInt32[i]))...])
 
 
@@ -101,6 +103,8 @@ function Base.rand(prg::PRG, ::Type{T}, N::Int; n = bitlength(T)) where T <: Int
 end
 
 Base.rand(prg::PRG, n::Int, N::Int) = Base.rand(prg, BigInt, N; n)
+
+Base.rand(prg::PRG, ::Type{T}; n = bitlength(T)) where T <: Integer = rand(prg, T; n)[1]
 
 
 

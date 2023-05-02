@@ -5,7 +5,7 @@
 # Eventually will need to revisit this implmentation to comply with CryptoGroups standart
 
 using Primes: isprime, nextprime
-using Random: AbstractRNG
+using Random: AbstractRNG, default_rng
 
 function n_bit_random_number(rng::AbstractRNG, len::Integer)
     max_n = ( BigInt(1) << len ) - 1
@@ -42,6 +42,8 @@ end
 function generate_qp(rng::AbstractRNG, t)
     while true
         q = rngprime(rng, t)
+        #q == 1 && continue
+
         r = rngint(rng, t)
 
         p = q*r + 1
@@ -51,14 +53,31 @@ function generate_qp(rng::AbstractRNG, t)
     end
 end
 
+generate_qp(t::Int) = generate_qp(default_rng(), t)
+
+
 function dsa_standart_group(rng::AbstractRNG, tp::Int, tg::Int)
     q, p = generate_qp(rng, 2*tp)
     while true
         u = mod(rngint(rng, tg), p)
         g = powermod(u, div((p-1), q), p)
 
-        if g!=1 || g!=0
+        if g!=1 && g!=0
             return MODP(; p, g, q)
         end
     end
 end
+
+dsa_standart_group(tp::Int, tg::Int) = dsa_standart_group(default_rng(), tp, tg)
+
+
+function generate_g(p::Integer, q::Integer; seed = Vector{UInt8}("SEED"), nr = 10)
+
+    prg = PRG("sha256"; s = seed)
+    sp = MODP(p; q)
+
+    h = rand(prg, sp, 1; nr)
+
+    return h[1]
+end
+

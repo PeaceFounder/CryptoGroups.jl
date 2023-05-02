@@ -6,7 +6,7 @@ import CryptoGroups: generator, order, oncurve, FP, Weierstrass, BinaryCurve, F2
 
 const FULL_TEST = false
 
-for C in [:P_192, :P_244, :P_256, :P_384, :P_521]
+for C in [:P_192, :P_224, :P_256, :P_384, :P_521]
 
     spec = getfield(Specs, Symbol("Curve_$C"))
 

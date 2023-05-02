@@ -40,8 +40,9 @@ struct ECP <: Spec
     b::BigInt
     Gx::Union{BigInt, Nothing} # = nothing
     Gy::Union{BigInt, Nothing} # = nothing
+    names::Vector{String}
 
-    function ECP(p, n, a, b, Gx, Gy)
+    function ECP(p, n, a, b, Gx, Gy; names = String[])
 
         _a = mod(_parse_int(a), p) # taking mod as conventually a=-3
 
@@ -49,21 +50,22 @@ struct ECP <: Spec
         _Gx = _parse_int(Gx)
         _Gy = _parse_int(Gy)
 
-        return new(p, n, _a, _b, _Gx, _Gy)
+        return new(p, n, _a, _b, _Gx, _Gy, names)
     end
 
 end
 
-function ECP(; p, n::Union{BigInt, Nothing} = nothing, a = -3, b, h = 1, G=nothing, Gx=nothing, Gy=nothing)
+function ECP(; p, n::Union{BigInt, Nothing} = nothing, a = -3, b, h = 1, G=nothing, Gx=nothing, Gy=nothing, names = String[])
     
     if !isnothing(G) 
         ecp = ECP(p, n, a, b, nothing, nothing)
         (Gx, Gy) = point(G, ecp) # Note that the method is defined later in conversions.jl
     end
 
-    return ECP(p, n, a, b, Gx, Gy)
+    return ECP(p, n, a, b, Gx, Gy; names)
 end
 
+names(curve::ECP) = curve.names
 
 order(curve::ECP) = curve.n
 generator(curve::ECP) = (curve.Gx, curve.Gy)
@@ -74,7 +76,7 @@ bitlength(curve::ECP) = bitlength(modulus(curve))
 
 # I could always add a field for equation to be used
 
-Base.:(==)(x::ECP, y::ECP) = x.p == y.p && x.n == y.n && x.a == y.a && x.b == y.b && x.Gx == y.Gx && x.Gy == y.Gy
+Base.:(==)(x::ECP, y::ECP) = x.p == y.p && x.n == y.n && x.a == y.a && x.b == y.b && x.Gx == y.Gx && x.Gy == y.Gy #&& x.names == y.names
 
 a(curve::ECP) = curve.a
 b(curve::ECP) = curve.b
@@ -107,23 +109,26 @@ struct EC2N{B<:BinaryBasis} <: Spec
     b::BitVector
     Gx::Union{BitVector, Nothing}
     Gy::Union{BitVector, Nothing}
+    names::Vector{String}
 
-    function EC2N(basis::B, n::BigInt, a::BitVector, b::BitVector, Gx::BitVector, Gy::BitVector) where B <: BinaryBasis
+    function EC2N(basis::B, n::BigInt, a::BitVector, b::BitVector, Gx::BitVector, Gy::BitVector; names=String[]) where B <: BinaryBasis
         @assert bitlength(basis) == length(a) == length(b) == length(Gx) == length(Gy) 
 
-        new{B}(basis, n, a, b, Gx, Gy)
+        new{B}(basis, n, a, b, Gx, Gy, names)
     end
     
-    function EC2N(basis::B, n::Union{BigInt, Nothing}, a::BitVector, b::BitVector) where B <: BinaryBasis
+    function EC2N(basis::B, n::Union{BigInt, Nothing}, a::BitVector, b::BitVector; names=String[]) where B <: BinaryBasis
         @assert bitlength(basis) == length(a) == length(b) 
-        new{B}(basis, n, a, b, nothing, nothing)
+        new{B}(basis, n, a, b, nothing, nothing, names)
     end
 
-    function EC2N(basis::B, a::BitVector, b::BitVector) where B <: BinaryBasis
+    function EC2N(basis::B, a::BitVector, b::BitVector; names=String[]) where B <: BinaryBasis
         @assert bitlength(basis) == length(a) == length(b) 
-        new{B}(basis, nothing, a, b, nothing, nothing)
+        new{B}(basis, nothing, a, b, nothing, nothing, names)
     end
 end
+
+names(curve::EC2N) = curve.names
 
 
 _parse_bits(x::BitVector, basis::BinaryBasis) = x
@@ -159,7 +164,7 @@ _parse_bits(x::Int, basis::PB) = _int2bits_pb(x, bitlength(basis))
 _parse_bits(x::Vector{UInt8}, basis::BinaryBasis) = octet2bits(x, bitlength(basis))
 
 # Basis could be nonoptional argument here
-function EC2N(basis::BinaryBasis; n=nothing, a, b, h=nothing, G=nothing, Gx=nothing, Gy=nothing) 
+function EC2N(basis::BinaryBasis; n=nothing, a, b, h=nothing, G=nothing, Gx=nothing, Gy=nothing, names = String[]) 
 
     #_n = convert(BigInt, n)
     _n = _parse_int(n)
@@ -168,7 +173,7 @@ function EC2N(basis::BinaryBasis; n=nothing, a, b, h=nothing, G=nothing, Gx=noth
 
 
     if !isnothing(G)
-        sp = EC2N(basis, _a, _b)
+        sp = EC2N(basis, _a, _b; names)
         _Gx, _Gy = point(G, sp) # The method is defined in conversions.jl
     else
         _Gx = _parse_bits(Gx, bitlength(basis))
@@ -177,9 +182,9 @@ function EC2N(basis::BinaryBasis; n=nothing, a, b, h=nothing, G=nothing, Gx=noth
 
 
     if isnothing(_Gx) && isnothing(_Gy)
-        return EC2N(basis, _n, _a, _b)
+        return EC2N(basis, _n, _a, _b; names)
     elseif !isnothing(_Gx) && !isnothing(_Gy)
-        return EC2N(basis, _n, _a, _b, _Gx, _Gy)
+        return EC2N(basis, _n, _a, _b, _Gx, _Gy; names)
     else
         error("Incompatible input.")
     end
@@ -241,6 +246,7 @@ struct Koblitz{B<:BinaryBasis} <: Spec
     end
 end
 
+names(curve::Koblitz) = names(curve.bec)
 
 order(curve::Koblitz) = order(curve.bec)
 generator(curve::Koblitz) = generator(curve.bec)
@@ -260,14 +266,21 @@ struct MODP <: Spec
     p::BigInt
     g::Union{BigInt, Nothing}
     q::Union{BigInt, Nothing}
+    names::Vector{String}
     
-    MODP(p, g, q) = new(tobint(p), tobint(g), tobint(q))    
-    MODP(p, g) = MODP(p, g, nothing)
+    MODP(p, g, q; names = String[]) = new(tobint(p), tobint(g), tobint(q), names)    
+    MODP(p, g; names = String[]) = MODP(p, g, nothing; names)
 
-    MODP(p::BigInt; g=nothing, q=nothing) = new(p, g, q)
-    MODP(;p::BigInt, g=nothing, q=nothing) = new(p, g, q)
+    MODP(p::BigInt; g=nothing, q=nothing, names=String[]) = new(p, g, q, names)
+    MODP(p::Integer, g::Integer, q::Integer; names=String[]) = new(p, g, q, names)
+
+    MODP(p::Vector{UInt8}, g::Vector{UInt8}, q::Vector{UInt8}; names=String[]) = new(p |> octet2int, g |> octet2int, q |> octet2int, names)
 end
 
+MODP(;p, q, g, names=String[]) = MODP(p, q, g; names)
+
+
+names(modp::MODP) = modp.names
 
 generator(spec::MODP) = spec.g
 modulus(spec::MODP) = spec.p
