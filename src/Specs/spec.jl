@@ -277,7 +277,7 @@ struct MODP <: Spec
     MODP(p::Vector{UInt8}, g::Vector{UInt8}, q::Vector{UInt8}; names=String[]) = new(p |> octet2int, g |> octet2int, q |> octet2int, names)
 end
 
-MODP(;p, q, g, names=String[]) = MODP(p, g, q; names)
+MODP(;p, q, g, names=String[]) = @show MODP(p, g, q; names)
 
 
 names(modp::MODP) = modp.names
