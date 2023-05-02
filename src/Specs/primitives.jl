@@ -103,9 +103,7 @@ function Base.rand(prg::PRG, ::Type{T}, N::Int; n = bitlength(T)) where T <: Int
 end
 
 Base.rand(prg::PRG, n::Int, N::Int) = Base.rand(prg, BigInt, N; n)
-
-Base.rand(prg::PRG, ::Type{T}; n = bitlength(T)) where T <: Integer = rand(prg, T; n)[1]
-
+Base.rand(prg::PRG, ::Type{T}; n = bitlength(T)) where T <: Integer = rand(prg, T, 1; n)[1]
 
 
 struct ROPRG
@@ -131,7 +129,6 @@ end
 
 (roprg::ROPRG)(x::String) = roprg(Vector{UInt8}(x))
 (roprg::ROPRG)(x::Symbol) = roprg(string(x))
-
 
 function Base.rand(prg::PRG, spec::MODP, N::Integer; nr::Integer = 0) 
 

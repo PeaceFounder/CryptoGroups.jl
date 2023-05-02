@@ -71,13 +71,14 @@ end
 dsa_standart_group(tp::Int, tg::Int) = dsa_standart_group(default_rng(), tp, tg)
 
 
-function generate_g(p::Integer, q::Integer; seed = Vector{UInt8}("SEED"), nr = 10)
+function generate_g(p::Integer, q::Integer; seed = Vector{UInt8}("SEED"), nr = 10, hasher = "sha256")
 
-    prg = PRG("sha256"; s = seed)
-    sp = MODP(p; q)
+    prg = PRG(hasher; s = seed)
+    sp = MODP(;p, q)
 
     h = rand(prg, sp, 1; nr)
 
+    rand(prg, sp, 10; nr)
+
     return h[1]
 end
-
