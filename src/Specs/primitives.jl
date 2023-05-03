@@ -32,6 +32,7 @@ struct PRG <: AbstractRNG
 end
 
 PRG(hasher::String; s = Vector{UInt8}("SEED")) = PRG(Hash(hasher), s)
+bitlength(prg::PRG) = bitlength(prg.h)
 
 (prg::PRG)(i::UInt32) = prg.h([prg.s..., reverse(reinterpret(UInt8, UInt32[i]))...])
 

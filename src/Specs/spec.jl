@@ -279,6 +279,7 @@ end
 
 MODP(;p, q, g = nothing, names=String[]) = MODP(p, g, q; names)
 
+Base.:(==)(x::MODP, y::MODP) = x.p == y.p && x.g == y.g && x.q == y.q
 
 names(modp::MODP) = modp.names
 
