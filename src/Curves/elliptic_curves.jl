@@ -59,7 +59,13 @@ function Base.:*(P::AffinePoint, k::Integer)
         if h[i] == 1 && e[i] == 0
             R = R + P
         elseif h[i] == 0 && e[i] == 1
-            R = R - P
+
+            if R == -P
+                R = double(R)
+            else
+                R = R - P
+            end
+
         end
     end
 

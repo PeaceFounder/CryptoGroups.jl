@@ -1,7 +1,7 @@
 name = "CryptoGroups"
 uuid = "bc997328-bedd-407e-bcd3-5758e064a52d"
 authors = ["Janis Erdmanis <akels14@gmail.com>"]
-version = "0.3.0"
+version = "0.3.1"
 
 [deps]
 CryptoUtils = "04afed74-ac16-11e9-37b6-1352e3e05830"

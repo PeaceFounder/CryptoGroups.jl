@@ -49,13 +49,14 @@ struct ECP <: Spec
         _b = _parse_int(b)
         _Gx = _parse_int(Gx)
         _Gy = _parse_int(Gy)
+        _n = _parse_int(n)
 
-        return new(p, n, _a, _b, _Gx, _Gy, names)
+        return new(p, _n, _a, _b, _Gx, _Gy, names)
     end
 
 end
 
-function ECP(; p, n::Union{BigInt, Nothing} = nothing, a = -3, b, h = 1, G=nothing, Gx=nothing, Gy=nothing, names = String[])
+function ECP(; p, n::Union{Integer, Nothing} = nothing, a = -3, b, h = 1, G=nothing, Gx=nothing, Gy=nothing, names = String[])
     
     if !isnothing(G) 
         ecp = ECP(p, n, a, b, nothing, nothing)

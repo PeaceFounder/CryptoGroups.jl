@@ -68,9 +68,14 @@ end
 
 
 function Base.:+(x::P, y::P) where P <: ECPoint 
-    @assert x.p != y.p "AffinePoint's can't be equal. Multiply by 2 instead." 
+    #@assert x.p != y.p "AffinePoint's can't be equal. Multiply by 2 instead." 
     # Also assertion that x.p != -x.p
-    return P(x.p + y.p)
+
+    if x.p == y.p
+        return P(double(x.p))
+    else
+        return P(x.p + y.p)
+    end
 end
 
 Base.:*(x::P, n::Integer) where P <: ECPoint = P(x.p * n)
