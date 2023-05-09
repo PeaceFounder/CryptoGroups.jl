@@ -37,6 +37,10 @@ h = g^7
 @test g^2/g == g
 
 
+@test one(g) * g == g
+@test g * one(g) == g
+
+
 ################################ Legacy ##################################
 
 import CryptoGroups
@@ -51,6 +55,9 @@ function testgroup(g::G) where G <: Group
     @test g*g^2 == g^3
     @test (g^2)^2 == g^4
     @test g^(order(G) + 1) == g
+
+    @test one(g) * g == g
+    @test g * one(g) == g
 end
 
 G = PGroup(23, 11)

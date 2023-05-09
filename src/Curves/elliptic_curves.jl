@@ -43,7 +43,6 @@ Base.:-(u::P, v::P) where P <: AffinePoint = u + (-v)
 Base.isless(x::P, y::P) where P <: AbstractPoint = gx(x) == gx(y) ? gx(x) < gx(y) : gy(x) < gy(y)
 
 
-
 function Base.:*(P::AffinePoint, k::Integer)
     
     h = tobits(3*k) 

@@ -16,11 +16,11 @@ import Base./
 
 name(x::G) where G <: Group = name(G)
 
-
 Base.convert(::Type{Vector{G}}, x::Vector) where G <: Group = G[ G <| i for i in x]
 
 Base.rand(prg::PRG, ::Type{G}, N::Integer; nr::Integer = 0) where G <: Group = Vector{G} <| rand(prg, spec(G), N; nr)
 
+Base.ones(x::Vector{G}) where G <: Group = [one(i) for i in x] # need to extend this
 
 struct ECGroup{P<:ECPoint} <: Group
     x::P
@@ -36,7 +36,11 @@ function Base.:^(x::G, n::Integer) where G <: ECGroup
 
     @assert n_mod != 0 "A bad exponent"
 
-    return G(n_mod * x.x)
+    if isone(x)
+        return x
+    else
+        return G(n_mod * x.x)
+    end
 end
 
 Base.inv(g::G) where G <: ECGroup = g^(order(G) - 1)
@@ -57,6 +61,9 @@ Base.isless(x::G, y::G) where G <: ECGroup = isless(x.x, y.x)
 Curves.gx(g::ECGroup) = gx(g.x)
 Curves.gy(g::ECGroup) = gy(g.x)
 
+Base.one(g::ECGroup{P}) where P <: ECPoint = ECGroup{P}(zero(P))
+Base.one(::Type{ECGroup{P}}) where P <: ECPoint = ECGroup{P}(zero(P))
+
 
 function Base.show(io::IO, g::G) where G <: ECGroup
     show(io, G)
@@ -71,9 +78,7 @@ end
 struct PGroup{S} <: Group
     g::BigInt
 
-
     PGroup(p::Integer, q::Integer; name=nothing) = PGroup{static(; p, q, name)}
-
 
     function PGroup{S}(x::BigInt) where S
         #@assert 1 < x < S.p "Not in range"
@@ -84,8 +89,14 @@ struct PGroup{S} <: Group
     end
 
     PGroup{S}(x::Integer) where S = PGroup{S}(BigInt(x))
-
+    PGroup{S}(::typeof(one)) where S = new{S}(1)
 end
+
+
+Base.one(::Type{PGroup{S}}) where S = PGroup{S}(one)
+Base.one(::PGroup{S}) where S = PGroup{S}(one)
+
+#Base.ones(::         
 
 modulus(::Type{PGroup{S}}) where S = BigInt(S.p)
 modulus(::G) where G <: PGroup = modulus(G)
@@ -148,7 +159,7 @@ function ^(x::G, n::Integer) where G <: PGroup
 
     n_mod = mod(n, order(G))
     @assert n_mod != 0 "A bad exponent"
-    @assert value(x) != 1 "A value 1 is not part of prime group"
+    #@assert value(x) != 1 "A value 1 is not part of prime group"
 
     return G(powermod(value(x), n_mod, modulus(G)))
 end
