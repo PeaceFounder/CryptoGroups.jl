@@ -13,7 +13,7 @@ Cryptographic groups are a fundamental building block for digital signatures, ke
   * [x] Rename `crs` to `rand` and in `ShuffleProofs`, `gen_verificatum_prg`.
   * [x] Rename `solidify` as `specialize`
   * [x] Rename `incurve` to `oncurve`
-  * [ ] According to https://safecurves.cr.yp.to/complete.html 
+  * [x] According to https://safecurves.cr.yp.to/complete.html 
 
     > ... the standard Weierstrass addition formulas fail if Q happens to match -P. This will not be caught by random tests. 
   
