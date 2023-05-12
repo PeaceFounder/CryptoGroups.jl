@@ -18,7 +18,7 @@ specialize(::Type{Weierstrass}, a::F, b::F) where F <: BinaryField = specialize(
 
 
 
-function specialize(::Type{ECPoint{P}}, curve::Spec; name=nothing) where P <: AbstractPoint
+function specialize(::Type{ECPoint{P}}, curve::Spec; name = name(curve)) where P <: AbstractPoint
     
     Q = specialize(P, curve)
 
@@ -30,7 +30,7 @@ function specialize(::Type{ECPoint{P}}, curve::Spec; name=nothing) where P <: Ab
     return R
 end
 
-specialize(::Type{ECPoint}, spec::Spec; name = nothing) = specialize(ECPoint{AffinePoint}, spec; name)
+specialize(::Type{ECPoint}, spec::Spec; name = name(spec)) = specialize(ECPoint{AffinePoint}, spec; name)
 
 
 ##################### Macro for defining curve as also a group ###################
@@ -168,28 +168,31 @@ function spec(::Type{EQ}, ::Type{F}; n=nothing, h=nothing, Gx=nothing, Gy=nothin
 end
 
 
-specialize(::Type{ECGroup{P}}, spec::Spec; name = nothing) where P <: ECPoint = ECGroup{specialize(P, spec; name)}
-specialize(::Type{ECGroup}, spec::Spec; name = nothing) = ECGroup{specialize(ECPoint, spec; name)}
+specialize(::Type{ECGroup{P}}, spec::Spec; name = name(spec)) where P <: ECPoint = ECGroup{specialize(P, spec; name)}
+specialize(::Type{ECGroup}, spec::Spec; name = name(spec)) = ECGroup{specialize(ECPoint, spec; name)}
 
 
 specialize(::Type{PGroup}, spec::MODP; name = nothing) = PGroup(spec.p, spec.q; name)
 
 
-function spec(x::Symbol)
-    if x == :P_192
-        return Specs.Curve_P_192
-    elseif x == :P_244
-        return Specs.Curve_P_244
-    elseif x == :P_256
-        return Specs.Curve_P_256
-    elseif x == :P_384
-        return Specs.Curve_P_384
-    elseif x == :P_521
-        return Specs.Curve_P_521
-    else
-        error("$x not implemented")
-    end
-end
+# function spec(x::Symbol)
+#     if x == :P_192
+#         return Specs.Curve_P_192
+#     elseif x == :P_244
+#         return Specs.Curve_P_244
+#     elseif x == :P_256
+#         return Specs.Curve_P_256
+#     elseif x == :P_384
+#         return Specs.Curve_P_384
+#     elseif x == :P_521
+#         return Specs.Curve_P_521
+#     else
+#         error("$x not implemented")
+#     end
+# end
+
+spec(x::Symbol) = curve(x) # 
+
 
 specialize(::Type{PGroup}, p, q) = PGroup(p, q)
 

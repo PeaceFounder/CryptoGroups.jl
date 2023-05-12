@@ -1,6 +1,6 @@
 module Specs
 
-import ..CryptoGroups: order, a, b, cofactor, modulus, bitlength #, point, octet
+import ..CryptoGroups: order, a, b, cofactor, modulus, bitlength, name #, point, octet
 
 include("spec.jl")
 include("field_specs.jl")

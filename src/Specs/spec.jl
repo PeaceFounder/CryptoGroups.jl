@@ -289,3 +289,5 @@ modulus(spec::MODP) = spec.p
 order(spec::MODP) = spec.q
 
 
+name(spec::Spec) = isempty(names(spec)) ? nothing : Symbol(names(spec)[1])
+

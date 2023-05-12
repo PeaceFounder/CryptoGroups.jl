@@ -79,8 +79,11 @@ Base.rem(x::PrimeField, q::Integer) = rem(value(x), q)
 
 
 Base.convert(group::Type{<:PGroup}, element::Vector{UInt8}) = group <| (element |> Specs.octet2int)
+PGroup{S}(element::Vector{UInt8}) where S = convert(PGroup{S}, element)
 octet(x::PGroup) = Specs.int2octet(value(x), bitlength(modulus(x)))
 Base.rem(x::PGroup, q::Integer) = rem(value(x), q)
+
+octet(g::ECGroup; mode = :uncompressed) = octet(g.x; mode)
 
 
 export @bin_str
