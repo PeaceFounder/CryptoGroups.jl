@@ -16,7 +16,10 @@ import Base./
 
 name(x::G) where G <: Group = name(G)
 
-Base.convert(::Type{Vector{G}}, x::Vector) where G <: Group = G[ G <| i for i in x]
+#Base.convert(::Type{Vector{G}}, x::Vector) where G <: Group = G[ G <| i for i in x]
+#Base.convert(::Type{Vector{G}}, x::Vector) where G <: Group = G[convert(G, i) for i in x]
+#Base.convert(::Type{Vector{G}}, x::Vector) where G <: Group = G[]
+
 
 Base.rand(prg::PRG, ::Type{G}, N::Integer; nr::Integer = 0) where G <: Group = Vector{G} <| rand(prg, spec(G), N; nr)
 
