@@ -1,7 +1,7 @@
 using Test
-using CryptoGroups: Hash, PRG, RO
+using CryptoGroups: HashSpec, PRG, RO
 
-h = Hash("sha256")
+h = HashSpec("sha256")
 
 s = hex2bytes("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f")
 prg = PRG(h, s)

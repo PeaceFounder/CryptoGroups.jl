@@ -24,7 +24,7 @@ struct ECGroup{P<:ECPoint} <: Group
     x::P
 end
 
-#Base.convert(::Type{ECGroup{P}}, x; allow_one=false) where P <: ECPoint = ECGroup{P}(P <| x)
+
 Base.convert(::Type{ECGroup{P}}, x; allow_one=false) where P <: ECPoint = ECGroup{P}(convert(P, x; allow_zero=allow_one))
 Base.convert(::Type{G}, x::G) where G <: ECGroup = x
 
@@ -167,7 +167,15 @@ Base.isvalid(g::G) where G <: PGroup = value(g) != 1 && powermod(value(g), order
 
 
 import Base.*
-*(x::G, y::G) where G <: PGroup = G(mod(value(x) * value(y), modulus(G)))
+function *(x::G, y::G) where G <: PGroup 
+    if isone(x) 
+        return y
+    elseif isone(y)
+        return x
+    else
+        return  G(mod(value(x) * value(y), modulus(G)))
+    end
+end
 
 
 import Base.^
@@ -185,7 +193,11 @@ function ^(x::G, n::Integer) where G <: PGroup
         end
     end
 
-    return G(powermod(value(x), n_mod, modulus(G)))
+    if isone(x)
+        return x
+    else
+        return G(powermod(value(x), n_mod, modulus(G)))
+    end
 end
 
 

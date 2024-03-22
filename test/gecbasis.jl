@@ -1,7 +1,7 @@
 module ECBasisTest
 
 using Test
-import CryptoGroups: ECGroup, Hash, specialize, value, ROPRG, Specs
+import CryptoGroups: ECGroup, HashSpec, specialize, value, ROPRG, Specs
 
 tobig(x) = parse(BigInt, bytes2hex(reverse(x)), base=16)
 interpret(::Type{BigInt}, x::Vector{UInt8}) = tobig(reverse(x))
@@ -35,8 +35,8 @@ leaf(x::String) = leaf(Vector{UInt8}(x))
 
 ### Let's make the setup complete. From repo I ahve a following public parameters:
 nr = 100
-rohash = Hash("sha256")
-prghash = Hash("sha256")
+rohash = HashSpec("sha256")
+prghash = HashSpec("sha256")
 
 ρ = hex2bytes("355806458d6cd42655a52be242705c8e824584ccdb6b1c016cad36c591413de4")
 

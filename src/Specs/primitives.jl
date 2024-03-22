@@ -3,16 +3,16 @@ using Random: AbstractRNG
 
 using CryptoUtils: is_quadratic_residue, sqrt_mod_prime
 
-struct Hash
+struct HashSpec
     spec::String
 end
 
-(h::Hash)(x::Vector{UInt8}) = hex2bytes(hexdigest(h.spec, x))
-(h::Hash)(x::String) = h(Vector{UInt8}(x))
+(h::HashSpec)(x::Vector{UInt8}) = hex2bytes(hexdigest(h.spec, x))
+(h::HashSpec)(x::String) = h(Vector{UInt8}(x))
 
 
 # Dispatching on value types seems as plausable solution
-function bitlength(h::Hash) 
+function bitlength(h::HashSpec) 
     s = h.spec
 
     if s == "sha256"
@@ -27,11 +27,11 @@ function bitlength(h::Hash)
 end
 
 struct PRG <: AbstractRNG
-    h::Hash
+    h::HashSpec
     s::Vector{UInt8}
 end
 
-PRG(hasher::String; s = Vector{UInt8}("SEED")) = PRG(Hash(hasher), s)
+PRG(hasher::String; s = Vector{UInt8}("SEED")) = PRG(HashSpec(hasher), s)
 bitlength(prg::PRG) = bitlength(prg.h)
 
 (prg::PRG)(i::UInt32) = prg.h([prg.s..., reverse(reinterpret(UInt8, UInt32[i]))...])
@@ -56,7 +56,7 @@ end
 
 
 struct RO
-    h::Hash
+    h::HashSpec
     n_out::Int
 end
 
@@ -109,8 +109,8 @@ Base.rand(prg::PRG, ::Type{T}; n = bitlength(T)) where T <: Integer = rand(prg, 
 
 struct ROPRG
     ρ::Vector{UInt8}
-    rohash::Hash
-    prghash::Hash
+    rohash::HashSpec
+    prghash::HashSpec
 end
 
 

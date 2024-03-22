@@ -26,7 +26,7 @@ Q = d*G
 # Signature Generation
 
 M = "abc"
-H = Hash("SHA1")
+H = HashSpec("SHA1")
 e = octet2int(H(M))
 
 ## Elliptic curve computaion
@@ -66,7 +66,7 @@ s = modinv(k, n) * (e + d*r) % n
 (r′, s′) = r, s
 
 M′ = "abc"
-H′ = Hash("sha256")
+H′ = HashSpec("sha256")
 e′ = octet2int(H(M′))
 
 @test 1 < r′ < n - 1

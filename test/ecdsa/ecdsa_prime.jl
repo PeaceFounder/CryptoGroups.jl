@@ -1,5 +1,5 @@
 using Test
-using CryptoGroups: @bin_str, @hex_str, ECP, specialize, ECPoint, <|, generator, octet, Hash, gx, gy, order, modinv
+using CryptoGroups: @bin_str, @hex_str, ECP, specialize, ECPoint, <|, generator, octet, HashSpec, gx, gy, order, modinv
 using CryptoGroups.Specs: octet2int
 
 curve_spec = ECP(;
@@ -26,8 +26,8 @@ Q = d*G
 # Signature Generation
 
 M = "abc"
-#H = Hash("sha256")
-H = Hash("SHA1")
+#H = HashSpec("sha256")
+H = HashSpec("SHA1")
 e = octet2int(H(M))
 
 @test e == 968236873715988614170569073515315707566766479517
@@ -70,7 +70,7 @@ s = modinv(k, n) * (e + d*r) % n
 (r′, s′) = r, s
 
 M′ = "abc"
-H′ = Hash("sha256")
+H′ = HashSpec("sha256")
 e′ = octet2int(H(M′))
 
 
