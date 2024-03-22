@@ -1,3 +1,4 @@
+using ..CryptoGroups: isstrict
 using ..CryptoGroups.Fields: F2PB, F2GNB, tobits
 using CryptoUtils: sqrt_mod_prime
 
@@ -141,8 +142,10 @@ end
 function point(x_octet::Vector{UInt8}, y_octet::Vector{UInt8}, ỹ::Bool, spec::EC2N)
 
     x, y = point(x_octet, y_octet, spec)
-
-    @warn "Sign bit is ignored."
+    
+    if isstrict()
+        @warn "Sign bit is ignored."
+    end
 
     return (x, y)
 end
@@ -268,8 +271,10 @@ function octet(x::BitVector, y::BitVector, basis::BinaryBasis; mode::Symbol = :u
 
         x_ = F(reverse(x))
         y_ = F(reverse(y))
-        
-        @warn "Calculation of ỹ could be wrong due to insufficient tests."
+
+        if isstrict()
+            @warn "Calculation of ỹ could be wrong due to insufficient tests."
+        end
 
         z = y_ * inv(x_)
 

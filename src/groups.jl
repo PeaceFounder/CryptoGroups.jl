@@ -24,16 +24,26 @@ struct ECGroup{P<:ECPoint} <: Group
     x::P
 end
 
-Base.convert(::Type{ECGroup{P}}, x) where P <: ECPoint = ECGroup{P}(P <| x)
+#Base.convert(::Type{ECGroup{P}}, x; allow_one=false) where P <: ECPoint = ECGroup{P}(P <| x)
+Base.convert(::Type{ECGroup{P}}, x; allow_one=false) where P <: ECPoint = ECGroup{P}(convert(P, x; allow_zero=allow_one))
 Base.convert(::Type{G}, x::G) where G <: ECGroup = x
 
 Base.:*(x::G, y::G) where G <: ECGroup = G(x.x + y.x)
 
 function Base.:^(x::G, n::Integer) where G <: ECGroup
+
     n_mod = mod(n, order(G))
 
-    @assert n_mod != 0 "A bad exponent"
-
+    # @assert n_mod != 0 "A bad exponent"    
+    if n_mod == 0
+        msg = "A bad exponent"
+        if isstrict()
+            error(msg)
+        else
+            @warn msg
+        end
+    end
+    
     if isone(x)
         return x
     else
@@ -78,10 +88,18 @@ struct PGroup{S} <: Group
 
     PGroup(p::Integer, q::Integer; name=nothing) = PGroup{static(; p, q, name)}
 
-    function PGroup{S}(x::BigInt) where S
-        #@assert 1 < x < S.p "Not in range"
+    function PGroup{S}(x::BigInt; allow_one::Bool=false) where S
+
+        if !allow_one && x == 1
+            msg = "Constructing a degenerate element. Use `allow_one` to hide this warning"
+            if isstrict()
+                error(msg)
+            else
+                @warn msg
+            end
+        end
+
         # Relaxing a little so that group products could happen propeerly
-        # But is a presence of 1 in multiplicative products a vulnerability?
         @assert 0 < x < S.p "Not in range" 
         new{S}(x)
     end
@@ -143,7 +161,7 @@ end
 
 value(g::PGroup) = g.g
 
-Base.convert(::Type{P}, x::Integer) where P <: PGroup = P(BigInt(x))
+Base.convert(::Type{P}, x::Integer; allow_one=false) where P <: PGroup = P(BigInt(x); allow_one)
 
 Base.isvalid(g::G) where G <: PGroup = value(g) != 1 && powermod(value(g), order(G), modulus(G)) == 1
 
@@ -156,8 +174,16 @@ import Base.^
 function ^(x::G, n::Integer) where G <: PGroup 
 
     n_mod = mod(n, order(G))
-    @assert n_mod != 0 "A bad exponent"
-    #@assert value(x) != 1 "A value 1 is not part of prime group"
+
+    # @assert n_mod != 0 "A bad exponent" 
+    if n_mod == 0
+        msg = "A bad exponent" 
+        if isstrict()
+            error(msg)
+        else
+            @warn msg
+        end
+    end
 
     return G(powermod(value(x), n_mod, modulus(G)))
 end

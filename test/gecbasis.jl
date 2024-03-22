@@ -1,11 +1,11 @@
+module ECBasisTest
+
 using Test
 import CryptoGroups: ECGroup, Hash, specialize, value, ROPRG, Specs
 
 tobig(x) = parse(BigInt, bytes2hex(reverse(x)), base=16)
 interpret(::Type{BigInt}, x::Vector{UInt8}) = tobig(reverse(x))
-
 interpret(::Type{Vector{UInt8}}, x::Integer) = reverse(reinterpret(UInt8, [x]))
-
 
 function interpret(::Type{T}, x::AbstractString) where T
     
@@ -65,6 +65,4 @@ G = specialize(ECGroup, Specs.Curve_P_192)
 
 @test 𝐡 == 𝐡′
 
-
-
-
+end

@@ -1,3 +1,5 @@
+module BasisTest
+
 using Test
 import CryptoGroups: PGroup, Hash, specialize, value, ROPRG, MODP
 
@@ -51,3 +53,5 @@ sp = MODP(p; q)
 𝐡′ = rand(prg, sp, 10; nr)
 
 @test 𝐡 == 𝐡′
+
+end

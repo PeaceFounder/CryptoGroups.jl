@@ -56,10 +56,10 @@ s = modinv(k, n) * (e + d*r) % n
 
 @test s == 308992691965804947361541664549085895292153777025772063598
 
-println("""The signature is:
-    r = $r
-    s = $s
-""")
+# println("""The signature is:
+#     r = $r
+#     s = $s
+# """)
 
 # Signature verification
 

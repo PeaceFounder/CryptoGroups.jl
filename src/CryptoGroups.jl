@@ -1,8 +1,22 @@
 module CryptoGroups
 
+global strict_mode::Bool = false
+
+function set_strict_mode(mode::Bool)
+
+    if strict_mode && !mode
+        @warn "Strict mode for CryptoGroups is downgraded."
+    end
+
+    global strict_mode = mode
+
+    return
+end
+
+isstrict() = strict_mode
+
 
 include("utils.jl")
-
 
 function spec end
 function specialize end

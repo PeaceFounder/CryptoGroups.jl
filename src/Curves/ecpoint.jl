@@ -1,4 +1,4 @@
-using ..CryptoGroups: static
+using ..CryptoGroups: static, isstrict
 
 struct ECPoint{P<:AbstractPoint, S} <: AbstractPoint # The same contract is satisfied thus a subtype
     p::P
@@ -8,9 +8,20 @@ struct ECPoint{P<:AbstractPoint, S} <: AbstractPoint # The same contract is sati
         return ECPoint{P, svars}
     end
 
-    function ECPoint{P, S}(x::P) where {P <: AbstractPoint, S}
-        
-        @assert oncurve(x) "Point is not in curve"
+    function ECPoint{P, S}(x::P; allow_zero=false) where {P <: AbstractPoint, S}
+
+        if iszero(x)
+            if !allow_zero
+                msg = "Constructing an offcurve element zero. Use `allow_zero` to hide this warning."
+                if isstrict()
+                    error(msg)
+                else
+                    @warn msg
+                end
+            end
+        else
+            @assert oncurve(x) "Point is not in curve"
+        end
         # A test with cofactor also here
         new{P, S}(x)
     end
@@ -86,7 +97,7 @@ end
 Base.:*(x::P, n::Integer) where P <: ECPoint = P(x.p * n)
 Base.:*(n::Integer, x::ECPoint) = x * n
 
-Base.convert(::Type{ECPoint{P, S}}, x::NTuple{2}) where {P <: AbstractPoint, S} = ECPoint{P, S}(P <| x)
+Base.convert(::Type{ECPoint{P, S}}, x::NTuple{2}; allow_zero=false) where {P <: AbstractPoint, S} = ECPoint{P, S}(P <| x; allow_zero)
 Base.convert(::Type{P}, x::P) where P <: ECPoint = x 
 
 Base.isvalid(p::P) where P <: ECPoint = order(P) * p.p == zero(p.p) 
