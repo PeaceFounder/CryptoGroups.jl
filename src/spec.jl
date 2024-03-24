@@ -1,6 +1,6 @@
 using .Fields: F2GNB, F2PB, FP, Field, PrimeField, BinaryField, tobits, value, reducer
 using .Curves: AbstractPoint, ECPoint, AffinePoint, Weierstrass, BinaryCurve, gx, gy, field, eq
-using .Specs: MODP, Koblitz, ECP, EC2N, Spec, PB, GNB
+using .Specs: MODP, Koblitz, ECP, EC2N, GroupSpec, PB, GNB
 
 specialize(::Type{FP}, p::Integer) = FP{static(p)} 
 
@@ -18,7 +18,7 @@ specialize(::Type{Weierstrass}, a::F, b::F) where F <: BinaryField = specialize(
 
 
 
-function specialize(::Type{ECPoint{P}}, curve::Spec; name = name(curve)) where P <: AbstractPoint
+function specialize(::Type{ECPoint{P}}, curve::GroupSpec; name = name(curve)) where P <: AbstractPoint
     
     Q = specialize(P, curve)
 
@@ -30,7 +30,7 @@ function specialize(::Type{ECPoint{P}}, curve::Spec; name = name(curve)) where P
     return R
 end
 
-specialize(::Type{ECPoint}, spec::Spec; name = name(spec)) = specialize(ECPoint{AffinePoint}, spec; name)
+specialize(::Type{ECPoint}, spec::GroupSpec; name = name(spec)) = specialize(ECPoint{AffinePoint}, spec; name)
 
 
 ##################### Macro for defining curve as also a group ###################
@@ -168,8 +168,8 @@ function spec(::Type{EQ}, ::Type{F}; n=nothing, h=nothing, Gx=nothing, Gy=nothin
 end
 
 
-specialize(::Type{ECGroup{P}}, spec::Spec; name = name(spec)) where P <: ECPoint = ECGroup{specialize(P, spec; name)}
-specialize(::Type{ECGroup}, spec::Spec; name = name(spec)) = ECGroup{specialize(ECPoint, spec; name)}
+specialize(::Type{ECGroup{P}}, spec::GroupSpec; name = name(spec)) where P <: ECPoint = ECGroup{specialize(P, spec; name)}
+specialize(::Type{ECGroup}, spec::GroupSpec; name = name(spec)) = ECGroup{specialize(ECPoint, spec; name)}
 
 
 specialize(::Type{PGroup}, spec::MODP; name = nothing) = PGroup(spec.p, spec.q; name)

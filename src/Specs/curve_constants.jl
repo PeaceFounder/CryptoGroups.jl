@@ -3,7 +3,7 @@
 # Instead of typing it would be much better to parse a JSON generated elsewhere
 
 
-const CURVES = Spec[]
+const CURVES = GroupSpec[]
 
 register(curve) = (push!(CURVES, curve); curve)
 

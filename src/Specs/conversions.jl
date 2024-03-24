@@ -152,7 +152,7 @@ end
 
 
 
-function point(po::Vector{UInt8}, spec::Spec) 
+function point(po::Vector{UInt8}, spec::GroupSpec) 
 
     pc = po[1]
 
@@ -184,7 +184,7 @@ function point(po::Vector{UInt8}, spec::Spec)
     end
 end
 
-point(po::String, spec::Spec) = point(hex2bytes(po), spec)
+point(po::String, spec::GroupSpec) = point(hex2bytes(po), spec)
 
 
 function _compressed_octet(x::Vector{UInt8}, y::Vector{UInt8}, ỹ::Bool)

@@ -1,4 +1,4 @@
-abstract type Spec end
+abstract type GroupSpec end
 
 import Base: @kwdef
 
@@ -33,7 +33,7 @@ _parse_int(x::Integer) = BigInt(x)
 _parse_int(::Nothing) = nothing
 _parse_int(x::Vector{UInt8}) = octet2int(x)
 
-struct ECP <: Spec
+struct ECP <: GroupSpec
     p::BigInt
     n::Union{BigInt, Nothing} # = nothing
     a::BigInt # = -3
@@ -103,7 +103,7 @@ end
 bitlength(x::GNB) = x.m
 
 
-struct EC2N{B<:BinaryBasis} <: Spec
+struct EC2N{B<:BinaryBasis} <: GroupSpec
     basis::B
     n::Union{BigInt, Nothing}
     a::BitVector
@@ -221,7 +221,7 @@ a(curve::EC2N) = curve.a
 b(curve::EC2N) = curve.b
 
 
-struct Koblitz{B<:BinaryBasis} <: Spec
+struct Koblitz{B<:BinaryBasis} <: GroupSpec
     bec::EC2N{B}
 
     function Koblitz{B}(; a, kwargs...) where B <: BinaryBasis
@@ -263,7 +263,7 @@ tobint(x::BigInt) = x
 tobint(x::Integer) = BigInt(x)
 tobint(x::Nothing) = nothing
 
-struct MODP <: Spec
+struct MODP <: GroupSpec
     p::BigInt
     g::Union{BigInt, Nothing}
     q::Union{BigInt, Nothing}
@@ -289,5 +289,5 @@ modulus(spec::MODP) = spec.p
 order(spec::MODP) = spec.q
 
 
-name(spec::Spec) = isempty(names(spec)) ? nothing : Symbol(names(spec)[1])
+name(spec::GroupSpec) = isempty(names(spec)) ? nothing : Symbol(names(spec)[1])
 
