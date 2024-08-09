@@ -1,4 +1,5 @@
 using Nettle
+import Random
 using Random: AbstractRNG
 
 using CryptoUtils: is_quadratic_residue, sqrt_mod_prime
@@ -103,8 +104,19 @@ function Base.rand(prg::PRG, ::Type{T}, N::Int; n = bitlength(T)) where T <: Int
     return 𝐭
 end
 
-Base.rand(prg::PRG, n::Int, N::Int) = Base.rand(prg, BigInt, N; n)
+#Base.rand(prg::PRG, n::Int, N::Int) = Base.rand(prg, BigInt, N; n)
+@deprecate Base.rand(prg::PRG, n::Int, N::Int) Base.rand(prg, BigInt, N; n) false
 Base.rand(prg::PRG, ::Type{T}; n = bitlength(T)) where T <: Integer = rand(prg, T, 1; n)[1]
+
+function Random.rand!(rng::PRG, a::AbstractArray{T}, sp) where T <: Integer
+
+    values = rand(rng, BigInt, length(a); n = bitlength(maximum(sp))) 
+
+    a_flat = reshape(a, length(a))
+    a_flat .= minimum(sp) .+ mod.(values, maximum(sp) - minimum(sp) + 1) # ToDo: fix bias (a simple skipping strategy should work)
+
+    return a
+end
 
 
 struct ROPRG
@@ -131,12 +143,8 @@ end
 (roprg::ROPRG)(x::String) = roprg(Vector{UInt8}(x))
 (roprg::ROPRG)(x::Symbol) = roprg(string(x))
 
-function Base.rand(prg::PRG, spec::MODP, N::Integer; nr::Integer = 0) 
 
-    p = modulus(spec)
-    q = order(spec)
-
-    @assert !isnothing(q) "Order of the group must be known"
+function modp_generator_basis(prg::PRG, p::Integer, q::Integer, N::Integer; nr::Integer = 0)
 
     np = bitlength(p)
 
@@ -149,17 +157,11 @@ function Base.rand(prg::PRG, spec::MODP, N::Integer; nr::Integer = 0)
     return 𝐡
 end
 
-function Base.rand(prg::PRG, spec::ECP, N::Integer; nr::Integer = 0) 
-
-    (; a, b) = spec
-
-    p = modulus(spec)
-    q = order(spec)
-
+function ecp_generator_basis(prg::PRG, (a, b)::Tuple{Integer, Integer}, p::Integer, q::Integer, N::Integer; nr::Integer = 0)
 
     np = bitlength(p) # 1
 
-    𝐭 = rand(prg, BigInt, N*10; n = np + nr)  # OPTIMIZE
+    𝐭 = rand(prg, BigInt, N*10; n = np + nr)  # OPTIMIZE (I would need it as an iterator)
 
     𝐭′ = mod.(𝐭, big(2)^(np + nr))
 
@@ -200,4 +202,17 @@ function Base.rand(prg::PRG, spec::ECP, N::Integer; nr::Integer = 0)
 
     return 𝐡
 end
+
+# ToDo: consider deprecating and redirect to generator_basis function
+function Base.rand(prg::PRG, spec::MODP, N::Integer; nr::Integer = 0) 
+
+    p = modulus(spec)
+    q = order(spec)
+
+    @assert !isnothing(q) "Order of the group must be known"
+
+    return modp_generator_basis(prg, p, q, N; nr)
+end
+
+Base.rand(prg::PRG, spec::ECP, N::Integer; nr::Integer = 0) = ecp_generator_basis(prg, (spec.a, spec.b), modulus(spec), order(spec), N; nr)
 

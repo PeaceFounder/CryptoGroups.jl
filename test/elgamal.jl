@@ -1,6 +1,7 @@
 using Test
 import CryptoGroups
-import CryptoGroups: PGroup, specialize, Enc, Dec, <|, generator, PGroup, ECGroup
+import CryptoGroups: PGroup, specialize, <|, generator, PGroup, ECGroup
+import CryptoGroups.ElGamal: Enc, Dec
 
 function elgamal_test(g)
 
@@ -35,6 +36,18 @@ function elgamal_test(g)
 
     @test sort(dec.(e_enc)) == sort(m_vec)
 
+    messages = [
+        (g, g^2),
+        (g^2, g^3),
+        (g^3, g^4)
+    ]
+
+    messages_enc = enc(messages, [2, 3, 7])
+    @test messages == dec(messages_enc)
+
+    messages_enc = enc(messages, [(2, 3), (3, 5), (7, 2)])
+    @test messages == dec(messages_enc)
+
     #m_vec = [g, g^2, g^3]
     #e_vec = enc.(m_vec, 1)
 end
@@ -67,7 +80,7 @@ end
 let
     spec = Specs.Curve_P_256
 
-    G = specialize(ECGroup, spec; name = :P_256)
+    G = specialize(ECGroup, spec; name = :P_192)
     g = G <| generator(spec)
 
     elgamal_test(g)

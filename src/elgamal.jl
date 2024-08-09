@@ -1,112 +1,101 @@
+module ElGamal
+
+using ..CryptoGroups: Group
+import Base: *, ^
+
+struct ElGamalElement{G<:Group}
+    a::G
+    b::G
+end
+
+ElGamalElement(m::G) where G <: Group = ElGamalElement(one(G), m)
+
+*(x::ElGamalElement{G}, y::ElGamalElement{G}) where G <: Group = ElGamalElement(x.a * y.a, x.b * y.b)
+*(x::ElGamalElement{G}, y::Tuple{G, G}) where G <: Group = x * ElGamalElement(y[1], y[2])
+*(x::Tuple{G, G}, y::ElGamalElement{G}) where G <: Group = y * x
+
+^(x::ElGamalElement{G}, k::Integer) where G <: Group = ElGamalElement(x.a ^ k, x.b ^ k) 
+
+Base.isless(x::ElGamalElement{G}, y::ElGamalElement{G}) where G <: Group = x.a == y.a ? x.b < y.b : x.a == y.a
+
+Base.:(==)(x::ElGamalElement{G}, y::ElGamalElement{G}) where G <: Group = x.a == y.a && x.b == y.b
+
+struct ElGamalRow{G<:Group, N} 
+    row::NTuple{N, ElGamalElement{G}}
+end
+
+ElGamalRow(a::G, b::G) where G <: Group = ElGamalRow(ElGamalElement(a, b))
+
+ElGamalRow(row::NTuple{N, G}) where {N, G <: Group} = convert(ElGamalRow{G, N}, row)
+ElGamalRow(element::ElGamalElement{G}) where {G <: Group} = convert(ElGamalRow{G, 1}, element)
+ElGamalRow(row::AbstractVector{<:ElGamalElement{G}}) where {G <: Group} = convert(ElGamalRow{G}, row)
+
+Base.convert(::Type{ElGamalRow{G, N}}, row::NTuple{N, G}) where {N, G<:Group} = ElGamalRow(tuple([ElGamalElement(mi) for mi in row]...))
+Base.convert(::Type{ElGamalRow{G, 1}}, element::ElGamalElement{G}) where G <: Group = ElGamalRow((element,))
+Base.convert(::Type{ElGamalRow{G}}, row::AbstractVector{<:ElGamalElement{G}}) where G <: Group = ElGamalRow(tuple(row...))
+#Base.convert(::Type{ElGamalRow}, row) = ElGamalRow(row)
+
+Base.:(==)(x::ElGamalRow{G, N}, y::ElGamalRow{G, N}) where {G <: Group, N} = x.row == y.row
+
+Base.getindex(row::ElGamalRow, index::Integer) = row.row[index]
+Base.getindex(row::ElGamalRow, range) = ElGamalRow(row.row[range])
+
+Base.length(row::ElGamalRow) = length(row.row)
+Base.lastindex(row::ElGamalRow) = length(row)
+
+*(x::ElGamalRow{G}, y::ElGamalRow{G}) where G <: Group = ElGamalRow(x.row .* y.row)
+*(x::ElGamalRow{G}, y::Tuple{G, G}) where G <: Group = ElGamalRow(x.row .* y)
+*(x::Tuple{G, G}, y::ElGamalRow{G}) where G <: Group = y * x
+*(x::ElGamalRow{G}, y::ElGamalElement{G}) where G <: Group = ElGamalRow(ElGamalElement{G}[i * y for i in x.row])
+*(x::ElGamalElement{G}, y::ElGamalRow{G}) where G <: Group = y * x
+
+^(x::ElGamalRow{G}, k::Integer) where G <: Group = ElGamalRow(x.row .^ k) #(x[1]^k, x[2]^k)
+
+function Base.isless(x::ElGamalRow{G, N}, y::ElGamalRow{G, N}) where {G <: Group, N}
+
+    for (xi, yi) in zip(x.row, y.row)
+
+        if xi !== yi
+            return xi < yi
+        end
+
+    end
+    
+    return false
+end
+
+
 struct Enc{T<:Group} 
     pk::T
     g::T
 end
 
+(enc::Enc)(r::Integer) = ElGamalElement(enc.g^r, enc.pk^r) # A tuple is treated as a scalar
+(enc::Enc{G})(e::ElGamalElement{G}, r::Integer) where G <: Group = e * enc(r)
+(enc::Enc{G})(m::G, r::Integer) where G <: Group = enc(ElGamalElement(one(G), m), r)
+(enc::Enc{G})(m::AbstractVector{G}, r::AbstractVector{<:Integer}) where G <: Group = enc.(m, r) # Returns ElGamalElement vector
+(enc::Enc{G})(m::AbstractVector{<:ElGamalElement{G}}, r::AbstractVector{<:Integer}) where G <: Group = enc.(m, r)
 
-(enc::Enc{T})(m::T, r::Integer) where T <: Group = (enc.g^r, m*enc.pk^r) ### Message first?
-(enc::Enc)(r::Integer) = (enc.g^r, enc.pk^r)  
+(enc::Enc)(r::NTuple{N, <:Integer}) where N = ElGamalRow(enc.(r))
+(enc::Enc{G})(e::ElGamalRow{G}, r::Integer) where G <: Group = e * enc(r) # Tuple is treated as a scalar
+(enc::Enc{G})(e::ElGamalRow{G}, r::NTuple{N, <:Integer}) where {N, G <: Group} = e * enc(r)
+(enc::Enc{G})(m::NTuple{N, G}, r::Integer) where {N, G <: Group} = enc(ElGamalRow(m), r)
+(enc::Enc{G})(m::NTuple{N, G}, r::NTuple{N, <:Integer}) where {N, G <: Group} = enc(ElGamalRow(m), r)
+
+(enc::Enc{G})(m::AbstractVector{<:ElGamalRow{G}}, r::AbstractVector{<:Integer}) where G <: Group = enc.(m, r)
+(enc::Enc{G})(m::AbstractVector{<:NTuple{N, G}}, r::AbstractVector{<:Integer}) where {N, G <: Group} = enc.(m, r)
+(enc::Enc{G})(m::AbstractVector{<:ElGamalRow{G}}, r::AbstractVector{<:NTuple{N, <:Integer}}) where {N, G <: Group} = enc.(m, r)
+(enc::Enc{G})(m::AbstractVector{<:NTuple{N, G}}, r::AbstractVector{<:NTuple{N, <:Integer}}) where {N, G <: Group} = enc.(m, r)
 
 
-a(x::Tuple{T, T}) where T <: Group = x[1]
-b(x::Tuple{T, T}) where T <: Group = x[2]
-
-
-*(x::Tuple{G, G}, y::Tuple{G, G}) where G <: Group = (a(x)*a(y), b(x)*b(y))
-
-(enc::Enc)(e::Tuple{G, G}, r::Integer) where G <: Group = e * enc(r)
-
-
-struct ElGamal{G <: Group} <: AbstractVector{G}
-    a::Vector{G}
-    b::Vector{G}
-
-    function ElGamal{G}(a::Vector{G}, b::Vector{G}) where {G <: Group} 
-        @assert length(a) == length(b)
-        return new(a, b)
-    end
+function (enc::Enc{G})(m::AbstractVector{<:ElGamalRow{G}}, r::AbstractMatrix{<:Integer}) where G <: Group
+    @assert length(r[:, 1]) == length(m[1]) "Dimensions not equal"
+    return [enc(mi, tuple(ri...)) for (mi, ri) in zip(m, eachcol(r))]
 end
 
-
-ElGamal(a::Vector{G}, b::Vector{G}) where G <: Group = ElGamal{G}(a, b)
-
-ElGamal(e::Vector{Tuple{G, G}}) where G <: Group = ElGamal([a(i) for i in e], [b(i) for i in e])
-
-function ElGamal{G}(a::Vector{T}, b::Vector{T}) where {T, G<:Group}
-    a′ = convert(Vector{G}, a)
-    b′ = convert(Vector{G}, b)
-
-    return ElGamal{G}(a′, b′)
-end
-
-
-a(e::ElGamal) = e.a
-b(e::ElGamal) = e.b
-
-Base.getindex(e::ElGamal, i::Int) = (a(e)[i], b(e)[i])
-Base.getindex(e::ElGamal{G}, ivec::Vector) where G <: Group = ElGamal{G}(a(e)[ivec], b(e)[ivec])
-Base.length(e::ElGamal) = length(a(e))
-Base.size(e::ElGamal) = size(a(e))
-
-Base.copy(e::ElGamal{G}) where G <: Group = ElGamal{G}(copy(a(e)), copy(b(e)))
-Base.sort(e::ElGamal) = sort!(copy(e))
-
-### NEW METHOD
-function Base.setindex!(e::ElGamal{G}, val::Tuple{G, G}, i) where G <: Group
-    a(e)[i] = a(val)
-    b(e)[i] = b(val)
-end
-
-
-function *(x::ElGamal{G}, y::ElGamal{G}) where G <: Group
-
-    @assert length(x) == length(y)
-
-    a′ = a(x) .* a(y)
-    b′ = b(x) .* b(y)
-
-    return ElGamal(a′, b′)
-end
-
-function *(x::ElGamal{G}, y::Tuple{G, G}) where G <: Group
-    
-    a′ = a(x) .* a(y)
-    b′ = b(x) .* b(y)
-
-    return ElGamal(a′, b′)
-end
-
-*(x::Tuple{G, G}, y::ElGamal{G}) where G <: Group = y * x
-
-
-import Base: ^
-
-^(x::Tuple{G, G}, k::Integer) where G <: Group = (x[1]^k, x[2]^k)
-^(x::ElGamal, k::AbstractVector{<:Integer}) = ElGamal(a(x) .^ k, b(x) .^ k)
-^(x::ElGamal, k::Integer) = ElGamal(a(x) .^ k, b(x) .^ k)
-
-Base.broadcasted(::typeof(^), x::ElGamal, y::AbstractVector{<:Integer}) = x^y
-
-
-(enc::Enc)(e::ElGamal, r::Integer) = enc(r) * e 
-
-
-function (enc::Enc{G})(m::Vector{G}, r::AbstractVector{<:Integer}) where G <: Group
-
-    a′ = enc.g .^ r
-    b′ = m .* (enc.pk .^ r)
-
-    return ElGamal(a′, b′)
-end
-
-
-function (enc::Enc{G})(𝐞::ElGamal{G}, 𝐫::AbstractVector{<:Integer}) where G <: Group
-    
-    ### Need to improve this 
-    r = ElGamal(enc.(𝐫))
-    𝐞′ = 𝐞 * r
-    
-    return 𝐞′    
+function (enc::Enc{G})(m::AbstractVector{<:NTuple{N, G}}, r::AbstractMatrix{<:Integer}) where {N, G <: Group}
+    @assert length(r[:, 1]) == N "Dimensions not equal"
+    return [enc(mi, tuple(ri...)) for (mi, ri) in zip(m, eachcol(r))]
 end
 
 
@@ -114,11 +103,13 @@ struct Dec
     sk::Integer
 end
 
-(dec::Dec)(e::Tuple{G, G}) where G = b(e) * a(e)^(-dec.sk) 
+(dec::Dec)(e::ElGamalElement) = e.b * e.a^(-dec.sk)
+(dec::Dec)(e::ElGamalRow) = dec.(e.row)
 
-(dec::Dec)(e::ElGamal) = [dec(ei) for ei in e]
+(dec::Dec)(e::Tuple{G, G}) where G <: Group = dec(ElGamalElement(e.a, e.b))
+(dec::Dec)(a::G, b::G) where G <: Group = dec(ElGamalElement(a, b))
 
-Base.isless(x::Tuple{G, G}, y::Tuple{G, G}) where G <: Group = x[1] == y[1] ? x[2] < y[2] : x[1] < y[1]
+(dec::Dec)(e::AbstractVector{<:ElGamalElement{<:Group}}) = dec.(e)
+(dec::Dec)(e::AbstractVector{<:ElGamalRow{<:Group, N}}) where N = dec.(e) # Using this method over dot syntax offers more type safety 
 
-
-Base.prod(e::ElGamal{G}) where G <: Group = (prod(e.a), prod(e.b))
+end

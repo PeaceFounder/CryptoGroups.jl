@@ -1,5 +1,5 @@
 using Test
-import CryptoGroups: PGroup, order, Enc, Dec, modulus, value, specialize, Specs, generator, <|
+import CryptoGroups: PGroup, order, modulus, value, specialize, Specs, generator, <|
 
 q = 11
 p = 2*q + 1
