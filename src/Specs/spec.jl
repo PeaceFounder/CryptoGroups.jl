@@ -3,25 +3,25 @@ abstract type GroupSpec end
 import Base: @kwdef
 
 # Dublicate present in utlis.jl
-function _hex2bytes(x::String)
+# function _hex2bytes(x::String)
     
-    normalized = join(split(x, " "), "") 
+#     normalized = join(split(x, " "), "") 
 
-    N = length(normalized)
+#     N = length(normalized)
     
-    if mod(N, 2) != 0
-        normalized = "0" * normalized
-    end
+#     if mod(N, 2) != 0
+#         normalized = "0" * normalized
+#     end
     
-    return hex2bytes(normalized)
-end
+#     return hex2bytes(normalized)
+# end
 
-function bytes2bits(x::Vector{UInt8})
-    bv = BitVector(u << -i % Bool for u in x for i in 7:-1:0)
-    return bv
-end
+# function bytes2bits(x::Vector{UInt8})
+#     bv = BitVector(u << -i % Bool for u in x for i in 7:-1:0)
+#     return bv
+# end
 
-hex2bits(x::String) = bytes2bits(_hex2bytes(x))
+# hex2bits(x::String) = bytes2bits(_hex2bytes(x))
 
 _parse_bits(x::String, N::Int) = hex2bits(x)[end - N + 1:end]
 _parse_bits(x::BitVector, m::Int) = x
@@ -56,15 +56,6 @@ struct ECP <: GroupSpec
 
 end
 
-function ECP(; p, n::Union{Integer, Nothing} = nothing, a = -3, b, h = 1, G=nothing, Gx=nothing, Gy=nothing, names = String[])
-    
-    if !isnothing(G) 
-        ecp = ECP(p, n, a, b, nothing, nothing)
-        (Gx, Gy) = point(G, ecp) # Note that the method is defined later in conversions.jl
-    end
-
-    return ECP(p, n, a, b, Gx, Gy; names)
-end
 
 names(curve::ECP) = curve.names
 
@@ -291,3 +282,15 @@ order(spec::MODP) = spec.q
 
 name(spec::GroupSpec) = isempty(names(spec)) ? nothing : Symbol(names(spec)[1])
 
+
+# I could implement a method for a point here
+
+function ECP(; p, n::Union{Integer, Nothing} = nothing, a = -3, b, h = 1, G=nothing, Gx=nothing, Gy=nothing, names = String[])
+    
+    if !isnothing(G) 
+        ecp = ECP(p, n, a, b, nothing, nothing)
+        (Gx, Gy) = point(G, ecp) # The only method that depends on the point. 
+    end
+
+    return ECP(p, n, a, b, Gx, Gy; names)
+end

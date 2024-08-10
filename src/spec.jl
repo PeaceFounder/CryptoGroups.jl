@@ -1,6 +1,6 @@
 using .Fields: F2GNB, F2PB, FP, Field, PrimeField, BinaryField, tobits, value, reducer
 using .Curves: AbstractPoint, ECPoint, AffinePoint, Weierstrass, BinaryCurve, gx, gy, field, eq
-using .Specs: MODP, Koblitz, ECP, EC2N, GroupSpec, PB, GNB
+using .Specs: MODP, Koblitz, ECP, EC2N, GroupSpec, PB, GNB, curve
 
 specialize(::Type{FP}, p::Integer) = FP{static(p)} 
 

@@ -1,6 +1,8 @@
 using Test
-using CryptoGroups: @bin_str, @hex_str, ECP, specialize, ECPoint, <|, generator, octet, HashSpec, gx, gy, order, modinv
-using CryptoGroups.Specs: octet2int
+using CryptoGroups: @bin_str, @hex_str, specialize, ECPoint, <|, generator, gx, gy, order, modinv
+using CryptoGroups.Conversions: octet2int, octet
+using CryptoGroups.CSPRG: HashSpec
+using CryptoGroups.Specs: ECP
 
 curve_spec = ECP(;
                  p = 6277101735386680763835789423207666416083908700390324961279,

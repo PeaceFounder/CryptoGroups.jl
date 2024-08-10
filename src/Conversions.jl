@@ -1,6 +1,17 @@
-using ..CryptoGroups: isstrict
+module Conversions
+
+# Conversions from and to different representations
+# It would be conceptially desirable to not depend on Specs module from which ECP, EC2N are imported
+
+import ..CryptoGroups: point, octet, octet2int, octet2bits, <|
+
+using ..CryptoGroups.Fields: BinaryField, PrimeField
+using ..CryptoGroups.Curves: AbstractPoint, gx, gy
+using ..CryptoGroups: isstrict, modulus, a, b, bitlength, value, spec
 using ..CryptoGroups.Fields: F2PB, F2GNB, tobits
 using CryptoUtils: sqrt_mod_prime
+
+using ..CryptoGroups.Specs: ECP, EC2N, GroupSpec, MODP, PB, GNB, BinaryBasis # To be removed
 
 
 function int2octet(x::Integer)
@@ -81,6 +92,91 @@ function bits2octet(_x::BitVector)
 end
 
 
+
+function _compressed_octet(x::Vector{UInt8}, y::Vector{UInt8}, ỹ::Bool)
+
+    if ỹ == false
+        return UInt8[2, x...]
+    elseif ỹ == true
+        return UInt8[3, x...]
+    end
+
+end
+
+
+function _hybrid_octet(x::Vector{UInt8}, y::Vector{UInt8}, ỹ::Bool)
+
+    if ỹ == false
+        return UInt8[6, x..., y...]
+    elseif ỹ == true
+        return UInt8[7, x..., y...]
+    end
+    
+end
+
+
+function _uncompressed_octet(x::Vector{UInt8}, y::Vector{UInt8})
+     return UInt8[4, x..., y...]
+end
+
+
+
+
+function octet(x::BigInt, y::BigInt, N::Int; mode::Symbol = :uncompressed)
+
+    _x = int2octet(x, N)
+    _y = int2octet(y, N)
+
+    if mode == :uncompressed
+
+        return _uncompressed_octet(_x, _y)
+
+    elseif mode in [:compressed, :hybrid]
+
+        ỹ = mod(y, 2) % Bool
+        
+        if mode == :compressed
+            
+            return _compressed_octet(_x, _y, ỹ)
+            
+        elseif mode == :hybrid
+
+            return _hybrid_octet(_x, _y, ỹ)
+
+        end
+
+    else
+        error("Unrecognized mode $mode")
+    end
+    
+end
+
+
+function _hex2bytes(x::String)
+    
+    normalized = join(split(x, " "), "") 
+
+    N = length(normalized)
+    
+    if mod(N, 2) != 0
+        normalized = "0" * normalized
+    end
+    
+    return hex2bytes(normalized)
+end
+
+
+function bytes2bits(x::Vector{UInt8})
+    bv = BitVector(u << -i % Bool for u in x for i in 7:-1:0)
+    return bv
+end
+
+hex2bits(x::String) = bytes2bits(_hex2bytes(x))
+
+
+
+
+
 function decompress(x::BigInt, ỹ::Bool, spec::ECP)
 
     p = modulus(spec)
@@ -151,7 +247,8 @@ function point(x_octet::Vector{UInt8}, y_octet::Vector{UInt8}, ỹ::Bool, spec::
 end
 
 
-
+# TODO: type spec to Type{AffinePoint}
+# consider making as a constructor method!!!
 function point(po::Vector{UInt8}, spec::GroupSpec) 
 
     pc = po[1]
@@ -187,63 +284,11 @@ end
 point(po::String, spec::GroupSpec) = point(hex2bytes(po), spec)
 
 
-function _compressed_octet(x::Vector{UInt8}, y::Vector{UInt8}, ỹ::Bool)
-
-    if ỹ == false
-        return UInt8[2, x...]
-    elseif ỹ == true
-        return UInt8[3, x...]
-    end
-
-end
+octet(x::BitVector, y::BitVector, spec::EC2N; mode::Symbol = :uncompressed) = octet(x, y, spec.basis; mode)
 
 
-function _hybrid_octet(x::Vector{UInt8}, y::Vector{UInt8}, ỹ::Bool)
+octet(x::BigInt, spec::MODP) = int2octet(x, bitlength(modulus(spec)))
 
-    if ỹ == false
-        return UInt8[6, x..., y...]
-    elseif ỹ == true
-        return UInt8[7, x..., y...]
-    end
-    
-end
-
-
-function _uncompressed_octet(x::Vector{UInt8}, y::Vector{UInt8})
-     return UInt8[4, x..., y...]
-end
-
-
-
-
-function octet(x::BigInt, y::BigInt, N::Int; mode::Symbol = :uncompressed)
-
-    _x = int2octet(x, N)
-    _y = int2octet(y, N)
-
-    if mode == :uncompressed
-
-        return _uncompressed_octet(_x, _y)
-
-    elseif mode in [:compressed, :hybrid]
-
-        ỹ = mod(y, 2) % Bool
-        
-        if mode == :compressed
-            
-            return _compressed_octet(_x, _y, ỹ)
-            
-        elseif mode == :hybrid
-
-            return _hybrid_octet(_x, _y, ỹ)
-
-        end
-
-    else
-        error("Unrecognized mode $mode")
-    end
-    
-end
 
 octet(x::BigInt, y::BigInt, spec::ECP; mode::Symbol = :uncompressed) = octet(x, y, bitlength(modulus(spec)); mode)
 
@@ -251,6 +296,7 @@ _field(basis::PB) = F2PB(basis.f)
 _field(basis::GNB) = F2GNB{basis.m, basis.T}
 
 
+# I could have point2octet_pb and point2octet_gnb while put data directly in the basis field
 function octet(x::BitVector, y::BitVector, basis::BinaryBasis; mode::Symbol = :uncompressed)
 
     _x = bits2octet(x)
@@ -295,8 +341,19 @@ function octet(x::BitVector, y::BitVector, basis::BinaryBasis; mode::Symbol = :u
     end
 end
 
-octet(x::BitVector, y::BitVector, spec::EC2N; mode::Symbol = :uncompressed) = octet(x, y, spec.basis; mode)
 
 
-octet(x::BigInt, spec::MODP) = int2octet(x, bitlength(modulus(spec)))
 
+
+octet(p::AbstractPoint; mode::Symbol = :uncompressed) = octet(value(gx(p)), value(gy(p)), spec(p); mode)
+Base.convert(::Type{P}, po::Vector{UInt8}) where P <: AbstractPoint = P <| point(po, spec(P))
+
+
+octet(x::BinaryField) = bits2octet(tobits(x))
+
+octet(x::PrimeField) = int2octet(value(x), bitlength(modulus(x)))
+
+
+
+
+end

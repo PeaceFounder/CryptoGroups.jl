@@ -1,7 +1,9 @@
 module ECBasisTest
 
 using Test
-import CryptoGroups: ECGroup, HashSpec, specialize, value, ROPRG, Specs
+import CryptoGroups: ECGroup, specialize, value, Specs
+import CryptoGroups.CSPRG: HashSpec, ROPRG
+
 
 tobig(x) = parse(BigInt, bytes2hex(reverse(x)), base=16)
 interpret(::Type{BigInt}, x::Vector{UInt8}) = tobig(reverse(x))

@@ -1,7 +1,9 @@
 module BasisTest
 
 using Test
-import CryptoGroups: PGroup, HashSpec, specialize, value, ROPRG, MODP
+import CryptoGroups: PGroup, specialize, value, MODP
+import CryptoGroups.CSPRG: HashSpec, ROPRG
+#import CryptoGroups.CryptoProofs
 
 tobig(x) = parse(BigInt, bytes2hex(reverse(x)), base=16)
 interpret(::Type{BigInt}, x::Vector{UInt8}) = tobig(reverse(x))

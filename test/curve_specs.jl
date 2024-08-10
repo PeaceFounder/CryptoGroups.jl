@@ -3,7 +3,6 @@ using Test
 import CryptoGroups
 import CryptoGroups: generator, order, oncurve, FP, Weierstrass, BinaryCurve, F2PB, F2GNB, @def, specialize, <|, ECPoint, AffinePoint, spec, Specs
 
-
 const FULL_TEST = false
 
 for C in [:P_192, :P_224, :P_256, :P_384, :P_521]

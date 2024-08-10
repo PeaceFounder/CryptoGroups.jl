@@ -69,9 +69,3 @@ function gn_basis_representation_rule(m)
         end
     end
 end
-
-
-
-
-
-

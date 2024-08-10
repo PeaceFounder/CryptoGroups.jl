@@ -1,5 +1,5 @@
 using Test
-using CryptoGroups: HashSpec, PRG, RO
+using CryptoGroups.CSPRG: HashSpec, PRG, RO
 
 h = HashSpec("sha256")
 

@@ -1,6 +1,7 @@
 # Point conversion routines
 using Test
-import CryptoGroups.Specs: bits2octet, octet2bits, int2octet, octet2int, ECP, octet, point, EC2N, PB
+import CryptoGroups.Conversions: bits2octet, octet2bits, int2octet, octet2int, octet, point
+import CryptoGroups.Specs: ECP, EC2N, PB
 import CryptoGroups: @bin_str, bitlength, @hex_str
 
 let 

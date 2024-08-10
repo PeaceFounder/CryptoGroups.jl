@@ -1,5 +1,5 @@
 using CryptoGroups: @bin_str, @hex_str, EC2N, PB, specialize, ECPoint, <|, generator, octet 
-using CryptoGroups.Specs: octet2int
+using CryptoGroups.Conversions: octet2int
 # Elliptic Curve Domain Parameter Setup
 
 basis = PB(hex"80000000 00000000 00000000 00000000 00000000 00000201", 191)

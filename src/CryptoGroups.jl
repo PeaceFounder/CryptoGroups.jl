@@ -64,45 +64,59 @@ end
 
 include("Fields/Fields.jl")
 include("Curves/Curves.jl")
-include("Specs/Specs.jl")
 
+# A temporary declarations
+
+function point end
+function octet end
+function octet2int end
+function int2octet end
+function octet2bits end
+function hex2bits end
+function bits2octet end
+
+include("CSPRG.jl")
+
+include("Specs/Specs.jl")
+include("Conversions.jl")
 
 include("groups.jl")
-include("elgamal.jl")
 include("spec.jl")
+
+
+include("ElGamal.jl")
+include("CryptoProofs.jl")
 
 # Some type piracy here
 # Though this one can can be avoided if AbstractPoint would be defined in this module as well as BinaryField and primeField.
 
-import .Specs: octet
-using .Specs: point
-
-octet(p::AbstractPoint; mode::Symbol = :uncompressed) = octet(value(gx(p)), value(gy(p)), spec(p); mode)
-Base.convert(::Type{P}, po::Vector{UInt8}) where P <: AbstractPoint = P <| point(po, spec(P))
-Base.rem(p::AbstractPoint, q::Integer) = rem(gx(p), q)
+#import .Specs: octet
+#using .Specs: point
 
 
-using .Specs: int2octet, bits2octet, BinaryBasis, octet2int
+#using .Specs: int2octet, bits2octet, BinaryBasis, octet2int
 using .Fields: PrimeField, BinaryField
 
-octet(x::BinaryField) = bits2octet(tobits(x))
+
+Base.rem(p::AbstractPoint, q::Integer) = rem(gx(p), q)
 Base.rem(x::BinaryField, q::Integer) = rem(octet(x) |> octet2int, q)
-
-octet(x::PrimeField) = int2octet(value(x), bitlength(modulus(x)))
 Base.rem(x::PrimeField, q::Integer) = rem(value(x), q)
+Base.rem(x::PGroup, q::Integer) = rem(value(x), q)
 
 
+# Can be put at groups
 Base.convert(group::Type{<:PGroup}, element::Vector{UInt8}) = group <| (element |> Specs.octet2int)
 PGroup{S}(element::Vector{UInt8}) where S = convert(PGroup{S}, element)
 octet(x::PGroup) = Specs.int2octet(value(x), bitlength(modulus(x)))
-Base.rem(x::PGroup, q::Integer) = rem(value(x), q)
 
 octet(g::ECGroup; mode = :uncompressed) = octet(g.x; mode)
 
 
+
+
 export @bin_str
 
-export spec, specialize, order, bitlength
+export spec, specialize #, order, bitlength
 
 import .Fields: Field, BinaryField, FP, F2GNB, F2PB, PrimeField
 export Field, FP, F2GNB, F2PB 
@@ -110,9 +124,12 @@ export Field, FP, F2GNB, F2PB
 import .Curves: AbstractPoint, ECPoint, AffinePoint, BinaryCurve, gx, gy, a, b, oncurve
 export AbstractPoint, ECPoint, AffinePoint, BinaryCurve 
 
-import .Specs: MODP, Koblitz, ECP, EC2N, PB, GNB, generator, HashSpec, PRG, RO, ROPRG, point, octet, curve
-export MODP, Koblitz, ECP, EC2N, PB, GNB, generator, HashSpec, PRG, RO, ROPRG, Specs, curve
+# import .Specs: MODP, Koblitz, ECP, EC2N, PB, GNB, generator, curve # HashSpec, PRG, RO, ROPRG, point, octet,
+#export MODP, Koblitz, ECP, EC2N, PB, GNB, generator, Specs, curve
 
-export ElGamal
+import .Specs: generator
+export generator, octet, order, modulus, value
+
+export ElGamal, Specs, CSPRG
 
 end

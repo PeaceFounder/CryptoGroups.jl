@@ -16,19 +16,28 @@ end
     include("../examples/external_fields.jl")
 end
 
-@testset "Testing Specs module" begin
-    include("spec.jl")
+@testset "Testing CSPRG" begin
     include("primitives.jl")
+end
+
+@testset "Testing CryptoProofs" begin
     include("gbasis.jl")
     include("gecbasis.jl")
-    include("conversions.jl")
+    include("elgamal.jl")
+end
+
+@testset "Testing Specs module" begin
+    include("spec.jl")
     include("ecdsa/ecdsa_prime.jl")
     include("ecdsa/ecdsa_pb.jl")
 end
 
-@testset "Testing groups and ElGamal" begin
+@testset "Testing Conversions" begin
+    include("conversions.jl")
+end
+
+@testset "Testing group API" begin
     include("groups.jl")
-    include("elgamal.jl")
 end
 
 
