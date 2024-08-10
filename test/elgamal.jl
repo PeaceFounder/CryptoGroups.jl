@@ -1,6 +1,6 @@
 using Test
 import CryptoGroups
-import CryptoGroups: PGroup, specialize, <|, generator, PGroup, ECGroup
+import CryptoGroups: PGroup, specialize, generator, PGroup, ECGroup
 import CryptoGroups.ElGamal: Enc, Dec
 
 function elgamal_test(g)
@@ -65,13 +65,13 @@ end
 
 
 import CryptoGroups
-import CryptoGroups: specialize, <|, generator, PGroup, ECGroup, Specs
+import CryptoGroups: specialize, generator, PGroup, ECGroup, Specs
 
 
 let
     spec = Specs.MODP_1024
     G = specialize(PGroup, spec)
-    g = G <| generator(spec)
+    g = G(generator(spec))
 
     elgamal_test(g)
 end
@@ -81,7 +81,7 @@ let
     spec = Specs.Curve_P_256
 
     G = specialize(ECGroup, spec; name = :P_192)
-    g = G <| generator(spec)
+    g = G(generator(spec))
 
     elgamal_test(g)
 end
@@ -90,7 +90,7 @@ end
 let
     spec = Specs.Curve_B_163_PB
     G = specialize(ECGroup, spec; name = :B_163_PB)
-    g = G <| generator(spec)
+    g = G(generator(spec))
 
     elgamal_test(g)
 end

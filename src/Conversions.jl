@@ -3,7 +3,7 @@ module Conversions
 # Conversions from and to different representations
 # It would be conceptially desirable to not depend on Specs module from which ECP, EC2N are imported
 
-import ..CryptoGroups: point, octet, octet2int, octet2bits, <|
+import ..CryptoGroups: point, octet, octet2int, octet2bits
 
 using ..CryptoGroups.Fields: BinaryField, PrimeField
 using ..CryptoGroups.Curves: AbstractPoint, gx, gy
@@ -174,9 +174,6 @@ end
 hex2bits(x::String) = bytes2bits(_hex2bytes(x))
 
 
-
-
-
 function decompress(x::BigInt, ỹ::Bool, spec::ECP)
 
     p = modulus(spec)
@@ -195,7 +192,6 @@ function decompress(x::BigInt, ỹ::Bool, spec::ECP)
 
     return y
 end
-
 
 
 function decompress(x::BitVector, ỹ::Bool, spec::EC2N)
@@ -346,7 +342,7 @@ end
 
 
 octet(p::AbstractPoint; mode::Symbol = :uncompressed) = octet(value(gx(p)), value(gy(p)), spec(p); mode)
-Base.convert(::Type{P}, po::Vector{UInt8}) where P <: AbstractPoint = P <| point(po, spec(P))
+Base.convert(::Type{P}, po::Vector{UInt8}) where P <: AbstractPoint = convert(P, point(po, spec(P)))
 
 
 octet(x::BinaryField) = bits2octet(tobits(x))

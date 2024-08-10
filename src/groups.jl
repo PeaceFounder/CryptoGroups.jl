@@ -16,7 +16,7 @@ import Base./
 
 name(x::G) where G <: Group = name(G)
 
-Base.rand(prg::PRG, ::Type{G}, N::Integer; nr::Integer = 0) where G <: Group = Vector{G} <| rand(prg, spec(G), N; nr)
+Base.rand(prg::PRG, ::Type{G}, N::Integer; nr::Integer = 0) where G <: Group = convert(Vector{G}, rand(prg, spec(G), N; nr))
 
 Base.ones(x::Vector{G}) where G <: Group = [one(i) for i in x] # need to extend this
 
@@ -73,14 +73,14 @@ Base.one(g::ECGroup{P}) where P <: ECPoint = ECGroup{P}(zero(P))
 Base.one(::Type{ECGroup{P}}) where P <: ECPoint = ECGroup{P}(zero(P))
 
 
-function Base.show(io::IO, g::G) where G <: ECGroup
-    show(io, G)
-    print(io, " <| (")
-    show(io, gx(g))
-    print(io, ", ")
-    show(io, gy(g))
-    print(io, ")")
-end
+# function Base.show(io::IO, g::G) where G <: ECGroup
+#     show(io, G)
+#     print(io, " <| (")
+#     show(io, gx(g))
+#     print(io, ", ")
+#     show(io, gy(g))
+#     print(io, ")")
+# end
 
 
 struct PGroup{S} <: Group

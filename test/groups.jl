@@ -1,5 +1,5 @@
 using Test
-import CryptoGroups: PGroup, order, modulus, value, specialize, Specs, generator, <|
+import CryptoGroups: PGroup, order, modulus, value, specialize, Specs, generator
 
 q = 11
 p = 2*q + 1
@@ -44,7 +44,7 @@ h = g^7
 ################################ Legacy ##################################
 
 import CryptoGroups
-import CryptoGroups: <|, PGroup, specialize, value, order, ECGroup, Group, modulus, generator, Specs
+import CryptoGroups: PGroup, specialize, value, order, ECGroup, Group, modulus, generator, Specs
 
 using Test
 
@@ -75,7 +75,7 @@ let
     spec = Specs.Curve_P_256
 
     G = specialize(ECGroup, spec; name = :P_256)
-    g = G <| generator(spec)
+    g = G(generator(spec))
 
     testgroup(g)
 end
@@ -85,7 +85,7 @@ end
 let
     spec = Specs.MODP_1024
     G = specialize(PGroup, spec)
-    g = G <| generator(spec)
+    g = G(generator(spec))
 
     testgroup(g)
 end
@@ -98,7 +98,7 @@ rng = MersenneTwister(0)
 let 
 modp_spec = Specs.sophie_germain_group(rng, 2, 100)
 G = specialize(PGroup, modp_spec)
-g = G <| generator(modp_spec)
+g = G(generator(modp_spec))
 
 #testgroup(g)
 end
@@ -107,7 +107,7 @@ end
 let
 modp_spec = Specs.dsa_standart_group(rng, 10, 10)
 G = specialize(PGroup, modp_spec)
-g = G <| generator(modp_spec)
+g = G(generator(modp_spec))
 
 testgroup(g)
 end

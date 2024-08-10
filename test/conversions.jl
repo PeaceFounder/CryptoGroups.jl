@@ -122,7 +122,7 @@ let
 end
 
 
-using CryptoGroups: spec, specialize, ECPoint, AffinePoint, Weierstrass, FP, generator, <|, F2PB, BinaryCurve, F2GNB
+using CryptoGroups: spec, specialize, ECPoint, AffinePoint, Weierstrass, FP, generator, F2PB, BinaryCurve, F2GNB
 
 import CryptoGroups
 
@@ -131,10 +131,10 @@ let
     _spec = spec(:P_192)
 
     P = specialize(ECPoint{AffinePoint{Weierstrass, FP}}, _spec)
-    g = P <| generator(_spec)
-    @test P <| octet(g; mode = :uncompressed) == g
-    @test P <| octet(g; mode = :compressed) == g
-    @test P <| octet(g; mode = :hybrid) == g
+    g = P(generator(_spec))
+    @test P(octet(g; mode = :uncompressed)) == g
+    @test P(octet(g; mode = :compressed)) == g
+    @test P(octet(g; mode = :hybrid)) == g
 
 end
 
@@ -144,20 +144,20 @@ let
     _spec = CryptoGroups.Specs.Curve_B_163_PB
 
     P = specialize(ECPoint{AffinePoint{BinaryCurve, F2PB}}, _spec)
-    g = P <| generator(_spec)
-    @test P <| octet(g; mode = :uncompressed) == g
+    g = P(generator(_spec))
+    @test P(octet(g; mode = :uncompressed)) == g
     #@test P <| octet(g; mode = :compressed) == g
-    @test P <| octet(g; mode = :hybrid) == g
+    @test P(octet(g; mode = :hybrid)) == g
 end
 
 let
     _spec = CryptoGroups.Specs.Curve_B_163_GNB
 
     P = specialize(ECPoint{AffinePoint{BinaryCurve, F2GNB}}, _spec)
-    g = P <| generator(_spec)
-    @test P <| octet(g; mode = :uncompressed) == g
+    g = P(generator(_spec))
+    @test P(octet(g; mode = :uncompressed)) == g
     #@test P <| octet(g; mode = :compressed) == g
-    @test P <| octet(g; mode = :hybrid) == g
+    @test P(octet(g; mode = :hybrid)) == g
 end
 
 
@@ -166,8 +166,8 @@ let
     _spec = CryptoGroups.Specs.Curve_K_163_PB
 
     P = specialize(ECPoint{AffinePoint{BinaryCurve, F2PB}}, _spec)
-    g = P <| generator(_spec)
-    @test P <| octet(g; mode = :uncompressed) == g
+    g = P(generator(_spec))
+    @test P(octet(g; mode = :uncompressed)) == g
     #@test P <| octet(g; mode = :compressed) == g
-    @test P <| octet(g; mode = :hybrid) == g
+    @test P(octet(g; mode = :hybrid)) == g
 end

@@ -1,6 +1,6 @@
 module Fields
 
-import ..CryptoGroups: bitlength, order, <|, tobits, value, modulus
+import ..CryptoGroups: bitlength, order, tobits, value, modulus
 
 include("abstract_fields.jl")
 include("galois_fields.jl")

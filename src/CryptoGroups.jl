@@ -24,7 +24,10 @@ function order end
 function bitlength end
 
 
-<|(x::Type, y) = convert(x, y)
+# function <|(x::Type, y) 
+#     @warn "Use convert instead"
+#     convert(x, y)
+# end
 
 
 function tobits end
@@ -105,7 +108,8 @@ Base.rem(x::PGroup, q::Integer) = rem(value(x), q)
 
 
 # Can be put at groups
-Base.convert(group::Type{<:PGroup}, element::Vector{UInt8}) = group <| (element |> Specs.octet2int)
+#Base.convert(group::Type{<:PGroup}, element::Vector{UInt8}) = group <| (element |> Specs.octet2int)
+Base.convert(group::Type{<:PGroup}, element::Vector{UInt8}) = convert(group, Specs.octet2int(element))
 PGroup{S}(element::Vector{UInt8}) where S = convert(PGroup{S}, element)
 octet(x::PGroup) = Specs.int2octet(value(x), bitlength(modulus(x)))
 

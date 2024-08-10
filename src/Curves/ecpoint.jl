@@ -62,14 +62,14 @@ function Base.show(io::IO, ::Type{P}) where P <: ECPoint
 end
 
 
-function Base.show(io::IO, p::P) where P <: ECPoint
-    show(io, P)
-    print(io, " <| (")
-    show(io, gx(p))
-    print(io, ", ")
-    show(io, gy(p))
-    print(io, ")")
-end
+# function Base.show(io::IO, p::P) where P <: ECPoint
+#     show(io, P)
+#     print(io, " <| (")
+#     show(io, gx(p))
+#     print(io, ", ")
+#     show(io, gy(p))
+#     print(io, ")")
+# end
 
 function Base.display(::Type{P}) where P <: ECPoint
     show(P)
@@ -97,7 +97,7 @@ end
 Base.:*(x::P, n::Integer) where P <: ECPoint = P(x.p * n)
 Base.:*(n::Integer, x::ECPoint) = x * n
 
-Base.convert(::Type{ECPoint{P, S}}, x::NTuple{2}; allow_zero=false) where {P <: AbstractPoint, S} = ECPoint{P, S}(P <| x; allow_zero)
+Base.convert(::Type{ECPoint{P, S}}, x::NTuple{2}; allow_zero=false) where {P <: AbstractPoint, S} = ECPoint{P, S}(convert(P, x); allow_zero)
 Base.convert(::Type{P}, x::P) where P <: ECPoint = x 
 
 Base.isvalid(p::P) where P <: ECPoint = order(P) * p.p == zero(p.p) 

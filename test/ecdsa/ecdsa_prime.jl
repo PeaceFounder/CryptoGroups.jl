@@ -1,5 +1,5 @@
 using Test
-using CryptoGroups: @bin_str, @hex_str, specialize, ECPoint, <|, generator, gx, gy, order, modinv
+using CryptoGroups: @bin_str, @hex_str, specialize, ECPoint, generator, gx, gy, order, modinv
 using CryptoGroups.Conversions: octet2int, octet
 using CryptoGroups.CSPRG: HashSpec
 using CryptoGroups.Specs: ECP
@@ -15,7 +15,7 @@ curve_spec = ECP(;
 
 
 P = specialize(ECPoint, curve_spec)
-G = P <| generator(curve_spec) 
+G = P(generator(curve_spec))
 
 # Key Generation
 

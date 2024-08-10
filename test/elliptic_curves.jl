@@ -110,7 +110,7 @@ end
 
 ######################  K_163 #################
 
-import CryptoGroups: hex2bits, <|
+import CryptoGroups: hex2bits
 
 let
 
@@ -121,7 +121,7 @@ let
 
     F = F2PB([163, 7, 6, 3, 0])
 
-    EQ = specialize(BinaryCurve, F <| a, F <| b)
+    EQ = specialize(BinaryCurve, F(a), F(b))
 
     Gx = "2 fe13c053 7bbc11ac aa07d793 de4e6d5e 5c94eee8" 
     Gy = "2 89070fb0 5d38ff58 321f2e80 0536d538 ccdaa3d9"
@@ -138,7 +138,7 @@ let
     Gy = "2 35b7c671 00506899 06bac3d9 dec76a83 5591edb2"
 
     F = F2GNB{163, 4}
-    eq = specialize(BinaryCurve, F <| a, F <| b)
+    eq = specialize(BinaryCurve, F(a), F(b))
 
     point = AffinePoint{eq, F}(Gx, Gy)
 

@@ -3,6 +3,8 @@ using ..Fields: Field, PrimeField, BinaryField
 abstract type EllipticCurve end
 abstract type AbstractPoint end
 
+(::Type{P})(x) where P <: AbstractPoint = convert(P, x)
+
 struct AffinePoint{E <: EllipticCurve, T <: Field} <: AbstractPoint
     x::T
     y::T
@@ -11,9 +13,7 @@ struct AffinePoint{E <: EllipticCurve, T <: Field} <: AbstractPoint
     AffinePoint{E}(x::F, y::F) where {E <: EllipticCurve, F <: Field} = new{E, F}(x, y)
 end
 
-
-AffinePoint{E, F}(x, y) where {E <: EllipticCurve, F <: Field} = AffinePoint{E, F}(F <| x, F <| y)
-
+AffinePoint{E, F}(x, y) where {E <: EllipticCurve, F <: Field} = AffinePoint{E, F}(convert(F, x), convert(F, y))
 
 eq(::Type{AffinePoint{EQ, F}}) where {EQ <: EllipticCurve, F <: Field} = EQ
 field(::Type{AffinePoint{EQ, F}}) where {EQ <: EllipticCurve, F <: Field} = F
@@ -99,8 +99,8 @@ struct Weierstrass{a, b} <: EllipticCurve end # May assume that a, b are
 a(::Type{Weierstrass{A, B}}) where {A, B} = A
 b(::Type{Weierstrass{A, B}}) where {A, B} = B
 
-a(::Type{AffinePoint{W, F}}) where {W <: Weierstrass, F <: Field} = F <| a(W)
-b(::Type{AffinePoint{W, F}}) where {W <: Weierstrass, F <: Field} = F <| b(W)
+a(::Type{AffinePoint{W, F}}) where {W <: Weierstrass, F <: Field} = convert(F, a(W))
+b(::Type{AffinePoint{W, F}}) where {W <: Weierstrass, F <: Field} = convert(F, b(W))
 
 
 function Base.:+(u::AffinePoint{E, F}, v::AffinePoint{E, F}) where {E <: Weierstrass, F <: Field}
@@ -144,8 +144,8 @@ struct BinaryCurve{a, b} <: EllipticCurve end
 a(::Type{BinaryCurve{A, B}}) where {A, B} = A
 b(::Type{BinaryCurve{A, B}}) where {A, B} = B
 
-a(::Type{AffinePoint{W, F}}) where {W <: BinaryCurve, F <: Field} = F <| a(W)
-b(::Type{AffinePoint{W, F}}) where {W <: BinaryCurve, F <: Field} = F <| b(W)
+a(::Type{AffinePoint{W, F}}) where {W <: BinaryCurve, F <: Field} = convert(F, a(W))
+b(::Type{AffinePoint{W, F}}) where {W <: BinaryCurve, F <: Field} = convert(F, b(W))
 
 
 function Base.:+(u::AffinePoint{E, F}, v::AffinePoint{E, F}) where {E<:BinaryCurve, F<:BinaryField}

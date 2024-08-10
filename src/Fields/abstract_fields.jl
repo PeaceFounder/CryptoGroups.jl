@@ -1,5 +1,7 @@
 abstract type Field end
 
+(::Type{F})(x) where F <: Field = convert(F, x)
+
 Base.:/(x::F, y::F) where F <: Field = x * inv(y)
 
 Base.one(x::F) where F <: Field = one(F)
