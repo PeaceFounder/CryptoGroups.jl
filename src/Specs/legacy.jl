@@ -4,7 +4,7 @@
 
 # Eventually will need to revisit this implmentation to comply with CryptoGroups standart
 
-using CryptoGroups.CSPRG: PRG 
+using CryptoPRG.Verificatum: PRG 
 using Primes: isprime, nextprime
 using Random: AbstractRNG, default_rng
 

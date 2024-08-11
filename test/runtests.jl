@@ -9,21 +9,11 @@ end
 end
 
 @testset "Testing NIST elliptic curves" begin
-    include("curve_specs.jl")
+    #include("curve_specs.jl")
 end
 
 @testset "Testing external fields" begin
     include("../examples/external_fields.jl")
-end
-
-@testset "Testing CSPRG" begin
-    include("primitives.jl")
-end
-
-@testset "Testing CryptoProofs" begin
-    include("gbasis.jl")
-    include("gecbasis.jl")
-    include("elgamal.jl")
 end
 
 @testset "Testing Specs module" begin

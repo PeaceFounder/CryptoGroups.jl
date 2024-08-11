@@ -28,6 +28,8 @@ end
 Base.convert(::Type{ECGroup{P}}, x; allow_one=false) where P <: ECPoint = ECGroup{P}(convert(P, x; allow_zero=allow_one))
 Base.convert(::Type{G}, x::G) where G <: ECGroup = x
 
+octet(g::ECGroup; mode = :uncompressed) = octet(g.x; mode)
+
 Base.:*(x::G, y::G) where G <: ECGroup = G(x.x + y.x)
 
 function Base.:^(x::G, n::Integer) where G <: ECGroup
@@ -72,7 +74,6 @@ Curves.gy(g::ECGroup) = gy(g.x)
 Base.one(g::ECGroup{P}) where P <: ECPoint = ECGroup{P}(zero(P))
 Base.one(::Type{ECGroup{P}}) where P <: ECPoint = ECGroup{P}(zero(P))
 
-
 # function Base.show(io::IO, g::G) where G <: ECGroup
 #     show(io, G)
 #     print(io, " <| (")
@@ -112,7 +113,11 @@ end
 Base.one(::Type{PGroup{S}}) where S = PGroup{S}(one)
 Base.one(::PGroup{S}) where S = PGroup{S}(one)
 
-#Base.ones(::         
+octet(x::PGroup) = int2octet(value(x), bitlength(modulus(x)))
+
+Base.convert(group::Type{<:PGroup}, element::Vector{UInt8}) = convert(group, octet2int(element))
+PGroup{S}(element::Vector{UInt8}) where S = convert(PGroup{S}, element)
+
 
 modulus(::Type{PGroup{S}}) where S = BigInt(S.p)
 modulus(::G) where G <: PGroup = modulus(G)
@@ -210,17 +215,3 @@ Base.:(==)(x::G, y::G) where G <: PGroup = x.g == y.g
 
 Base.isless(x::G, y::G) where G <: PGroup = value(x) < value(y)
 
-#Base.convert(::Type{G}, x::Integer) where G <: PGroup = G(x)
-
-
-# function Base.prod(x::Vector{G}) where G <: PGroup
-
-#     p = modulus(G)1
-#     s = value(x[1])
-    
-#     for i in x[2:end]
-#         s = mod(s * value(i), p)
-#     end
-    
-#     return G(s)
-# end

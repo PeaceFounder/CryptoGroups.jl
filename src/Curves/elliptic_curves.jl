@@ -1,9 +1,22 @@
 using ..Fields: Field, PrimeField, BinaryField
+import ..Fields
 
 abstract type EllipticCurve end
 abstract type AbstractPoint end
 
 (::Type{P})(x) where P <: AbstractPoint = convert(P, x)
+
+
+function (::Type{P})(x, y) where P <: AbstractPoint
+
+    F = field(P)
+    
+    _x = F(x) # convert(F, x) could also be used
+    _y = F(y)
+
+    return P(_x, _y)
+end
+
 
 struct AffinePoint{E <: EllipticCurve, T <: Field} <: AbstractPoint
     x::T
@@ -13,7 +26,7 @@ struct AffinePoint{E <: EllipticCurve, T <: Field} <: AbstractPoint
     AffinePoint{E}(x::F, y::F) where {E <: EllipticCurve, F <: Field} = new{E, F}(x, y)
 end
 
-AffinePoint{E, F}(x, y) where {E <: EllipticCurve, F <: Field} = AffinePoint{E, F}(convert(F, x), convert(F, y))
+# AffinePoint{E, F}(x, y) where {E <: EllipticCurve, F <: Field} = AffinePoint{E, F}(convert(F, x), convert(F, y))
 
 eq(::Type{AffinePoint{EQ, F}}) where {EQ <: EllipticCurve, F <: Field} = EQ
 field(::Type{AffinePoint{EQ, F}}) where {EQ <: EllipticCurve, F <: Field} = F
@@ -23,11 +36,13 @@ field(::Type{AffinePoint{EQ, F}}) where {EQ <: EllipticCurve, F <: Field} = F
 Base.convert(::Type{P}, x::Tuple{BigInt, BigInt}) where P <: AffinePoint = P(x...)
 Base.convert(::Type{P}, x::Tuple{BitVector, BitVector}) where P <: AffinePoint = P(x...)
 
+Base.convert(::Type{Tuple{BigInt, BigInt}}, p::AbstractPoint) = (convert(BigInt, gx(p)), convert(BigInt, gy(p)))
+Base.convert(::Type{Tuple{BitVector, BitVector}}, p::AbstractPoint) = (convert(BitVector, gx(p)), convert(BitVector, gy(p)))
 
 gx(p::AffinePoint) = p.x
 gy(p::AffinePoint) = p.y
 
-modulus(::Type{AffinePoint{<:EllipticCurve, F}}) where F <: PrimeField = modulus(F)
+Fields.modulus(::Type{AffinePoint{<:EllipticCurve, F}}) where F <: PrimeField = modulus(F)
 
 Base.zero(::Type{AffinePoint{E, F}}) where {E <: EllipticCurve, F <: Field} = AffinePoint{E , F}(zero(F), zero(F))
 Base.zero(x::P) where P <: AffinePoint = zero(P)

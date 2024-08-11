@@ -1,7 +1,7 @@
 using Test
 
 import CryptoGroups
-import CryptoGroups: generator, order, oncurve, FP, Weierstrass, BinaryCurve, F2PB, F2GNB, @def, specialize, ECPoint, AffinePoint, spec, Specs
+import CryptoGroups: generator, order, oncurve, FP, Weierstrass, BinaryCurve, F2PB, F2GNB, @def, concretize_type, ECPoint, AffinePoint, spec, Specs
 
 const FULL_TEST = false
 
@@ -9,7 +9,7 @@ for C in [:P_192, :P_224, :P_256, :P_384, :P_521]
 
     spec = getfield(Specs, Symbol("Curve_$C"))
 
-    P = specialize(ECPoint{AffinePoint{Weierstrass, FP}}, spec)
+    P = concretize_type(ECPoint{AffinePoint{Weierstrass, FP}}, spec)
 
     g = P(generator(spec))
 
@@ -24,7 +24,7 @@ for C in [:B_163_PB, :B_233_PB, :B_283_PB, :B_409_PB, :B_571_PB, :K_163_PB, :K_2
     
     spec = getfield(Specs, Symbol("Curve_$C"))
 
-    P = specialize(ECPoint{AffinePoint{BinaryCurve, F2PB}}, spec)
+    P = concretize_type(ECPoint{AffinePoint{BinaryCurve, F2PB}}, spec)
 
     g = P(generator(spec))
 
@@ -42,7 +42,7 @@ for C in [:B_163_GNB, :B_233_GNB, :B_283_GNB, :B_409_GNB, :B_571_GNB, :K_163_GNB
 
     spec = getfield(Specs, Symbol("Curve_$C"))
 
-    P = specialize(ECPoint{AffinePoint{BinaryCurve, F2GNB}}, spec)
+    P = concretize_type(ECPoint{AffinePoint{BinaryCurve, F2GNB}}, spec)
 
     g = P(generator(spec))
 

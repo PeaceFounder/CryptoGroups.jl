@@ -2,7 +2,7 @@
 # elliptic curves. For making things interesting we shall wrap GaloisFields implementeed binary extension field. 
 using Test
 using CryptoGroups
-import CryptoGroups: BinaryField, specialize, PB, bitlength
+import CryptoGroups: BinaryField, concretize_type, PB, bitlength
 import GaloisFields: ExtensionField, GaloisField
 
 struct GF₂{F <: ExtensionField} <: BinaryField
@@ -30,7 +30,7 @@ end
 bitlength(::Type{F}) where F <: ExtensionField = length(F.parameters[4]) - 1
 bitlength(::Type{GF₂{F}}) where F <: ExtensionField = bitlength(F)
 
-specialize(::Type{GF₂}, basis::PB) = GF₂(basis.f)
+concretize_type(::Type{GF₂}, basis::PB) = GF₂(basis.f)
 
 Base.convert(::Type{F}, a::BitVector) where F <: GF₂ = F(a)
 Base.convert(::Type{BitVector}, a::GF₂) = reverse(BitVector(i.n for i in a.x.coeffs))
@@ -53,7 +53,7 @@ import CryptoGroups: Specs
 import .Specs: Curve_B_163_PB, Curve_K_163_PB
 
 let 
-    B_163v3 = specialize(AffinePoint{BinaryCurve, GF₂}, Curve_B_163_PB)
+    B_163v3 = concretize_type(AffinePoint{BinaryCurve, GF₂}, Curve_B_163_PB)
 
     g = B_163v3(generator(Curve_B_163_PB))
     q = order(Curve_B_163_PB)

@@ -19,17 +19,9 @@ isstrict() = strict_mode
 include("utils.jl")
 
 function spec end
-function specialize end
+function concretize_type end
 function order end
 function bitlength end
-
-
-# function <|(x::Type, y) 
-#     @warn "Use convert instead"
-#     convert(x, y)
-# end
-
-
 function tobits end
 
 function value end
@@ -70,70 +62,52 @@ include("Curves/Curves.jl")
 
 # A temporary declarations
 
-function point end
-function octet end
-function octet2int end
-function int2octet end
-function octet2bits end
-function hex2bits end
-function bits2octet end
+import .Fields: octet, int2octet, octet2int, octet2bits, bits2octet
 
-include("CSPRG.jl")
+function point end
+function hex2bits end
+
+function concretize_type end
 
 include("Specs/Specs.jl")
-include("Conversions.jl")
-
 include("groups.jl")
 include("spec.jl")
 
-
-include("ElGamal.jl")
-include("CryptoProofs.jl")
-
-# Some type piracy here
-# Though this one can can be avoided if AbstractPoint would be defined in this module as well as BinaryField and primeField.
-
-#import .Specs: octet
-#using .Specs: point
-
-
-#using .Specs: int2octet, bits2octet, BinaryBasis, octet2int
 using .Fields: PrimeField, BinaryField
-
 
 Base.rem(p::AbstractPoint, q::Integer) = rem(gx(p), q)
 Base.rem(x::BinaryField, q::Integer) = rem(octet(x) |> octet2int, q)
 Base.rem(x::PrimeField, q::Integer) = rem(value(x), q)
 Base.rem(x::PGroup, q::Integer) = rem(value(x), q)
+Base.rem(x::ECGroup, q::Integer) = rem(x.x, q)
 
 
-# Can be put at groups
-#Base.convert(group::Type{<:PGroup}, element::Vector{UInt8}) = group <| (element |> Specs.octet2int)
-Base.convert(group::Type{<:PGroup}, element::Vector{UInt8}) = convert(group, Specs.octet2int(element))
-PGroup{S}(element::Vector{UInt8}) where S = convert(PGroup{S}, element)
-octet(x::PGroup) = Specs.int2octet(value(x), bitlength(modulus(x)))
+point(po::String, spec::GroupSpec) = point(hex2bytes(po), spec)
 
-octet(g::ECGroup; mode = :uncompressed) = octet(g.x; mode)
+function point(po::Vector{UInt8}, spec::GroupSpec)
 
+    P = concretize_type(AffinePoint, spec)
 
+    p = P(po)
+
+    return point(p)
+end
+
+point(p::AffinePoint{<:Weierstrass}) = convert(Tuple{BigInt, BigInt}, p)
+point(p::AffinePoint{<:BinaryCurve}) = convert(Tuple{BitVector, BitVector}, p)
 
 
 export @bin_str
 
-export spec, specialize #, order, bitlength
+export spec, concretize_type #, order, bitlength
 
 import .Fields: Field, BinaryField, FP, F2GNB, F2PB, PrimeField
-export Field, FP, F2GNB, F2PB 
+#export Field, FP, F2GNB, F2PB 
 
 import .Curves: AbstractPoint, ECPoint, AffinePoint, BinaryCurve, gx, gy, a, b, oncurve
-export AbstractPoint, ECPoint, AffinePoint, BinaryCurve 
-
-# import .Specs: MODP, Koblitz, ECP, EC2N, PB, GNB, generator, curve # HashSpec, PRG, RO, ROPRG, point, octet,
-#export MODP, Koblitz, ECP, EC2N, PB, GNB, generator, Specs, curve
+export AbstractPoint, ECPoint, AffinePoint #, BinaryCurve 
 
 import .Specs: generator
 export generator, octet, order, modulus, value
-
-export ElGamal, Specs, CSPRG
 
 end

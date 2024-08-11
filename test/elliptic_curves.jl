@@ -3,7 +3,7 @@ using Test
 using CryptoGroups
 import CryptoGroups.Fields: F2PB, F2GNB, FP
 import CryptoGroups.Curves: Weierstrass, AffinePoint, double, BinaryCurve, oncurve
-import CryptoGroups: specialize
+import CryptoGroups: concretize_type
 
 
 eq = Weierstrass{1, 1}
@@ -30,7 +30,7 @@ a = α^4
 b = one(α)
 
 #eq = BEQ(a, b)
-eq = specialize(BinaryCurve, a, b)
+eq = concretize_type(BinaryCurve, a, b)
 
 p1 = AffinePoint{eq}(α^6, α^8)
 p2 = AffinePoint{eq}(α^3, α^13)
@@ -44,7 +44,7 @@ p2 = AffinePoint{eq}(α^3, α^13)
 α = F2GNB{4, 1}(bin"1100")
 
 
-eq = specialize(BinaryCurve, zero(α), α^3)
+eq = concretize_type(BinaryCurve, zero(α), α^3)
 
 G = AffinePoint{eq}(α^3, α^5)
 
@@ -60,7 +60,7 @@ G = AffinePoint{eq}(α^3, α^5)
 α = F2GNB{4, 1}(bin"1100")
 
 #eq = WeierstrassEQ(one(α), one(α))
-eq = specialize(Weierstrass, one(α), one(α))
+eq = concretize_type(Weierstrass, one(α), one(α))
 
 
 p1 = AffinePoint{eq}(α^5, α^10)
@@ -100,7 +100,7 @@ let
     Gy = parse(BigInt, "07192b95 ffc8da78 631011ed 6b24cdd5 73f977a1 1e794811", base=16)
 
     #point = AffinePoint{WeierstrassEQ(a, b), (FP/p)}(Gx, Gy)
-    point = AffinePoint{specialize(Weierstrass, a, b), specialize(FP, p)}(Gx, Gy)
+    point = AffinePoint{concretize_type(Weierstrass, a, b), concretize_type(FP, p)}(Gx, Gy)
 
 
     @test oncurve(point) == true
@@ -121,7 +121,7 @@ let
 
     F = F2PB([163, 7, 6, 3, 0])
 
-    EQ = specialize(BinaryCurve, F(a), F(b))
+    EQ = concretize_type(BinaryCurve, F(a), F(b))
 
     Gx = "2 fe13c053 7bbc11ac aa07d793 de4e6d5e 5c94eee8" 
     Gy = "2 89070fb0 5d38ff58 321f2e80 0536d538 ccdaa3d9"
@@ -138,7 +138,7 @@ let
     Gy = "2 35b7c671 00506899 06bac3d9 dec76a83 5591edb2"
 
     F = F2GNB{163, 4}
-    eq = specialize(BinaryCurve, F(a), F(b))
+    eq = concretize_type(BinaryCurve, F(a), F(b))
 
     point = AffinePoint{eq, F}(Gx, Gy)
 

@@ -2,25 +2,25 @@ using .Fields: F2GNB, F2PB, FP, Field, PrimeField, BinaryField, tobits, value, r
 using .Curves: AbstractPoint, ECPoint, AffinePoint, Weierstrass, BinaryCurve, gx, gy, field, eq
 using .Specs: MODP, Koblitz, ECP, EC2N, GroupSpec, PB, GNB, curve
 
-specialize(::Type{FP}, p::Integer) = FP{static(p)} 
+concretize_type(::Type{FP}, p::Integer) = FP{static(p)} 
 
-specialize(::Type{BinaryCurve}, a::BitVector, b::BitVector) = BinaryCurve{StaticBitVector(a), StaticBitVector(b)}
-specialize(::Type{BinaryCurve}, a::F, b::F) where F <: BinaryField = specialize(BinaryCurve, tobits(a), tobits(b)) 
+concretize_type(::Type{BinaryCurve}, a::BitVector, b::BitVector) = BinaryCurve{StaticBitVector(a), StaticBitVector(b)}
+concretize_type(::Type{BinaryCurve}, a::F, b::F) where F <: BinaryField = concretize_type(BinaryCurve, tobits(a), tobits(b)) 
 
 
 static_int(x::Integer) = x
 static_int(x::BigInt) = StaticBigInt(x)
 
-specialize(::Type{Weierstrass}, a::Integer, b::Integer) = Weierstrass{static_int(a), static_int(b)}
+concretize_type(::Type{Weierstrass}, a::Integer, b::Integer) = Weierstrass{static_int(a), static_int(b)}
 
-specialize(::Type{Weierstrass}, a::BitVector, b::BitVector) = Weierstrass{StaticBitVector(a), StaticBitVector(b)}
-specialize(::Type{Weierstrass}, a::F, b::F) where F <: BinaryField = specialize(Weierstrass, tobits(a), tobits(b))
+concretize_type(::Type{Weierstrass}, a::BitVector, b::BitVector) = Weierstrass{StaticBitVector(a), StaticBitVector(b)}
+concretize_type(::Type{Weierstrass}, a::F, b::F) where F <: BinaryField = concretize_type(Weierstrass, tobits(a), tobits(b))
 
 
 
-function specialize(::Type{ECPoint{P}}, curve::GroupSpec; name = name(curve)) where P <: AbstractPoint
-    
-    Q = specialize(P, curve)
+function concretize_type(::Type{ECPoint{P}}, curve::GroupSpec; name = name(curve)) where P <: AbstractPoint
+
+    Q = concretize_type(P, curve)
 
     _order = order(curve)
     _cofactor = 1 # Need to update this one
@@ -30,7 +30,7 @@ function specialize(::Type{ECPoint{P}}, curve::GroupSpec; name = name(curve)) wh
     return R
 end
 
-specialize(::Type{ECPoint}, spec::GroupSpec; name = name(spec)) = specialize(ECPoint{AffinePoint}, spec; name)
+concretize_type(::Type{ECPoint}, spec::GroupSpec; name = name(spec)) = concretize_type(ECPoint{AffinePoint}, spec; name)
 
 
 ##################### Macro for defining curve as also a group ###################
@@ -42,7 +42,7 @@ specialize(::Type{ECPoint}, spec::GroupSpec; name = name(spec)) = specialize(ECP
 #     M = @__MODULE__
 
 #     return esc(quote
-#         const $constant_name = $M.specialize($type, $group_spec)
+#         const $constant_name = $M.concretize_type($type, $group_spec)
 
 #         $M.name(::Type{$constant_name}) = $name_str
 
@@ -59,14 +59,14 @@ macro def(constant_name, type, group_spec)
     M = @__MODULE__
 
     return esc(quote
-        const $constant_name = $M.specialize($type, $group_spec; name = $(QuoteNode(constant_name)))
+        const $constant_name = $M.concretize_type($type, $group_spec; name = $(QuoteNode(constant_name)))
     end)
 end
 
 
 
 
-function specialize(::Type{F2GNB}, N::Int)
+function concretize_type(::Type{F2GNB}, N::Int)
 
     @assert div(N, 8) != 0 "Out of X9.62 spec"
     T = gn_basis_representation_rule(m)
@@ -77,51 +77,51 @@ end
 function F2GNB(x::BitVector)
 
     N = length(x)
-    F = specialize(F2GNB, N)
+    F = concretize_type(F2GNB, N)
 
     return F(x)
 end
 
 
-function specialize(::Type{AffinePoint{Weierstrass, F}}, curve::ECP) where F <: PrimeField
+function concretize_type(::Type{AffinePoint{Weierstrass, F}}, curve::ECP) where F <: PrimeField
 
     (; p, a, b) = curve
 
-    P = AffinePoint{specialize(Weierstrass, a, b), specialize(F, p)}
+    P = AffinePoint{concretize_type(Weierstrass, a, b), concretize_type(F, p)}
     
     return P
 end
 
-specialize(::Type{AffinePoint}, spec::ECP) = specialize(AffinePoint{Weierstrass, FP}, spec)
+concretize_type(::Type{AffinePoint}, spec::ECP) = concretize_type(AffinePoint{Weierstrass, FP}, spec)
 
 
-function specialize(::Type{F}, basis::PB) where F <: BinaryField
+function concretize_type(::Type{F}, basis::PB) where F <: BinaryField
     (; f) = basis
     return F(f)
 end
 
 
-function specialize(::Type{F}, basis::GNB) where F <: BinaryField
+function concretize_type(::Type{F}, basis::GNB) where F <: BinaryField
     (; m, T) = basis
     return F{m, T}
 end
 
-specialize(::Type{F}, basis::Integer) where F <: FP = F{static(basis)}
+concretize_type(::Type{F}, basis::Integer) where F <: FP = F{static(basis)}
 
 
-specialize(::Type{BinaryCurve}, curve::EC2N) = specialize(BinaryCurve, a(curve), b(curve))
+concretize_type(::Type{BinaryCurve}, curve::EC2N) = concretize_type(BinaryCurve, a(curve), b(curve))
 
-function specialize(::Type{AffinePoint{BinaryCurve, F}}, curve) where F <: BinaryField
-    P = AffinePoint{specialize(BinaryCurve, curve), specialize(F, curve.basis)}
+function concretize_type(::Type{AffinePoint{BinaryCurve, F}}, curve) where F <: BinaryField
+    P = AffinePoint{concretize_type(BinaryCurve, curve), concretize_type(F, curve.basis)}
     return P
 end
 
-specialize(::Type{AffinePoint}, curve::EC2N{GNB}) = specialize(AffinePoint{BinaryCurve, F2GNB}, curve)
-specialize(::Type{AffinePoint}, curve::EC2N{PB}) = specialize(AffinePoint{BinaryCurve, F2PB}, curve)
+concretize_type(::Type{AffinePoint}, curve::EC2N{GNB}) = concretize_type(AffinePoint{BinaryCurve, F2GNB}, curve)
+concretize_type(::Type{AffinePoint}, curve::EC2N{PB}) = concretize_type(AffinePoint{BinaryCurve, F2PB}, curve)
 
 
 
-specialize(::Type{AffinePoint{BinaryCurve, F}}, curve::Koblitz) where F <: BinaryField = specialize(AffinePoint{BinaryCurve, F}, curve.bec)
+concretize_type(::Type{AffinePoint{BinaryCurve, F}}, curve::Koblitz) where F <: BinaryField = concretize_type(AffinePoint{BinaryCurve, F}, curve.bec)
 
 function spec(::Type{P}; kwargs...) where P <: AbstractPoint
 
@@ -168,11 +168,11 @@ function spec(::Type{EQ}, ::Type{F}; n=nothing, h=nothing, Gx=nothing, Gy=nothin
 end
 
 
-specialize(::Type{ECGroup{P}}, spec::GroupSpec; name = name(spec)) where P <: ECPoint = ECGroup{specialize(P, spec; name)}
-specialize(::Type{ECGroup}, spec::GroupSpec; name = name(spec)) = ECGroup{specialize(ECPoint, spec; name)}
+concretize_type(::Type{ECGroup{P}}, spec::GroupSpec; name = name(spec)) where P <: ECPoint = ECGroup{concretize_type(P, spec; name)}
+concretize_type(::Type{ECGroup}, spec::GroupSpec; name = name(spec)) = ECGroup{concretize_type(ECPoint, spec; name)}
 
 
-specialize(::Type{PGroup}, spec::MODP; name = nothing) = PGroup(spec.p, spec.q; name)
+concretize_type(::Type{PGroup}, spec::MODP; name = nothing) = PGroup(spec.p, spec.q; name)
 
 
 # function spec(x::Symbol)
@@ -194,7 +194,7 @@ specialize(::Type{PGroup}, spec::MODP; name = nothing) = PGroup(spec.p, spec.q; 
 spec(x::Symbol) = curve(x) # 
 
 
-specialize(::Type{PGroup}, p, q) = PGroup(p, q)
+concretize_type(::Type{PGroup}, p, q) = PGroup(p, q)
 
 
 spec(::Type{ECGroup{P}}) where P = spec(P)

@@ -2,26 +2,6 @@ abstract type GroupSpec end
 
 import Base: @kwdef
 
-# Dublicate present in utlis.jl
-# function _hex2bytes(x::String)
-    
-#     normalized = join(split(x, " "), "") 
-
-#     N = length(normalized)
-    
-#     if mod(N, 2) != 0
-#         normalized = "0" * normalized
-#     end
-    
-#     return hex2bytes(normalized)
-# end
-
-# function bytes2bits(x::Vector{UInt8})
-#     bv = BitVector(u << -i % Bool for u in x for i in 7:-1:0)
-#     return bv
-# end
-
-# hex2bits(x::String) = bytes2bits(_hex2bytes(x))
 
 _parse_bits(x::String, N::Int) = hex2bits(x)[end - N + 1:end]
 _parse_bits(x::BitVector, m::Int) = x

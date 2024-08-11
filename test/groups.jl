@@ -1,5 +1,5 @@
 using Test
-import CryptoGroups: PGroup, order, modulus, value, specialize, Specs, generator
+import CryptoGroups: PGroup, order, modulus, value, concretize_type, Specs, generator
 
 q = 11
 p = 2*q + 1
@@ -44,7 +44,7 @@ h = g^7
 ################################ Legacy ##################################
 
 import CryptoGroups
-import CryptoGroups: PGroup, specialize, value, order, ECGroup, Group, modulus, generator, Specs
+import CryptoGroups: PGroup, concretize_type, value, order, ECGroup, Group, modulus, generator, Specs
 
 using Test
 
@@ -74,7 +74,7 @@ testgroup(g)
 let
     spec = Specs.Curve_P_256
 
-    G = specialize(ECGroup, spec; name = :P_256)
+    G = concretize_type(ECGroup, spec; name = :P_256)
     g = G(generator(spec))
 
     testgroup(g)
@@ -84,7 +84,7 @@ end
 
 let
     spec = Specs.MODP_1024
-    G = specialize(PGroup, spec)
+    G = concretize_type(PGroup, spec)
     g = G(generator(spec))
 
     testgroup(g)
@@ -97,7 +97,7 @@ rng = MersenneTwister(0)
 # Broken
 let 
 modp_spec = Specs.sophie_germain_group(rng, 2, 100)
-G = specialize(PGroup, modp_spec)
+G = concretize_type(PGroup, modp_spec)
 g = G(generator(modp_spec))
 
 #testgroup(g)
@@ -106,7 +106,7 @@ end
 ### Seems to have an issue with large numbers
 let
 modp_spec = Specs.dsa_standart_group(rng, 10, 10)
-G = specialize(PGroup, modp_spec)
+G = concretize_type(PGroup, modp_spec)
 g = G(generator(modp_spec))
 
 testgroup(g)

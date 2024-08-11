@@ -1,8 +1,8 @@
 # Point conversion routines
 using Test
-import CryptoGroups.Conversions: bits2octet, octet2bits, int2octet, octet2int, octet, point
+import CryptoGroups.Fields: bits2octet, octet2bits, int2octet, octet2int
 import CryptoGroups.Specs: ECP, EC2N, PB
-import CryptoGroups: @bin_str, bitlength, @hex_str
+import CryptoGroups: @bin_str, @hex_str, octet, point
 
 let 
     x = UInt8[0, 129]
@@ -19,7 +19,7 @@ end
 
 @test octet2int(hex"0003ABF1CD") == 61600205
 
-@test int2octet(94311, bitlength(104729)) == hex"017067"
+@test int2octet(94311, 17) == hex"017067" # I could deprecate
 
 @test bits2octet(bin"11011011011101111001101111110110111110001") == hex"01B6EF37EDF1"
 
@@ -42,17 +42,19 @@ let
     xp = 602046282375688656758213480587526111916698976636884684818 
     yp = 174050332293622031404857552280219410364023488927386650641
 
+    #@infiltrate
 
-    @test octet(xp, yp, bitlength(prime_curve); mode = :compressed) == hex"03 188DA80E B03090F6 7CBF20EB 43A18800 F4FF0AFD 82FF1012"
-    @test point(hex"03 188DA80E B03090F6 7CBF20EB 43A18800 F4FF0AFD 82FF1012", prime_curve) == (xp, yp)
+    P = concretize_type(AffinePoint, prime_curve)
+    p = P(xp, yp)
 
-    @test octet(xp, yp, bitlength(prime_curve); mode = :uncompressed) == hex"04 188DA80E B03090F6 7CBF20EB 43A18800 F4FF0AFD 82FF1012 07192B95 FFC8DA78 631011ED 6B24CDD5 73F977A1 1E794811"
-    @test point(hex"04 188DA80E B03090F6 7CBF20EB 43A18800 F4FF0AFD 82FF1012 07192B95 FFC8DA78 631011ED 6B24CDD5 73F977A1 1E794811", prime_curve) == (xp, yp)
-
-
-    @test octet(xp, yp, bitlength(prime_curve); mode = :hybrid) == hex"07 188DA80E B03090F6 7CBF20EB 43A18800 F4FF0AFD 82FF1012 07192B95 FFC8DA78 631011ED 6B24CDD5 73F977A1 1E794811"
-    @test point(hex"07 188DA80E B03090F6 7CBF20EB 43A18800 F4FF0AFD 82FF1012 07192B95 FFC8DA78 631011ED 6B24CDD5 73F977A1 1E794811", prime_curve) == (xp, yp)
-
+    @test octet(p; mode = :compressed) == hex"03 188DA80E B03090F6 7CBF20EB 43A18800 F4FF0AFD 82FF1012"
+    @test octet(p; mode = :uncompressed) == hex"04 188DA80E B03090F6 7CBF20EB 43A18800 F4FF0AFD 82FF1012 07192B95 FFC8DA78 631011ED 6B24CDD5 73F977A1 1E794811"
+    @test octet(p; mode = :hybrid) == hex"07 188DA80E B03090F6 7CBF20EB 43A18800 F4FF0AFD 82FF1012 07192B95 FFC8DA78 631011ED 6B24CDD5 73F977A1 1E794811"
+    
+    @test P(octet(p; mode = :compressed)) == p
+    @test P(octet(p; mode = :uncompressed)) == p
+    @test P(octet(p; mode = :hybrid)) == p
+    
 end
 
 ### Now the binary curve with polynomial basis
@@ -73,16 +75,16 @@ let
     xp = bin"01101101011001111011010111110001010001000110010000001101111100111000100111100101001100111010111101100100001101010011100001101101001000100110111111100101100100001001010111000011010101000001101"
     yp = bin"11101100101101111100111001101000011001110110011111110010101111000110011001010010011001011100111000011101010001001000101110010100010010000011000111010100000111011111001100000000001100011111011"
 
+    P = concretize_type(AffinePoint, binary_curve) # @ECPoint{binary_curve}
+    p = P(xp, yp)
 
-    @test octet(xp, yp, PB(f); mode = :uncompressed) == hex"04 36B3DAF8 A23206F9 C4F299D7 B21A9C36 9137F2C8 4AE1AA0D 765BE734 33B3F95E 332932E7 0EA245CA 2418EA0E F98018FB"
-    @test point(hex"04 36B3DAF8 A23206F9 C4F299D7 B21A9C36 9137F2C8 4AE1AA0D 765BE734 33B3F95E 332932E7 0EA245CA 2418EA0E F98018FB", binary_curve) == (xp, yp)
+    @test octet(p; mode = :uncompressed) == hex"04 36B3DAF8 A23206F9 C4F299D7 B21A9C36 9137F2C8 4AE1AA0D 765BE734 33B3F95E 332932E7 0EA245CA 2418EA0E F98018FB"
+    @test octet(p; mode = :compressed) == hex"02 36B3DAF8 A23206F9 C4F299D7 B21A9C36 9137F2C8 4AE1AA0D"
+    @test octet(p; mode = :hybrid) == hex"06 36B3DAF8 A23206F9 C4F299D7 B21A9C36 9137F2C8 4AE1AA0D 765BE734 33B3F95E 332932E7 0EA245CA 2418EA0E F98018FB" 
 
-
-    @test octet(xp, yp, PB(f); mode = :compressed) == hex"02 36B3DAF8 A23206F9 C4F299D7 B21A9C36 9137F2C8 4AE1AA0D"
-
-    @test octet(xp, yp, PB(f); mode = :hybrid) == hex"06 36B3DAF8 A23206F9 C4F299D7 B21A9C36 9137F2C8 4AE1AA0D 765BE734 33B3F95E 332932E7 0EA245CA 2418EA0E F98018FB"
-    @test point(hex"06 36B3DAF8 A23206F9 C4F299D7 B21A9C36 9137F2C8 4AE1AA0D 765BE734 33B3F95E 332932E7 0EA245CA 2418EA0E F98018FB", binary_curve) == (xp, yp)
-
+    @test P(octet(p; mode = :uncompressed)) == p
+    @test P(octet(p; mode = :hybrid)) == p
+    
 end
 
 ### Now reading of the point
@@ -117,12 +119,14 @@ let
 
     xp = bin"01110000000100110110010101101111100110000011011001010001100110001011010100001111001001001101010101011011000001111111101001010000111100010011110100000011110001011001001111000111011111100010000"
     yp = bin"00101110100001101000011100001100110001001101101000101001111001111011011111100000001011101100000110110010010000100111010001111100001110011110011011110101110110001000011011111010110011010001010"
-
-    # point(_hex2bytes(PO), binary_curve) == (xp, yp)
+    
+    P = concretize_type(AffinePoint, binary_curve)
+    p = P(xp, yp)
+    @test octet(p; mode = :compressed) == hex"02 3809B2B7 CC1B28CC 5A87926A AD83FD28 789E81E2 C9E3BF10"
 end
 
 
-using CryptoGroups: spec, specialize, ECPoint, AffinePoint, Weierstrass, FP, generator, F2PB, BinaryCurve, F2GNB
+using CryptoGroups: spec, concretize_type, ECPoint, AffinePoint, Weierstrass, FP, generator, F2PB, BinaryCurve, F2GNB
 
 import CryptoGroups
 
@@ -130,7 +134,7 @@ let
 
     _spec = spec(:P_192)
 
-    P = specialize(ECPoint{AffinePoint{Weierstrass, FP}}, _spec)
+    P = concretize_type(ECPoint{AffinePoint{Weierstrass, FP}}, _spec)
     g = P(generator(_spec))
     @test P(octet(g; mode = :uncompressed)) == g
     @test P(octet(g; mode = :compressed)) == g
@@ -143,7 +147,7 @@ let
 
     _spec = CryptoGroups.Specs.Curve_B_163_PB
 
-    P = specialize(ECPoint{AffinePoint{BinaryCurve, F2PB}}, _spec)
+    P = concretize_type(ECPoint{AffinePoint{BinaryCurve, F2PB}}, _spec)
     g = P(generator(_spec))
     @test P(octet(g; mode = :uncompressed)) == g
     #@test P <| octet(g; mode = :compressed) == g
@@ -153,7 +157,7 @@ end
 let
     _spec = CryptoGroups.Specs.Curve_B_163_GNB
 
-    P = specialize(ECPoint{AffinePoint{BinaryCurve, F2GNB}}, _spec)
+    P = concretize_type(ECPoint{AffinePoint{BinaryCurve, F2GNB}}, _spec)
     g = P(generator(_spec))
     @test P(octet(g; mode = :uncompressed)) == g
     #@test P <| octet(g; mode = :compressed) == g
@@ -165,7 +169,7 @@ let
 
     _spec = CryptoGroups.Specs.Curve_K_163_PB
 
-    P = specialize(ECPoint{AffinePoint{BinaryCurve, F2PB}}, _spec)
+    P = concretize_type(ECPoint{AffinePoint{BinaryCurve, F2PB}}, _spec)
     g = P(generator(_spec))
     @test P(octet(g; mode = :uncompressed)) == g
     #@test P <| octet(g; mode = :compressed) == g

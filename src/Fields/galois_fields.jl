@@ -6,6 +6,8 @@ struct FP{P} <: PrimeField
     FP(p::Integer) = FP{static(p)}
 end
 
+Base.convert(::Type{BigInt}, x::PrimeField) = x.x
+
 value(x::FP) = x.x
 modulus(::FP{P}) where P = BigInt(P)
 modulus(::Type{FP{P}}) where P = BigInt(P)
@@ -58,6 +60,8 @@ struct F2PB{R} <: BinaryField ### R is reducer
     F2PB(f, x; e::Endian) = F2PB(f; e)(x; e)
 end
 
+Base.convert(::Type{BitVector}, x::F2PB) = reverse(x.x)
+
 F2PB(x::F2PB) = x
 
 bitlength(::Type{F2PB{R}}) where R = length(R) - 1
@@ -66,7 +70,7 @@ bitlength(::F) where F <: F2PB = bitlength(F)
 Base.convert(::Type{F}, x::BitVector) where F <: F2PB = F(x, little)
 
 # This function is necessary in differetn contexts so I could keep it as is. 
-tobits(x::F2PB) = reverse(x.x)
+#tobits(x::F2PB) = reverse(x.x)
 
 reducer(::Type{F2PB{S}}; e::Endian = little) where S = e == little ? reverse(convert(BitVector, S)) : convert(BitVector, S)
 reducer(::Type{F2PB}; e::Endian = little) = nothing
@@ -182,8 +186,7 @@ struct F2GNB{N, T} <: BinaryField
 end
 
 Base.convert(::Type{F2GNB{N, T}}, bits::BitVector) where {N, T} = F2GNB{N, T}(bits)
-
-tobits(x::F2GNB) = x.x
+Base.convert(::Type{BitVector}, x::F2GNB) = x.x
 
 bitlength(::Type{F2GNB{N, T}}) where {N, T} = N
 bitlength(::F) where F <: F2GNB = bitlength(F)
@@ -191,17 +194,13 @@ bitlength(::F) where F <: F2GNB = bitlength(F)
 order(::Type{F}) where F <: F2GNB = BigInt(2)^bitlength(F) - 1
 order(x::F) where F <: F2GNB = order(F)    
 
-
 Base.zero(::Type{F2GNB{N, T}}) where {N, T} = F2GNB{N, T}(BitVector(false for i in 1:N))
 Base.one(::Type{F2GNB{N, T}}) where {N, T} = F2GNB{N, T}(BitVector(true for i in 1:N))
 
-
 square(x::F) where F <: F2GNB = F(circshift(x.x, 1))
-
 
 Base.:+(x::F, y::F) where F <: F2GNB = F(xor.(x.x, y.x))
 Base.:(==)(x::F, y::F) where F <: F2GNB = x.x == y.x
-
 
 # Improving performace of this function is top priority
 # Random access order with Fvec is likelly making a lot of chache misses

@@ -1,5 +1,5 @@
-using CryptoGroups: @bin_str, @hex_str, EC2N, PB, specialize, ECPoint, generator, octet 
-using CryptoGroups.Conversions: octet2int
+using CryptoGroups: @bin_str, @hex_str, EC2N, PB, concretize_type, ECPoint, generator, octet, octet2int
+
 # Elliptic Curve Domain Parameter Setup
 
 basis = PB(hex"80000000 00000000 00000000 00000000 00000000 00000201", 191)
@@ -12,7 +12,7 @@ curve_spec = EC2N(basis;   ### Need to think about adding a proper methods
                   h = 2
 )
 
-P = specialize(ECPoint, curve_spec)
+P = concretize_type(ECPoint, curve_spec)
 G = P(generator(curve_spec))
 
 # Key Generation

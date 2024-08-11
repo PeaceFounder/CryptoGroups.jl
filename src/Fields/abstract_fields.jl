@@ -19,6 +19,7 @@ abstract type BinaryField <: Field end
 Base.:-(x::F, y::F) where F <: BinaryField = x + y
 
 Base.convert(::Type{F}, x::BitVector) where F <: BinaryField = F(x)
+#Base.convert(::Type{BitVector}, x::BinaryField) = 
 
 function Base.convert(::Type{F}, x::Bool) where F <: BinaryField
     if x == false
@@ -29,7 +30,6 @@ function Base.convert(::Type{F}, x::Bool) where F <: BinaryField
 end
 
 Base.convert(::Type{F}, x::Integer) where F <: BinaryField = convert(F, Bool(x))
-
 
 function Base.:^(g::F, a::Integer) where F <: BinaryField
 
@@ -109,7 +109,6 @@ Base.:+(x::F, y::F) where F <: PrimeField = F(mod(value(x) + value(y), modulus(F
 Base.:-(x::F, y::F) where F <: PrimeField = x + F(modulus(F) - value(y))
 Base.:-(x::F) where F <: PrimeField = F(modulus(F) - value(x))
 
-
 Base.:*(x::F, y::F) where F <: PrimeField = F(mod(value(x) * value(y), modulus(F)))
 Base.:*(x::Integer, y::F) where F <: PrimeField = F(x) * y
 Base.:*(x::F, y::Integer) where F <: PrimeField = x * F(y)
@@ -121,3 +120,82 @@ Base.:(==)(x::F, y::F) where F <: PrimeField = value(x) == value(y)
 Base.isless(x::F, y::F) where F <: PrimeField = value(x) < value(y)
 
 
+
+function int2octet(x::Integer)
+
+    hex = string(x, base=16)
+    if mod(length(hex), 2) != 0
+        hex = string("0", hex)
+    end
+    
+    return hex2bytes(hex)
+end
+
+
+function int2octet(x::Integer, N::Int)
+    k = div(N, 8, RoundUp)
+
+
+    bytes = int2octet(x)
+
+    pad = UInt8[0 for i in 1:(k - length(bytes))]
+
+    return UInt8[pad..., bytes...]
+end
+
+
+octet2int(x::Vector{UInt8}) = parse(BigInt, bytes2hex(x), base=16)
+octet2int(x::String) =  octet2int(hex2bytes(x))
+    
+function octet2bits(x::Vector{UInt8})
+    bv = BitVector(u << -i % Bool for u in x for i in 7:-1:0)
+    return bv
+end
+
+octet2bits(x::Vector{UInt8}, N::Int) = octet2bits(x)[end - N + 1:end]
+octet2bits(x::String, N::Int) = octet2bits(hex2bytes(x), N)
+
+
+function bits2uint8(x::BitVector)
+
+    s = UInt8(0)
+
+    for (i, j) in enumerate(reverse(x))
+
+        if j == 1
+            s += UInt8(2)^(i - 1)
+        end
+    end
+
+    return s
+end
+
+function bits2octet(_x::BitVector)
+    
+    x = copy(_x)
+
+    if mod(length(x), 8) != 0
+
+        padding = BitVector(0 for i in 1:(8 - mod(length(x), 8)))
+        prepend!(x, padding)
+
+    end
+
+    # For now assuming that x is in the length of octets
+
+    N = div(length(x), 8, RoundUp)
+
+    b = reshape(x, 8, N)
+
+    bytes = UInt8[bits2uint8(b[:, i]) for i in 1:N]
+
+    return bytes
+end
+
+
+octet(x::BinaryField) = bits2octet(tobits(x))
+octet(x::PrimeField) = int2octet(value(x), bitlength(modulus(x)))
+
+# Perhaps a convert method fits better here as the type is specific
+(::Type{F})(x::Vector{UInt8}) where F <: PrimeField = F(octet2int(x))
+(::Type{F})(x::Vector{UInt8}) where F <: BinaryField = F(octet2bits(x, bitlength(F)))
