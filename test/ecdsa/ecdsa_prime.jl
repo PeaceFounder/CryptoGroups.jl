@@ -1,5 +1,7 @@
 using Test
-using CryptoGroups: @bin_str, @hex_str, concretize_type, ECPoint, generator, gx, gy, order, modinv, octet, octet2int
+using CryptoGroups.Utils: @bin_str, @hex_str, octet2int, modinv
+using CryptoGroups: concretize_type, generator, order, octet
+using CryptoGroups.Curves: ECPoint, gx, gy
 using CryptoPRG.Verificatum: HashSpec
 using CryptoGroups.Specs: ECP
 

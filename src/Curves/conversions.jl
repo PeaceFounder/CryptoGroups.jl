@@ -1,5 +1,5 @@
 # Implements point compression. Currently it is tied to AffinePoint but should be extended for generic case
-using ..Fields: modulus, value, bitlength, int2octet, octet2int, octet2bits, bits2octet
+using ..Fields: modulus, value, bitlength, int2octet, octet2int, octet2bits, bits2octet, tobits
 using CryptoUtils: sqrt_mod_prime
 import ..Fields: octet
 

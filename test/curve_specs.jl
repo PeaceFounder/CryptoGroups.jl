@@ -1,7 +1,11 @@
 using Test
 
 import CryptoGroups
-import CryptoGroups: generator, order, oncurve, FP, Weierstrass, BinaryCurve, F2PB, F2GNB, @def, concretize_type, ECPoint, AffinePoint, spec, Specs
+import CryptoGroups: generator, BinaryCurve, @def, concretize_type, spec, Specs
+using CryptoGroups.Curves: order, oncurve, Weierstrass, ECPoint, AffinePoint, cofactor
+using CryptoGroups.Fields: FP, F2PB, F2GNB
+
+
 
 const FULL_TEST = false
 

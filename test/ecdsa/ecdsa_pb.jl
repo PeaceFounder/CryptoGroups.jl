@@ -1,4 +1,6 @@
-using CryptoGroups: @bin_str, @hex_str, EC2N, PB, concretize_type, ECPoint, generator, octet, octet2int
+using CryptoGroups.Utils: @bin_str, @hex_str, octet2int
+using CryptoGroups.Specs: EC2N, PB
+using CryptoGroups: concretize_type, ECPoint, generator, octet
 
 # Elliptic Curve Domain Parameter Setup
 

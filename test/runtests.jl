@@ -9,7 +9,7 @@ end
 end
 
 @testset "Testing NIST elliptic curves" begin
-    #include("curve_specs.jl")
+    include("curve_specs.jl")
 end
 
 @testset "Testing external fields" begin

@@ -1,3 +1,5 @@
+using .Utils: modinv
+import .Fields: value, modulus, octet
 using .Curves: ECPoint, gx, gy
 using .Specs: PRG
 

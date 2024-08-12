@@ -4,6 +4,7 @@ using CryptoGroups
 import CryptoGroups.Fields: F2PB, F2GNB, FP
 import CryptoGroups.Curves: Weierstrass, AffinePoint, double, BinaryCurve, oncurve
 import CryptoGroups: concretize_type
+import CryptoGroups.Utils: @bin_str
 
 
 eq = Weierstrass{1, 1}
@@ -109,8 +110,6 @@ let
 end
 
 ######################  K_163 #################
-
-import CryptoGroups: hex2bits
 
 let
 

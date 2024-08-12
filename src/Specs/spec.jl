@@ -1,7 +1,8 @@
+using ..CryptoGroups.Utils: hex2bits
+
 abstract type GroupSpec end
 
 import Base: @kwdef
-
 
 _parse_bits(x::String, N::Int) = hex2bits(x)[end - N + 1:end]
 _parse_bits(x::BitVector, m::Int) = x

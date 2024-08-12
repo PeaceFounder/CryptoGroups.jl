@@ -1,4 +1,5 @@
-using ..CryptoGroups: static, isstrict
+using ..CryptoGroups.Utils: static
+using ..CryptoGroups: isstrict
 
 struct ECPoint{P<:AbstractPoint, S} <: AbstractPoint # The same contract is satisfied thus a subtype
     p::P

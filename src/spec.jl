@@ -1,5 +1,6 @@
+using .Utils: StaticBitVector, StaticBigInt, static
 using .Fields: F2GNB, F2PB, FP, Field, PrimeField, BinaryField, tobits, value, reducer
-using .Curves: AbstractPoint, ECPoint, AffinePoint, Weierstrass, BinaryCurve, gx, gy, field, eq
+using .Curves: AbstractPoint, ECPoint, AffinePoint, Weierstrass, BinaryCurve, gx, gy, field, eq, a, b, cofactor
 using .Specs: MODP, Koblitz, ECP, EC2N, GroupSpec, PB, GNB, curve
 
 concretize_type(::Type{FP}, p::Integer) = FP{static(p)} 

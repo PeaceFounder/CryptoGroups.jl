@@ -1,4 +1,4 @@
-using ..Fields: Field, PrimeField, BinaryField
+using ..Fields: Field, PrimeField, BinaryField, tobits
 import ..Fields
 
 abstract type EllipticCurve end

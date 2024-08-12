@@ -1,8 +1,8 @@
 # Point conversion routines
 using Test
-import CryptoGroups.Fields: bits2octet, octet2bits, int2octet, octet2int
+import CryptoGroups.Utils: bits2octet, octet2bits, int2octet, octet2int, @bin_str, @hex_str
 import CryptoGroups.Specs: ECP, EC2N, PB
-import CryptoGroups: @bin_str, @hex_str, octet, point
+import CryptoGroups: octet, point
 
 let 
     x = UInt8[0, 129]

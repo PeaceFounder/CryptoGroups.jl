@@ -1,4 +1,4 @@
-using ..CryptoGroups: static
+using ..CryptoGroups.Utils: static
 
 struct FP{P} <: PrimeField
     x::BigInt # Instead of BigInt I could use BitIntegers here. Need to check performance of powermod...

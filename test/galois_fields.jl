@@ -1,6 +1,6 @@
 using Test
 import CryptoGroups.Fields: F2PB, F2GNB, print_poly, red!, mul, mul_gnb, construct_integer_order_prime, FP, order, reducer, tobits
-import CryptoGroups: @bin_str
+import CryptoGroups.Utils: @bin_str
 
 
 f = bin"10011"

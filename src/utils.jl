@@ -1,27 +1,92 @@
-macro bin_str(x)
-    a = BitVector((i for i in x) .== '1')
-    return a
-end
+module Utils
 
+import CryptoPRG: bitlength
 
-tobig(x) = parse(BigInt, bytes2hex(reverse(x)), base=16)
+function int2octet(x::Integer)
 
-function int2bytes(x::Integer)
     hex = string(x, base=16)
     if mod(length(hex), 2) != 0
         hex = string("0", hex)
     end
     
-    return reverse(hex2bytes(hex))
+    return hex2bytes(hex)
 end
 
+
+function int2octet(x::Integer, N::Int)
+    k = div(N, 8, RoundUp)
+
+
+    bytes = int2octet(x)
+
+    pad = UInt8[0 for i in 1:(k - length(bytes))]
+
+    return UInt8[pad..., bytes...]
+end
+
+
+octet2int(x::Vector{UInt8}) = parse(BigInt, bytes2hex(x), base=16)
+octet2int(x::String) = octet2int(hex2bytes(x))
+
+octet2int(x::NTuple{N, UInt8}) where N = octet2int([x...])
+    
+function octet2bits(x::Vector{UInt8})
+    bv = BitVector(u << -i % Bool for u in x for i in 7:-1:0)
+    return bv
+end
+
+octet2bits(x::Vector{UInt8}, N::Int) = octet2bits(x)[end - N + 1:end]
+octet2bits(x::String, N::Int) = octet2bits(hex2bytes(x), N)
+
+
+function bits2uint8(x::BitVector)
+
+    s = UInt8(0)
+
+    for (i, j) in enumerate(reverse(x))
+
+        if j == 1
+            s += UInt8(2)^(i - 1)
+        end
+    end
+
+    return s
+end
+
+function bits2octet(_x::BitVector)
+    
+    x = copy(_x)
+
+    if mod(length(x), 8) != 0
+
+        padding = BitVector(0 for i in 1:(8 - mod(length(x), 8)))
+        prepend!(x, padding)
+
+    end
+
+    # For now assuming that x is in the length of octets
+
+    N = div(length(x), 8, RoundUp)
+
+    b = reshape(x, 8, N)
+
+    bytes = UInt8[bits2uint8(b[:, i]) for i in 1:N]
+
+    return bytes
+end
+
+
+macro bin_str(x)
+    a = BitVector((i for i in x) .== '1')
+    return a
+end
 
 struct StaticBigInt{N} <: Integer
     x::NTuple{N, UInt8}
 end
 
 function StaticBigInt(x::Integer; n = bitlength(x))
-    bytes = int2bytes(x)
+    bytes = int2octet(x)
     
     N = div(n, 8, RoundUp)
 
@@ -32,13 +97,10 @@ function StaticBigInt(x::Integer; n = bitlength(x))
 end
 
 
-
-Base.convert(::Type{BigInt}, x::StaticBigInt) = tobig(x.x)
+Base.convert(::Type{BigInt}, x::StaticBigInt) = octet2int(x.x)
 Base.convert(::Type{Integer}, x::StaticBigInt) = convert(BigInt, x)
 
-
-Base.BigInt(x::StaticBigInt) = tobig(x.x)
-
+Base.BigInt(x::StaticBigInt) = octet2int(x.x)
 
 style(x, n) = "\33[1;$(n)m$x\33[0m"
 
@@ -69,15 +131,12 @@ macro hex_str(x)
 end
 
 
+# function bytes2bits(x::Vector{UInt8})
+#     bv = BitVector(u << -i % Bool for u in x for i in 7:-1:0)
+#     return bv
+# end
 
-function bytes2bits(x::Vector{UInt8})
-    bv = BitVector(u << -i % Bool for u in x for i in 7:-1:0)
-    return bv
-end
-
-
-hex2bits(x::String) = bytes2bits(_hex2bytes(x))
-
+hex2bits(x::String) = octet2bits(_hex2bytes(x))
 
 tobits(x::String) = hex2bits(x)
 tobits(x::Vector{UInt8}) = bytes2bits(x)
@@ -175,3 +234,7 @@ static(x::Symbol) = StaticSymbol(x)
 # Goeas through the keyword arguments and returns a coresponding namedtuple where on each argument static is being called
 static(; kwargs...) = NamedTuple((key, static(value)) for (key, value) in pairs(kwargs))
 
+
+export static, @bin_str, @hex_str, octet2int, int2octet, octet2bits, bits2octet
+
+end
