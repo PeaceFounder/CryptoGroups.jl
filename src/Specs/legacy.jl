@@ -71,15 +71,27 @@ end
 
 dsa_standart_group(tp::Int, tg::Int) = dsa_standart_group(default_rng(), tp, tg)
 
+# Dublicate exists in SigmaProofs, perhaps here it could be reduced to one element
+# Alternativelly the GeneratorBasis module could be put back within CryptoGroups
+function modp_generator_basis(prg::PRG, p::Integer, q::Integer, N::Integer; nr::Integer = 0)
+
+    np = bitlength(p)
+
+    𝐭 = rand(prg, BigInt, N; n = np + nr)
+
+    𝐭′ = mod.(𝐭, big(2)^(np + nr))
+
+    𝐡 = powermod.(𝐭′, (p - 1) ÷ q, p)
+    
+    return 𝐡
+end
 
 function generate_g(p::Integer, q::Integer; seed = Vector{UInt8}("SEED"), nr = 10, hasher = "sha256")
 
     prg = PRG(hasher; s = seed)
     sp = MODP(;p, q)
 
-    h = rand(prg, sp, 1; nr)
-
-    rand(prg, sp, 10; nr)
+    h = modp_generator_basis(prg, p, q, 1; nr)
 
     return h[1]
 end

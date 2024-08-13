@@ -1,4 +1,4 @@
-using .Utils: modinv
+using .Utils: modinv, int2octet, octet2int
 import .Fields: value, modulus, octet
 using .Curves: ECPoint, gx, gy
 using .Specs: PRG

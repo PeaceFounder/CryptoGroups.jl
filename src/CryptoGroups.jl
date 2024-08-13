@@ -36,7 +36,7 @@ include("spec.jl")
 using .Fields: PrimeField, BinaryField
 
 Base.rem(p::AbstractPoint, q::Integer) = rem(gx(p), q)
-Base.rem(x::BinaryField, q::Integer) = rem(octet(x) |> octet2int, q)
+Base.rem(x::BinaryField, q::Integer) = rem(octet(x) |> Utils.octet2int, q) # used in ec2n.jl test in CryptoSignatures
 Base.rem(x::PrimeField, q::Integer) = rem(value(x), q)
 Base.rem(x::PGroup, q::Integer) = rem(value(x), q)
 Base.rem(x::ECGroup, q::Integer) = rem(x.x, q)
