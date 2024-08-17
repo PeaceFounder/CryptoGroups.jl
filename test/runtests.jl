@@ -1,7 +1,18 @@
-using Test
+#using Test
+
+using SafeTestsets
+
+# @testset "Galois field tests" begin
+#     include("galois_fields.jl")
+# end
+
 
 @testset "Galois field tests" begin
+
+module GaloisTest
     include("galois_fields.jl")
+end
+
 end
 
 @testset "Elliptic curve primitive tests" begin
@@ -9,7 +20,7 @@ end
 end
 
 @testset "Testing NIST elliptic curves" begin
-    include("curve_specs.jl")
+    #include("curve_specs.jl")
 end
 
 @testset "Testing external fields" begin

@@ -1,7 +1,7 @@
 name = "CryptoGroups"
 uuid = "bc997328-bedd-407e-bcd3-5758e064a52d"
 authors = ["Janis Erdmanis <janiserdmanis@protonmail.ch>"]
-version = "0.4.1"
+version = "0.5.0"
 
 [deps]
 CryptoPRG = "d846c407-34c1-46cb-aa27-d51818cc05e2"
@@ -21,6 +21,7 @@ julia = "1"
 BitIntegers = "c3b6d118-76ef-56ca-8cc7-ebb389d030a1"
 GaloisFields = "8d0d7f98-d412-5cd4-8397-071c807280aa"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+SafeTestsets = "1bc83da4-3b8d-516f-aca4-4fe02f6d838f"
 
 [targets]
-test = ["Test", "GaloisFields", "BitIntegers"]
+test = ["SafeTestsets", "Test", "GaloisFields", "BitIntegers"]

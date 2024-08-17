@@ -4,12 +4,6 @@ using ..CryptoGroups: isstrict, order
 struct ECPoint{P<:AbstractPoint, S} <: AbstractPoint # The same contract is satisfied thus a subtype
     p::P
 
-    # This method could perhaps be deprecated in favour of ECPoint macro with kwargs
-    function ECPoint{P}(order::Integer, cofactor::Integer; name=nothing) where P <: AbstractPoint
-        svars = static(; order, cofactor, name)
-        return ECPoint{P, svars}
-    end
-
     function ECPoint{P, S}(x::P; allow_zero=false) where {P <: AbstractPoint, S}
 
         if iszero(x)
@@ -30,13 +24,18 @@ struct ECPoint{P<:AbstractPoint, S} <: AbstractPoint # The same contract is sati
     end
 
     function ECPoint(p::P, order::Integer, cofactor::Integer; name=nothing) where P <: AbstractPoint
-        EP = ECPoint{P}(order, cofactor; name)
+        EP = concretize_type(ECPoint{P}, order, cofactor; name)
         return EP(p)
     end
 
     ECPoint{P, S}(::typeof(zero)) where {P <: AbstractPoint, S} = new{P, S}(zero(P))
 
     ECPoint{P, S}(x::F, y::F) where {P <: AbstractPoint, S, F <: Field} = ECPoint{P, S}(P(x, y))
+end
+
+function concretize_type(::Type{ECPoint{P}}, order::Integer, cofactor::Integer; name=nothing) where P <: AbstractPoint
+    svars = static(; order, cofactor, name)
+    return ECPoint{P, svars}
 end
 
 order(::Type{ECPoint{P, S}}) where {P <: AbstractPoint, S} = convert(Integer, S.order) 
@@ -82,3 +81,5 @@ Base.:(==)(x::ECPoint, y::ECPoint) = x.p == y.p
 
 gx(p::ECPoint) = gx(p.p)
 gy(p::ECPoint) = gy(p.p)
+
+value(p::ECPoint) = value(p.p)

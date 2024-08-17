@@ -58,7 +58,6 @@ end
 
 Base.inv(g::G) where G <: ECGroup = g^(order(G) - 1)
 
-
 order(::Type{ECGroup{P}}) where P = order(P)
 
 Base.isvalid(x::ECGroup) = isvalid(x.x)
@@ -78,6 +77,7 @@ Curves.gy(g::ECGroup) = gy(g.x)
 Base.one(g::ECGroup{P}) where P <: ECPoint = ECGroup{P}(zero(P))
 Base.one(::Type{ECGroup{P}}) where P <: ECPoint = ECGroup{P}(zero(P))
 
+value(g::ECGroup) = value(g.x)
 
 struct PGroup{S} <: Group
     g::BigInt

@@ -49,7 +49,7 @@ Base.one(::Type{GF₂{F}}) where F <: ExtensionField = GF₂(one(F))
 ########################## This one we can test easally as follows ##################
 
 import CryptoGroups.Curves: oncurve, order, AffinePoint, ECPoint, BinaryCurve
-import CryptoGroups: generator, @def
+import CryptoGroups: generator
 import CryptoGroups.Specs: Curve_B_163_PB, Curve_K_163_PB
 
 let 
@@ -64,7 +64,9 @@ let
 end
 
 
-@def K_163v3 ECPoint{AffinePoint{BinaryCurve, GF₂}} Curve_K_163_PB
+K_163v3 = concretize_type(ECPoint{AffinePoint{BinaryCurve, GF₂}}, Curve_K_163_PB)
+
+#@def K_163v3 ECPoint{AffinePoint{BinaryCurve, GF₂}} Curve_K_163_PB
 
 let
     g = K_163v3(generator(Curve_K_163_PB))

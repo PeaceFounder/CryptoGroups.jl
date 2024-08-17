@@ -6,7 +6,6 @@ abstract type AbstractPoint end
 
 (::Type{P})(x) where P <: AbstractPoint = convert(P, x)
 
-
 function (::Type{P})(x, y) where P <: AbstractPoint
 
     F = field(P)
@@ -114,6 +113,7 @@ b(::Type{Weierstrass{A, B}}) where {A, B} = B
 a(::Type{AffinePoint{W, F}}) where {W <: Weierstrass, F <: Field} = convert(F, a(W))
 b(::Type{AffinePoint{W, F}}) where {W <: Weierstrass, F <: Field} = convert(F, b(W))
 
+value(p::AffinePoint{<:Weierstrass}) = convert(Tuple{BigInt, BigInt}, p)
 
 function Base.:+(u::AffinePoint{E, F}, v::AffinePoint{E, F}) where {E <: Weierstrass, F <: Field}
         
@@ -159,6 +159,7 @@ b(::Type{BinaryCurve{A, B}}) where {A, B} = B
 a(::Type{AffinePoint{W, F}}) where {W <: BinaryCurve, F <: Field} = convert(F, a(W))
 b(::Type{AffinePoint{W, F}}) where {W <: BinaryCurve, F <: Field} = convert(F, b(W))
 
+value(p::AffinePoint{<:BinaryCurve}) = convert(Tuple{BitVector, BitVector}, p)
 
 function Base.:+(u::AffinePoint{E, F}, v::AffinePoint{E, F}) where {E<:BinaryCurve, F<:BinaryField}
         

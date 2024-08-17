@@ -1,8 +1,18 @@
+using ..CryptoGroups.Curves: AffinePoint
+using ..CryptoGroups: concretize_type, value
 using ..CryptoGroups.Utils: hex2bits
 
 abstract type GroupSpec end
 
 import Base: @kwdef
+
+function point(po::Vector{UInt8}, spec::GroupSpec)
+
+    P = concretize_type(AffinePoint, spec)
+    p = P(po)
+
+    return value(p)
+end
 
 _parse_bits(x::String, N::Int) = hex2bits(x)[end - N + 1:end]
 _parse_bits(x::BitVector, m::Int) = x

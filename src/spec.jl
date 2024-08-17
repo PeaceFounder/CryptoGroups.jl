@@ -26,7 +26,9 @@ function concretize_type(::Type{ECPoint{P}}, curve::GroupSpec; name = name(curve
     _order = order(curve)
     _cofactor = cofactor(curve)
     
-    R = ECPoint{Q}(_order, _cofactor; name)
+    # The issue is here as I removed a method
+    #R = ECPoint{Q}(_order, _cofactor; name)
+    R = concretize_type(ECPoint{Q}, _order, _cofactor; name)
 
     return R
 end

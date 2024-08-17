@@ -1,8 +1,8 @@
 # Point conversion routines
 using Test
 import CryptoGroups.Utils: bits2octet, octet2bits, int2octet, octet2int, @bin_str, @hex_str
-import CryptoGroups.Specs: ECP, EC2N, PB
-import CryptoGroups: octet, point, concretize_type
+import CryptoGroups.Specs: ECP, EC2N, PB, point
+import CryptoGroups: octet, value, concretize_type, GroupSpec
 import CryptoGroups.Curves: AffinePoint
 
 let 
@@ -42,8 +42,6 @@ let
 
     xp = 602046282375688656758213480587526111916698976636884684818 
     yp = 174050332293622031404857552280219410364023488927386650641
-
-    #@infiltrate
 
     P = concretize_type(AffinePoint, prime_curve)
     p = P(xp, yp)
