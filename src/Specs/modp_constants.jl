@@ -2,6 +2,24 @@
 
 # Another method can be added for calculating order. That can generally be done by providing an r as an argument.
 
+const MODP_SPECS = MODP[]
+
+register(spec::MODP) = (push!(MODP_SPECS, spec); spec)
+
+function modp_spec(name::String) 
+
+    for spec in MODP_SPECS
+        if name in names(spec)
+            return spec
+        end
+    end    
+
+    error("No MODP spec with $name found")
+end
+
+modp_spec(name::Symbol) = modp_spec(string(name))
+
+
 """
 6.1 First Oakley Default Group
 
@@ -24,8 +42,9 @@ const MODP_Oakley1_768 = MODP(
      29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD
      EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245
      E485B576 625E7EC6 F44C42E9 A63A3620 FFFFFFFF FFFFFFFF",
-    2
-)
+    2;
+    names = ["Oakley1_768"]
+) |> register
 
 
 """
@@ -53,8 +72,9 @@ const MODP_Oakley2_1024 = MODP(
      E485B576 625E7EC6 F44C42E9 A637ED6B 0BFF5CB6 F406B7ED
      EE386BFB 5A899FA5 AE9F2411 7C4B1FE6 49286651 ECE65381
      FFFFFFFF FFFFFFFF",
-    2
-)
+    2;
+    names = ["Oakley2_1024"]
+) |> register
 
 ### https://tools.ietf.org/html/rfc5114#section-2.1
 
@@ -96,8 +116,9 @@ const MODP_1024 = MODP(
      909D0D22 63F80A76 A6A24C08 7A091F53 1DBF0A01 69B6A28A
      D662A4D1 8E73AFA3 2D779D59 18D08BC8 858F4DCE F97C2A24
      855E6EEB 22B3B2E5", 
-    "F518AA87 81A8DF27 8ABA4E7D 64B7CB9D 49462353"
-)
+    "F518AA87 81A8DF27 8ABA4E7D 64B7CB9D 49462353";
+    names = ["RFC5114_1024"]    
+) |> register
 
 
 """
@@ -159,8 +180,9 @@ const MODP_2048_224 = MODP(
      EDFE72FE 9B6AA4BD 7B5A0F1C 71CFFF4C 19C418E1 F6EC0179
      81BC087F 2A7065B3 84B890D3 191F2BFA",
     "801C0D34 C58D93FE 99717710 1F80535A 4738CEBC BF389A99
-     B36371EB"
-)
+     B36371EB";
+    names = ["RFC5114_2048_224"]
+) |> register
 
 
 """
@@ -223,5 +245,7 @@ const MODP_2048_256 = MODP(
      184B523D 1DB246C3 2F630784 90F00EF8 D647D148 D4795451
      5E2327CF EF98C582 664B4C0F 6CC41659",
     "8CF83642 A709A097 B4479976 40129DA2 99B1A47D 1EB3750B
-     A308B0FE 64F5FBD3"
-)
+     A308B0FE 64F5FBD3";
+    names = ["RFC5114_2048_256"]
+) |> register
+

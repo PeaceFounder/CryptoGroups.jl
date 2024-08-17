@@ -130,12 +130,6 @@ macro hex_str(x)
     return _hex2bytes(x)
 end
 
-
-# function bytes2bits(x::Vector{UInt8})
-#     bv = BitVector(u << -i % Bool for u in x for i in 7:-1:0)
-#     return bv
-# end
-
 hex2bits(x::String) = octet2bits(_hex2bytes(x))
 
 tobits(x::String) = hex2bits(x)
@@ -187,7 +181,13 @@ function Base.convert(::Type{BitVector}, x::StaticBitVector)
 end
 
 
-Base.show(io::IO, x::StaticBitVector) = print(io, join(i ? "1" : "0" for i in convert(BitVector, x)))
+function Base.show(io::IO, x::StaticBitVector) 
+    print(io, "static(")
+    print(io, "bin\"")
+    print(io, join(i ? "1" : "0" for i in convert(BitVector, x)))
+    print(io, "\"")
+    print(")")
+end
 
 
 modinv(s, q) = mod(gcdx(s, q)[2], q)

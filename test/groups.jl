@@ -1,10 +1,9 @@
 using Test
-import CryptoGroups: PGroup, order, modulus, value, concretize_type, Specs, generator
+import CryptoGroups: PGroup, @PGroup, order, modulus, value, concretize_type, Specs, generator
 
-q = 11
-p = 2*q + 1
-
-G = PGroup(p, q; name=:G)
+G = @PGroup{p = 23, q = 11}
+q = order(G)
+p = modulus(G)
 
 @test isvalid(G(3)) == true
 @test isvalid(G(11)) == false
@@ -60,7 +59,7 @@ function testgroup(g::G) where G <: Group
     @test g * one(g) == g
 end
 
-G = PGroup(23, 11)
+G = @PGroup{p = 23, q = 11}
 g = G(3)
 
 @test value(g) == 3

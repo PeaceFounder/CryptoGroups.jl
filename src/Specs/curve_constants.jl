@@ -14,6 +14,7 @@ const Curve_P_192 = ECP(
     #SEED = "3045ae6f c8422f64 ed579528 d38120ea e12196d5",
     #c = "3099d2bb bfcb2538 542dcd5f b078b6ef 5f3d6fe2 c745de65",
     b = "64210519 e59c80e7 0fa7e9ab 72243049 feb8deec c146b9b1",
+    cofactor = 1,
     Gx = "188da80e b03090f6 7cbf20eb 43a18800 f4ff0afd 82ff1012",
     Gy = "07192b95 ffc8da78 631011ed 6b24cdd5 73f977a1 1e794811"
 ) |> register
@@ -25,6 +26,7 @@ const Curve_P_224 = ECP( # Instead I may need to use Curve25519 definition
     # SEED = "bd713447 99d5c7fc dc45b59f a3b9ab8f 6a948bc5",
     # c = "5b056c7e 11dd68f4 0469ee7f 3c7a7d74 f7d12111 6506d031 218291fb", 
     b = "b4050a85 0c04b3ab f5413256 5044b0b7 d7bfd8ba 270b3943 2355ffb4",
+    cofactor = 1,
     Gx = "b70e0cbd 6bb4bf7f 321390b9 4a03c1d3 56c21122 343280d6 115c1d21", 
     Gy = "bd376388 b5f723fb 4c22dfe6 cd4375a0 5a074764 44d58199 85007e34"    
 ) |> register
@@ -36,6 +38,7 @@ const Curve_P_256 = ECP(
     #SEED = "c49d3608 86e70493 6a6678e1 139d26b7 819f7e90",
     #c = "7efba166 2985be94 03cb055c 75d4f7e0 ce8d84a9 c5114abc af317768 0104fa0d",
     b = "5ac635d8 aa3a93e7 b3ebbd55 769886bc 651d06b0 cc53b0f6 3bce3c3e 27d2604b",
+    cofactor = 1,
     Gx = "6b17d1f2 e12c4247 f8bce6e5 63a440f2 77037d81 2deb33a0 f4a13945 d898c296",
     Gy = "4fe342e2 fe1a7f9b 8ee7eb4a 7c0f9e16 2bce3357 6b315ece cbb64068 37bf51f5"   
 ) |> register
@@ -47,6 +50,7 @@ const Curve_P_384 = ECP(
     #SEED = "a335926a a319a27a 1d00896a 6773a482 7acdac73",
     #c = "79d1e655 f868f02f ff48dcde e14151dd b80643c1 406d0ca1 0dfe6fc5 2009540a 495e8042 ea5f744f 6e184667 cc722483",
     b = "b3312fa7 e23ee7e4 988e056b e3f82d19 181d9c6e fe814112 0314088f 5013875a c656398d 8a2ed19d 2a85c8ed d3ec2aef",
+    cofactor = 1,
     Gx = "aa87ca22 be8b0537 8eb1c71e f320ad74 6e1d3b62 8ba79b98 59f741e0 82542a38 5502f25d bf55296c 3a545e38 72760ab7", 
     Gy = "3617de4a 96262c6f 5d9e98bf 9292dc29 f8f41dbd 289a147c e9da3113 b5f0b8c0 0a60b1ce 1d7e819d 7a431d7c 90ea0e5f"
 ) |> register
@@ -58,6 +62,7 @@ const Curve_P_521 = ECP(
     #SEED = "d09e8800 291cb853 96cc6717 393284aa a0da64ba",
     #c = "0b4 8bfa5f42 0a349495 39d2bdfc 264eeeeb 077688e4 4fbf0ad8 f6d0edb3 7bd6b533 28100051 8e19f1b9 ffbe0fe9 ed8a3c22 00b8f875 e523868c 70c1e5bf 55bad637",
     b = "051 953eb961 8e1c9a1f 929a21a0 b68540ee a2da725b 99b315f3 b8b48991 8ef109e1 56193951 ec7e937b 1652c0bd 3bb1bf07 3573df88 3d2c34f1 ef451fd4 6b503f00", 
+    cofactor = 1,
     Gx = "c6 858e06b7 0404e9cd 9e3ecb66 2395b442 9c648139 053fb521 f828af60 6b4d3dba a14b5e77 efe75928 fe1dc127 a2ffa8de 3348b3c1 856a429b f97e7e31 c2e5bd66", 
     Gy = "118 39296a78 9a3bc004 5c8a5fb4 2c7d1bd9 98f54449 579b4468 17afbd17 273e662c 97ee7299 5ef42640 c550b901 3fad0761 353c7086 a272c240 88be9476 9fd16650"
 ) |> register
@@ -73,7 +78,7 @@ const Curve_K_163_PB = Koblitz{PB}(
 ) 
 
 const Curve_K_163_GNB = Koblitz{GNB}(
-    names = ["K-163"],
+    names = ["K_163"],
     n = 5846006549323611672814741753598448348329118574063,
     a = 1,
     m = 163,
@@ -92,7 +97,7 @@ const Curve_K_233_PB = Koblitz{PB}(
 )
 
 const Curve_K_233_GNB = Koblitz{GNB}(
-    names = ["K-233"],
+    names = ["K_233"],
     m = 233,
     T = 2,
     a = 0,
@@ -110,7 +115,7 @@ const Curve_K_283_PB = Koblitz{PB}(
 )
 
 const Curve_K_283_GNB = Koblitz{GNB}(
-    names = ["K-283"],
+    names = ["K_283"],
     m = 283,
     T = 6,
     a = 0,
@@ -128,7 +133,7 @@ const Curve_K_409_PB = Koblitz{PB}(
 )
 
 const Curve_K_409_GNB = Koblitz{GNB}(
-    names = ["K-409"],
+    names = ["K_409"],
     m = 409,
     T = 4,
     a = 0,
@@ -146,7 +151,7 @@ const Curve_K_571_PB = Koblitz{PB}(
 )
 
 const Curve_K_571_GNB = Koblitz{GNB}(
-    names = ["K-571"],
+    names = ["K_571"],
     m = 571,
     T = 10,
     a = 0,
@@ -164,17 +169,19 @@ const Curve_B_163_PB = EC2N{PB}(
     a = 1,
     b = "2 0a601907 b8c953ca 1481eb10 512f7874 4a3205fd",
     n = 5846006549323611672814742442876390689256843201587,
+    cofactor = 2,
     Gx = "3 f0eba162 86a2d57e a0991168 d4994637 e8343e36", 
     Gy = "0 d51fbc6c 71a0094f a2cdd545 b11c5c0c 797324f1"    
 )
 
 const Curve_B_163_GNB = EC2N{GNB}(
-    names = ["B-163"],
+    names = ["B_163"],
     m = 163,
     T = 4,
     a = 1,
     b = "6 645f3cac f1638e13 9c6cd13e f61734fb c9e3d9fb",
     n = 5846006549323611672814742442876390689256843201587,
+    cofactor = 2,
     Gx = "0 311103c1 7167564a ce77ccb0 9c681f88 6ba54ee8",
     Gy = "3 33ac13c6 447f2e67 613bf700 9daf98c8 7bb50c7f"
 ) |> register
@@ -185,17 +192,19 @@ const Curve_B_233_PB = EC2N{PB}(
     a = 1,
     b = "066 647ede6c 332c7f8c 0923bb58 213b333b 20e9ce42 81fe115f 7d8f90ad",
     n = 6901746346790563787434755862277025555839812737345013555379383634485463,
+    cofactor = 2,
     Gx = "0fa c9dfcbac 8313bb21 39f1bb75 5fef65bc 391f8b36 f8f8eb73 71fd558b",
     Gy = "100 6a08a419 03350678 e58528be bf8a0bef f867a7ca 36716f7e 01f81052"
 )
 
 const Curve_B_233_GNB = EC2N{GNB}(
-    names = ["B-233"],
+    names = ["B_233"],
     m = 233,
     T = 2,
     a = 1,
     b = "1a0 03e0962d 4f9a8e40 7c904a95 38163adb 82521260 0c7752ad 52233279",
     n = 6901746346790563787434755862277025555839812737345013555379383634485463,
+    cofactor = 2,
     Gx = "18b 863524b3 cdfefb94 f2784e0b 116faac5 4404bc91 62a363ba b84a14c5",
     Gy = "049 25df77bd 8b8ff1a5 ff519417 822bfedf 2bbd7526 44292c98 c7af6e02"
 ) |> register
@@ -205,17 +214,19 @@ const Curve_B_283_PB = EC2N{PB}(
     n = 770675568902916283677847627294075626569625924376904889109196526770044277787378692871,
     a = 1,
     b = "27b680a c8b8596d a5a4af8a 19a0303f ca97fd76 45309fa2 a581485a f6263e31 3b79a2f5",
+    cofactor = 2,
     Gx = "5f93925 8db7dd90 e1934f8c 70b0dfec 2eed25b8 557eac9c 80e2e198 f8cdbecd 86b12053", 
     Gy = "3676854 fe24141c b98fe6d4 b20d02b4 516ff702 350eddb0 826779c8 13f0df45 be8112f4"
 )
 
 const Curve_B_283_GNB = EC2N{GNB}(
-    names = ["B-283"],
+    names = ["B_283"],
     m = 283,
     T = 6,
     a = 1,
     b = "157261b 894739fb 5a13503f 55f0b3f1 0c560116 66331022 01138cc1 80c0206b dafbc951",
     n = 7770675568902916283677847627294075626569625924376904889109196526770044277787378692871,
+    cofactor = 2,
     Gx = "749468e 464ee468 634b21f7 f61cb700 701817e6 bc36a236 4cb8906e 940948ea a463c35d",
     Gy = "62968bd 3b489ac5 c9b859da 68475c31 5bafcdc4 ccd0dc90 5b70f624 46f49c05 2f49c08c"
 ) |> register
@@ -225,17 +236,19 @@ const Curve_B_409_PB = EC2N{PB}(
     n = 661055968790248598951915308032771039828404682964281219284648798304157774827374805208143723762179110965979867288366567526771,
     a = 1,
     b = "021a5c2 c8ee9feb 5c4b9a75 3b7b476b 7fd6422e f1f3dd67 4761fa99 d6ac27c8 a9a197b2 72822f6c d57a55aa 4f50ae31 7b13545f", 
+    cofactor = 2,
     Gx = "15d4860 d088ddb3 496b0c60 64756260 441cde4a f1771d4d b01ffe5b 34e59703 dc255a86 8a118051 5603aeab 60794e54 bb7996a7",
     Gy = "061b1cf ab6be5f3 2bbfa783 24ed106a 7636b9c5 a7bd198d 0158aa4f 5488d08f 38514f1f df4b4f40 d2181b36 81c364ba 0273c706"
 )
 
 const Curve_B_409_GNB = EC2N{GNB}(
-    names = ["B-409"],
+    names = ["B_409"],
     m = 409,
     T = 4,
     a = 1,
     b = "124d065 1c3d3772 f7f5a1fe 6e715559 e2129bdf a04d52f7 b6ac7c53 2cf0ed06 f610072d 88ad2fdc c50c6fde 72843670 f8b3742a",
     n = 661055968790248598951915308032771039828404682964281219284648798304157774827374805208143723762179110965979867288366567526771,
+    cofactor = 2,
     Gx = "0ceacbc 9f475767 d8e69f3b 5dfab398 13685262 bcacf22b 84c7b6dd 981899e7 318c96f0 761f77c6 02c016ce d7c548de 830d708f",
     Gy = "199d64b a8f089c6 db0e0b61 e80bb959 34afd0ca f2e8be76 d1c5e9af fc7476df 49142691 ad303902 88aa09bc c59c1573 aa3c009a"
 ) |> register
@@ -245,17 +258,19 @@ const Curve_B_571_PB = EC2N{PB}(
     n = 3864537523017258344695351890931987344298927329706434998657235251451519142289560424536143999389415773083133881121926944486246872462816813070234528288303332411393191105285703,
     a = 1,
     b = "2f40e7e 2221f295 de297117 b7f3d62f 5c6a97ff cb8ceff1 cd6ba8ce 4a9a18ad 84ffabbd 8efa5933 2be7ad67 56a66e29 4afd185a 78ff12aa 520e4de7 39baca0c 7ffeff7f 2955727a", 
+    cofactor = 2,
     Gx = "303001d 34b85629 6c16c0d4 0d3cd775 0a93d1d2 955fa80a a5f40fc8 db7b2abd bde53950 f4c0d293 cdd711a3 5b67fb14 99ae6003 8614f139 4abfa3b4 c850d927 e1e7769c 8eec2d19", 
     Gy = "37bf273 42da639b 6dccfffe b73d69d7 8c6c27a6 009cbbca 1980f853 3921e8a6 84423e43 bab08a57 6291af8f 461bb2a8 b3531d2f 0485c19b 16e2f151 6e23dd3c 1a4827af 1b8ac15b"
 )
 
 const Curve_B_571_GNB = EC2N{GNB}(
-    names = ["B-571"],
+    names = ["B_571"],
     m = 571,
     T = 10,
     a = 1,
     b = "3762d0d 47116006 179da356 88eeaccf 591a5cde a7500011 8d9608c5 9132d434 26101a1d fb377411 5f586623 f75f0000 1ce61198 3c1275fa 31f5bc9f 4be1a0f4 67f01ca8 85c74777",
     n = 3864537523017258344695351890931987344298927329706434998657235251451519142289560424536143999389415773083133881121926944486246872462816813070234528288303332411393191105285703,
+    cofactor = 2,
     Gx = "0735e03 5def5925 cc33173e b2a8ce77 67522b46 6d278b65 0a291612 7dfea9d2 d361089f 0a7a0247 a184e1c7 0d417866 e0fe0feb 0ff8f2f3 f9176418 f97d117e 624e2015 df1662a8",
     Gy = "04a3642 0572616c df7e606f ccadaecf c3b76dab 0eb1248d d03fbdfc 9cd3242c 4726be57 9855e812 de7ec5c5 00b4576a 24628048 b6a72d88 0062eed0 dd34b109 6d3acbb6 b01a4a97"
 ) |> register
@@ -275,9 +290,9 @@ end
 
 function curve(name::String)
 
-    for curve in CURVES
-        if name in names(curve)
-            return curve
+    for spec in CURVES
+        if name in names(spec)
+            return spec
         end
     end    
 

@@ -26,6 +26,7 @@ struct ECGroup{P<:ECPoint} <: Group
     x::P
 end
 
+ECGroup{P}(x, y) where {P <: ECPoint} = ECGroup{P}(P(x, y))
 
 Base.convert(::Type{ECGroup{P}}, x; allow_one=false) where P <: ECPoint = ECGroup{P}(convert(P, x; allow_zero=allow_one))
 Base.convert(::Type{G}, x::G) where G <: ECGroup = x
@@ -66,6 +67,7 @@ Base.:(==)(x::G, y::G) where G <: ECGroup = x.x == y.x
 
 modulus(::Type{ECGroup{P}}) where P <: ECPoint = modulus(P)
 
+name(::Type{ECGroup}) = nothing
 name(::Type{ECGroup{P}}) where P <: ECPoint = name(P)
 
 Base.isless(x::G, y::G) where G <: ECGroup = isless(x.x, y.x)
@@ -76,20 +78,9 @@ Curves.gy(g::ECGroup) = gy(g.x)
 Base.one(g::ECGroup{P}) where P <: ECPoint = ECGroup{P}(zero(P))
 Base.one(::Type{ECGroup{P}}) where P <: ECPoint = ECGroup{P}(zero(P))
 
-# function Base.show(io::IO, g::G) where G <: ECGroup
-#     show(io, G)
-#     print(io, " <| (")
-#     show(io, gx(g))
-#     print(io, ", ")
-#     show(io, gy(g))
-#     print(io, ")")
-# end
-
 
 struct PGroup{S} <: Group
     g::BigInt
-
-    PGroup(p::Integer, q::Integer; name=nothing) = PGroup{static(; p, q, name)}
 
     function PGroup{S}(x::BigInt; allow_one::Bool=false) where S
 
@@ -124,46 +115,12 @@ PGroup{S}(element::Vector{UInt8}) where S = convert(PGroup{S}, element)
 modulus(::Type{PGroup{S}}) where S = BigInt(S.p)
 modulus(::G) where G <: PGroup = modulus(G)
 
-order(::Type{PGroup{S}}) where S = BigInt(S.q)
+order(::Type{PGroup{S}}) where S = S.q isa Nothing ? nothing : BigInt(S.q)
 
 name(::Type{PGroup}) = nothing
 
-name(::Type{PGroup{S}}) where S =  isnothing(S.name) ? nothing : convert(Symbol, S.name)
-    
+name(::Type{PGroup{S}}) where S = !(@isdefined S) || isnothing(S.name) ? nothing : convert(Symbol, S.name)
 
-Base.show(io::IO, g::PGroup) = print(io, value(g))
-
-
-Base.show(io::IO, ::Type{PGroup}) = print(io, "PGroup")
-
-#dublicate at Fields. 
-function trimnumber(x::String)
-    if length(x) < 30
-        return x
-    else
-        return x[1:10] * "..." * x[end-10:end]
-    end
-end
-
-trimnumber(x::Integer) = trimnumber(string(x))
-
-groupstr(m) = "𝐙/($(trimnumber(m)))"
-
-
-function Base.show(io::IO, ::Type{G}) where G <: PGroup
-    
-    if name(G) == nothing
-        print(io, groupstr(modulus(G)))
-    else
-        print(io, name(G))
-    end
-end
-
-
-function Base.display(::Type{G}) where G <: PGroup
-    show(G)
-    print(" (order = $(order(G)))")
-end
 
 
 value(g::PGroup) = g.g

@@ -2,7 +2,8 @@
 using Test
 import CryptoGroups.Utils: bits2octet, octet2bits, int2octet, octet2int, @bin_str, @hex_str
 import CryptoGroups.Specs: ECP, EC2N, PB
-import CryptoGroups: octet, point
+import CryptoGroups: octet, point, concretize_type
+import CryptoGroups.Curves: AffinePoint
 
 let 
     x = UInt8[0, 129]

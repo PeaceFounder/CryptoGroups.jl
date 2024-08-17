@@ -1,7 +1,7 @@
 using Test
 
 import CryptoGroups
-import CryptoGroups: generator, BinaryCurve, @def, concretize_type, spec, Specs
+import CryptoGroups: generator, BinaryCurve, concretize_type, spec, Specs, @ECPoint
 using CryptoGroups.Curves: order, oncurve, Weierstrass, ECPoint, AffinePoint, cofactor
 using CryptoGroups.Fields: FP, F2PB, F2GNB
 
@@ -55,10 +55,7 @@ for C in [:B_163_GNB, :B_233_GNB, :B_283_GNB, :B_409_GNB, :B_571_GNB, :K_163_GNB
 
 end
 
-### macro test
 
-@def P_192 ECPoint{AffinePoint{Weierstrass, FP}} Specs.Curve_P_192
-
-@test oncurve(P_192(generator(Specs.Curve_P_192)))
-
-@test spec(P_192(generator(Specs.Curve_P_192))) == Specs.Curve_P_192
+@test oncurve(@ECPoint{P_192}())
+@test spec(@ECPoint{P_192}()) == Specs.Curve_P_192 # spec method constructs specification from a concrete type without lookup!
+@test spec(@ECPoint{B_163}()) == Specs.Curve_B_163_GNB 

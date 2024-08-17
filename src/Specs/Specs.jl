@@ -12,15 +12,10 @@ include("spec.jl")
 include("field_specs.jl")
 
 include("legacy.jl")
-#include("primitives.jl")
 
 include("curve_constants.jl")
 include("modp_constants.jl")
 
-# Shall be refactored in Conversations instead
-# include("conversions.jl")
-
 export ECP, EC2N, Koblitz, MODP
-
 
 end

@@ -1,5 +1,5 @@
 using .Utils: StaticBitVector, StaticBigInt, static
-using .Fields: F2GNB, F2PB, FP, Field, PrimeField, BinaryField, tobits, value, reducer
+using .Fields: F2GNB, F2PB, @F2PB, FP, Field, PrimeField, BinaryField, tobits, value, reducer
 using .Curves: AbstractPoint, ECPoint, AffinePoint, Weierstrass, BinaryCurve, gx, gy, field, eq, a, b, cofactor
 using .Specs: MODP, Koblitz, ECP, EC2N, GroupSpec, PB, GNB, curve
 
@@ -24,7 +24,7 @@ function concretize_type(::Type{ECPoint{P}}, curve::GroupSpec; name = name(curve
     Q = concretize_type(P, curve)
 
     _order = order(curve)
-    _cofactor = 1 # Need to update this one
+    _cofactor = cofactor(curve)
     
     R = ECPoint{Q}(_order, _cofactor; name)
 
@@ -32,39 +32,6 @@ function concretize_type(::Type{ECPoint{P}}, curve::GroupSpec; name = name(curve
 end
 
 concretize_type(::Type{ECPoint}, spec::GroupSpec; name = name(spec)) = concretize_type(ECPoint{AffinePoint}, spec; name)
-
-
-##################### Macro for defining curve as also a group ###################
-
-# macro def(constant_name, type, group_spec)
-
-#     name_str = string(constant_name)
-
-#     M = @__MODULE__
-
-#     return esc(quote
-#         const $constant_name = $M.concretize_type($type, $group_spec)
-
-#         $M.name(::Type{$constant_name}) = $name_str
-
-#         local ORDER = $group_spec.n
-#         $M.order(::Type{$constant_name}) = ORDER
-
-#         local GENERATOR = $constant_name($M.generator($group_spec)...)
-#         $M.generator(::Type{$constant_name}) = GENERATOR
-#     end)
-# end
-
-macro def(constant_name, type, group_spec)
-
-    M = @__MODULE__
-
-    return esc(quote
-        const $constant_name = $M.concretize_type($type, $group_spec; name = $(QuoteNode(constant_name)))
-    end)
-end
-
-
 
 
 function concretize_type(::Type{F2GNB}, N::Int)
@@ -95,19 +62,19 @@ end
 
 concretize_type(::Type{AffinePoint}, spec::ECP) = concretize_type(AffinePoint{Weierstrass, FP}, spec)
 
-
-function concretize_type(::Type{F}, basis::PB) where F <: BinaryField
+function concretize_type(::Type{<:F2PB}, basis::PB)
     (; f) = basis
-    return F(f)
+    f_bits = reverse(BitVector(i in f for i in 0:maximum(f)))
+    return @F2PB{f_bits}
 end
 
 
-function concretize_type(::Type{F}, basis::GNB) where F <: BinaryField
+function concretize_type(::Type{<:F2GNB}, basis::GNB) #where F <: BinaryField
     (; m, T) = basis
-    return F{m, T}
+    return F2GNB{m, T}
 end
 
-concretize_type(::Type{F}, basis::Integer) where F <: FP = F{static(basis)}
+concretize_type(::Type{<:FP}, basis::Integer) = FP{static(basis)}
 
 
 concretize_type(::Type{BinaryCurve}, curve::EC2N) = concretize_type(BinaryCurve, a(curve), b(curve))
@@ -120,9 +87,7 @@ end
 concretize_type(::Type{AffinePoint}, curve::EC2N{GNB}) = concretize_type(AffinePoint{BinaryCurve, F2GNB}, curve)
 concretize_type(::Type{AffinePoint}, curve::EC2N{PB}) = concretize_type(AffinePoint{BinaryCurve, F2PB}, curve)
 
-
-
-concretize_type(::Type{AffinePoint{BinaryCurve, F}}, curve::Koblitz) where F <: BinaryField = concretize_type(AffinePoint{BinaryCurve, F}, curve.bec)
+concretize_type(::Type{AffinePoint{BinaryCurve, F}}, curve::Koblitz) where F <: BinaryField = concretize_type(AffinePoint, curve.bec)
 
 function spec(::Type{P}; kwargs...) where P <: AbstractPoint
 
@@ -132,20 +97,20 @@ function spec(::Type{P}; kwargs...) where P <: AbstractPoint
     EQ = eq(P)
     F = field(P)
 
-    return spec(EQ, F; n, h, kwargs...)
+    return spec(EQ, F; n, cofactor = h, kwargs...)
 end
 
 spec(p::P) where P <: AbstractPoint = spec(P; Gx=value(gx(p)), Gy=value(gy(p)))
 
 
-function spec(::Type{EQ}, ::Type{F}; n=nothing, h=nothing, Gx=nothing, Gy=nothing) where {EQ <: Weierstrass, F <: PrimeField}
+function spec(::Type{EQ}, ::Type{F}; n=nothing, cofactor=nothing, Gx=nothing, Gy=nothing) where {EQ <: Weierstrass, F <: PrimeField}
     
     _a = a(EQ)
     _b = b(EQ)
 
     p = modulus(F)
 
-    return ECP(p, n, _a, _b, Gx, Gy) # I will need to add H in the end here
+    return ECP(p, n, _a, _b, cofactor, Gx, Gy) # I will need to add H in the end here
 end
 
 
@@ -153,18 +118,17 @@ spec(::Type{F}) where F <: F2PB = PB(reducer(F))
 spec(::Type{F2GNB{N, T}}) where {N, T} = GNB(N, T)
 
 
-function spec(::Type{EQ}, ::Type{F}; n=nothing, h=nothing, Gx=nothing, Gy=nothing) where {EQ <: BinaryCurve, F <: BinaryField}
+function spec(::Type{EQ}, ::Type{F}; n=nothing, cofactor=nothing, Gx=nothing, Gy=nothing) where {EQ <: BinaryCurve, F <: BinaryField}
     
     _a = convert(BitVector, a(EQ))
     _b = convert(BitVector, b(EQ))  ### Perhaps I would be better to do conversion at acessor methods!
 
     basis = spec(F)
 
-    #p = modulus(F)
     if isnothing(Gx) && isnothing(Gy)
-        return EC2N(basis, n, _a, _b) # I will need to add H in the end here
+        return EC2N(basis, n, _a, _b, cofactor) # I will need to add H in the end here
     else
-        return EC2N(basis, n, _a, _b, Gx, Gy) 
+        return EC2N(basis, n, _a, _b, cofactor, Gx, Gy) 
     end
 end
 
@@ -173,34 +137,19 @@ concretize_type(::Type{ECGroup{P}}, spec::GroupSpec; name = name(spec)) where P 
 concretize_type(::Type{ECGroup}, spec::GroupSpec; name = name(spec)) = ECGroup{concretize_type(ECPoint, spec; name)}
 
 
-concretize_type(::Type{PGroup}, spec::MODP; name = nothing) = PGroup(spec.p, spec.q; name)
+concretize_type(::Type{PGroup}, p::Integer, q::Union{Integer, Nothing}, name::Union{Symbol, Nothing}) = PGroup{static(; p, q, name)}
+concretize_type(::Type{PGroup}, spec::MODP; name = nothing) = concretize_type(PGroup, spec.p, spec.q, name)
 
-
-# function spec(x::Symbol)
-#     if x == :P_192
-#         return Specs.Curve_P_192
-#     elseif x == :P_244
-#         return Specs.Curve_P_244
-#     elseif x == :P_256
-#         return Specs.Curve_P_256
-#     elseif x == :P_384
-#         return Specs.Curve_P_384
-#     elseif x == :P_521
-#         return Specs.Curve_P_521
-#     else
-#         error("$x not implemented")
-#     end
-# end
 
 spec(x::Symbol) = curve(x) # 
 
-
 concretize_type(::Type{PGroup}, p, q) = PGroup(p, q)
-
 
 spec(::Type{ECGroup{P}}) where P = spec(P)
 spec(g::ECGroup) = spec(g.x)
 
 spec(::Type{G}) where G <: PGroup = MODP(; p = modulus(G), q = order(G))
 
-
+(::Type{P})() where P <: ECPoint = P(generator(curve(name(P))))
+(::Type{G})() where G <: ECGroup = G(generator(curve(name(G))))
+(::Type{G})() where G <: PGroup = G(generator(modp_spec(name(G))))

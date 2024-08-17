@@ -1,6 +1,8 @@
-using CryptoGroups.Utils: @bin_str, @hex_str, octet2int
+using CryptoPRG: HashSpec
+using CryptoGroups.Utils: @bin_str, @hex_str, octet2int, modinv
+using CryptoGroups.Curves: gx, gy
 using CryptoGroups.Specs: EC2N, PB
-using CryptoGroups: concretize_type, ECPoint, generator, octet
+using CryptoGroups: concretize_type, ECPoint, generator, octet, order
 
 # Elliptic Curve Domain Parameter Setup
 
@@ -9,9 +11,9 @@ basis = PB(hex"80000000 00000000 00000000 00000000 00000000 00000201", 191)
 curve_spec = EC2N(basis;   ### Need to think about adding a proper methods
                   a = hex"2866537B 67675263 6A68F565 54E12640 276B649E F7526267",
                   b = hex"2E45EF57 1F00786F 67B0081B 9495A3D9 5462F5DE 0AA185EC",
+                  cofactor = 2,
                   G = hex"04 36B3DAF8 A23206F9 C4F299D7 B21A9C36 9137F2C8 4AE1AA0D 765BE734 33B3F95E 332932E7 0EA245CA 2418EA0E F98018FB",
                   n = 1569275433846670190958947355803350458831205595451630533029,
-                  h = 2
 )
 
 P = concretize_type(ECPoint, curve_spec)

@@ -32,6 +32,7 @@ include("Curves/Curves.jl")
 include("Specs/Specs.jl")
 include("groups.jl")
 include("spec.jl")
+include("macros.jl")
 
 using .Fields: PrimeField, BinaryField
 
@@ -56,9 +57,10 @@ end
 point(p::AffinePoint{<:Weierstrass}) = convert(Tuple{BigInt, BigInt}, p)
 point(p::AffinePoint{<:BinaryCurve}) = convert(Tuple{BitVector, BitVector}, p)
 
+
 export spec, concretize_type #, order, bitlength
 
 import .Specs: generator 
-export generator, octet, order, modulus, value, name, spec, concretize_type, PGroup, ECGroup
+export generator, octet, order, modulus, value, @PGroup, @ECGroup, @ECPoint
 
 end

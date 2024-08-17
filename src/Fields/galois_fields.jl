@@ -12,26 +12,8 @@ value(x::FP) = x.x
 modulus(::FP{P}) where P = BigInt(P)
 modulus(::Type{FP{P}}) where P = BigInt(P)
 
-# Why order and modulus is the same thing here?
 order(::FP{P}) where P = BigInt(P)
 order(::Type{FP{P}}) where P = BigInt(P)
-
-
-function trimnumber(x::String)
-    if length(x) < 30
-        return x
-    else
-        return x[1:10] * "..." * x[end-10:end]
-    end
-end
-
-trimnumber(x::Integer) = trimnumber(string(x))
-
-modulus_str(x::BigInt) = trimnumber(x)
-modulus_str(::Type{F}) where F <: FP = modulus_str(modulus(F))
-
-Base.show(io::IO, ::Type{FP}) = print(io, "FP")
-Base.show(io::IO, ::Type{F}) where F <: FP = print(io, "FP/$(modulus_str(F))")
 
 #########################################
 
@@ -53,11 +35,6 @@ struct F2PB{R} <: BinaryField ### R is reducer
     end 
 
     F2PB{R}(x::BitVector; e::Endian = little) where R = F2PB{R}(x, e)
-
-    F2PB(f::BitVector; e::Endian = little) = e == little ? F2PB{static(reverse(f))} : F2PB{static(f)}
-    F2PB(f::Vector{Int}) = F2PB(BitVector(i in f for i in 0:maximum(f)); e = bige)
-
-    F2PB(f, x; e::Endian) = F2PB(f; e)(x; e)
 end
 
 Base.convert(::Type{BitVector}, x::F2PB) = reverse(x.x)
@@ -68,9 +45,6 @@ bitlength(::Type{F2PB{R}}) where R = length(R) - 1
 bitlength(::F) where F <: F2PB = bitlength(F)
 
 Base.convert(::Type{F}, x::BitVector) where F <: F2PB = F(x, little)
-
-# This function is necessary in differetn contexts so I could keep it as is. 
-#tobits(x::F2PB) = reverse(x.x)
 
 reducer(::Type{F2PB{S}}; e::Endian = little) where S = e == little ? reverse(convert(BitVector, S)) : convert(BitVector, S)
 reducer(::Type{F2PB}; e::Endian = little) = nothing
@@ -151,7 +125,7 @@ end
 get_powers(x::BitVector) = (0:x.len - 1)[x]
 
 function print_poly(io::IO, x::BitVector)
-    n = reverse(get_powers(x)) # Best to visualize dominant first
+    n = reverse(get_powers(reverse(x))) # Best to visualize dominant first
     write(io, "$(xstr(n[1]))")
     for i in n[2:end]
         write(io, " + $(xstr(i))")
@@ -160,17 +134,68 @@ end
 
 
 function Base.show(io::IO, ::Type{F}) where F <: F2PB
-    
-    print(io, "F2PB")
 
-    r = reducer(F)
-                   
-    if !isnothing(r) #@isdefined S
-        print(io, "{")
-        print_poly(io, r)
-        print(io, "}")
+    print(io, "@F2PB")
+
+    if @isdefined(F)
+
+        r = reducer(F)
+        
+        if !isnothing(r) #@isdefined S
+            print(io, "{")
+            print_poly(io, r)
+            print(io, "}")
+        end
+
+    end
+
+end
+
+function poly2exponents(poly_string::String)
+    # Remove spaces and split the string by '+'
+    terms = split(replace(poly_string, " " => ""), "+")
+    
+    exponents = Int[]
+    
+    for term in terms
+        if term == "1" || term == "X"
+            push!(exponents, term == "1" ? 0 : 1)
+        elseif startswith(term, "X^")
+            push!(exponents, parse(Int, term[3:end]))
+        end
+    end
+    
+    # Sort exponents in descending order
+    sort!(exponents, rev=true)
+    
+    return exponents
+end
+
+macro F2PB(expr)
+    if expr.head == :braces 
+
+        if expr.args[1] isa Symbol ||  expr.args[1].head == :macrocall
+
+            return quote
+                F2PB{static(reverse($(esc(expr.args[1]))))}
+            end
+
+        else
+
+            # Single argument case: @PGroup{some_name}
+            parameter = string(expr.args[1])
+            exponents = poly2exponents(parameter)
+
+            #return F2PB{static(reverse(BitVector(i in exponents for i in 0:maximum(exponents))))}
+            return F2PB{static(BitVector(i in exponents for i in 0:maximum(exponents)))}
+
+        end
+
+    else
+        error("Invalid syntax. Use @F2PB{P(X)}")
     end
 end
+
 
 #####################################################################################
 

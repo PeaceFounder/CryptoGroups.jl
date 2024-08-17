@@ -1,5 +1,5 @@
 using Test
-import CryptoGroups.Fields: F2PB, F2GNB, print_poly, red!, mul, mul_gnb, construct_integer_order_prime, FP, order, reducer, tobits
+import CryptoGroups.Fields: F2PB, @F2PB, F2GNB, print_poly, red!, mul, mul_gnb, construct_integer_order_prime, FP, order, reducer, tobits
 import CryptoGroups.Utils: @bin_str
 
 
@@ -22,16 +22,16 @@ c = mul(a, b)
 @test mul(reverse(bin"0010"), reverse(bin"0010"), reverse(bin"10011")) == reverse(bin"0100")
 @test mul(reverse(bin"0010"), reverse(bin"0100"), reverse(bin"10011")) == reverse(bin"1000")
 
-a = F2PB(f)(bin"1101")
-b = F2PB(f)(bin"1001")
+a = @F2PB{f}(bin"1101")
+b = @F2PB{f}(bin"1001")
 
-c = F2PB(f)(bin"1111")
+c = @F2PB{f}(bin"1111")
 
 @test a*b == c
 
 ### Testing generation of basis elements
 
-α = F2PB(f)(bin"0010")
+α = @F2PB{f}(bin"0010")
 
 @test α^(order(α) + 1) == α
 

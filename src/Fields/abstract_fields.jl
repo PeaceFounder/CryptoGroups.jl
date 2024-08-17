@@ -20,7 +20,6 @@ abstract type BinaryField <: Field end
 Base.:-(x::F, y::F) where F <: BinaryField = x + y
 
 Base.convert(::Type{F}, x::BitVector) where F <: BinaryField = F(x)
-#Base.convert(::Type{BitVector}, x::BinaryField) = 
 
 function Base.convert(::Type{F}, x::Bool) where F <: BinaryField
     if x == false
@@ -83,7 +82,13 @@ Base.convert(::Type{F}, x::F) where F <: BinaryField = x
 
 tobits(::Type{F}, x::BinaryField) where F <: BinaryField = convert(BitVector, x)
 
-Base.show(io::IO, x::BinaryField) = print(io, join(i ? "1" : "0" for i in tobits(x)))
+function Base.show(io::IO, x::BinaryField)
+    print(io, typeof(x))
+    print(io, "(")
+    print(io, "bin\"")
+    print(io, join(i ? "1" : "0" for i in tobits(x)))
+    print(io, "\")")
+end
 
 Base.isless(x::F, y::F) where F <: BinaryField = tobits(x) < tobits(y)
 

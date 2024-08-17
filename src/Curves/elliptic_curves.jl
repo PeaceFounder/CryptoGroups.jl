@@ -26,11 +26,8 @@ struct AffinePoint{E <: EllipticCurve, T <: Field} <: AbstractPoint
     AffinePoint{E}(x::F, y::F) where {E <: EllipticCurve, F <: Field} = new{E, F}(x, y)
 end
 
-# AffinePoint{E, F}(x, y) where {E <: EllipticCurve, F <: Field} = AffinePoint{E, F}(convert(F, x), convert(F, y))
-
 eq(::Type{AffinePoint{EQ, F}}) where {EQ <: EllipticCurve, F <: Field} = EQ
 field(::Type{AffinePoint{EQ, F}}) where {EQ <: EllipticCurve, F <: Field} = F
-
 
 ### More through subtyping could be in here
 Base.convert(::Type{P}, x::Tuple{BigInt, BigInt}) where P <: AffinePoint = P(x...)

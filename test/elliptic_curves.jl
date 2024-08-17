@@ -1,7 +1,7 @@
 using Test
 
 using CryptoGroups
-import CryptoGroups.Fields: F2PB, F2GNB, FP
+import CryptoGroups.Fields: @F2PB, F2GNB, FP
 import CryptoGroups.Curves: Weierstrass, AffinePoint, double, BinaryCurve, oncurve
 import CryptoGroups: concretize_type
 import CryptoGroups.Utils: @bin_str
@@ -25,7 +25,7 @@ p2 = AffinePoint{eq}(x2, y2)
 @test oncurve(p2) == true
 
 f = bin"10011"
-α = F2PB(f)(bin"0100")
+α = @F2PB{f}(bin"0100")
 
 a = α^4
 b = one(α)
@@ -118,7 +118,8 @@ let
 
     ########### Polynomial basis
 
-    F = F2PB([163, 7, 6, 3, 0])
+    #F = F2PB([163, 7, 6, 3, 0])
+    F = @F2PB{X^163 + X^7 + X^6 + X^3 + 1}
 
     EQ = concretize_type(BinaryCurve, F(a), F(b))
 

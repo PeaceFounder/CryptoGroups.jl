@@ -73,6 +73,8 @@ dsa_standart_group(tp::Int, tg::Int) = dsa_standart_group(default_rng(), tp, tg)
 
 # Dublicate exists in SigmaProofs, perhaps here it could be reduced to one element
 # Alternativelly the GeneratorBasis module could be put back within CryptoGroups
+# It may also be reasonable to deprecate generate_g, but then it would imply that parameter
+# generation is out of the scope of the package. 
 function modp_generator_basis(prg::PRG, p::Integer, q::Integer, N::Integer; nr::Integer = 0)
 
     np = bitlength(p)
