@@ -1,24 +1,53 @@
+using ..Fields: Field
 using ..CryptoGroups.Utils: static
 using ..CryptoGroups: isstrict, order
+
+abstract type EllipticCurve end
+abstract type AbstractPoint end
+
+(::Type{P})(x) where P <: AbstractPoint = convert(P, x)
+
+function (::Type{P})(x, y) where P <: AbstractPoint
+
+    F = field(P)
+    
+    _x = F(x) # convert(F, x) could also be used
+    _y = F(y)
+
+    return P(_x, _y)
+end
+
+Base.:-(u::P, v::P) where P <: AbstractPoint = u + (-v)
+
+Base.isless(x::P, y::P) where P <: AbstractPoint = gx(x) == gx(y) ? gx(x) < gx(y) : gy(x) < gy(y)
+
+function validate(x::AbstractPoint, order::Integer, cofactor::Integer)
+
+    @assert oncurve(x) "Point is not in curve"
+    @assert x * cofactor != zero(x) "Point is in cofactor subgroup"
+
+    return
+end
 
 struct ECPoint{P<:AbstractPoint, S} <: AbstractPoint # The same contract is satisfied thus a subtype
     p::P
 
-    function ECPoint{P, S}(x::P; allow_zero=false) where {P <: AbstractPoint, S}
+    function ECPoint{P, S}(x::P; allow_zero=false, skip_validation=false) where {P <: AbstractPoint, S}
 
-        if iszero(x)
-            if !allow_zero
-                msg = "Constructing an offcurve element zero. Use `allow_zero` to hide this warning."
-                if isstrict()
-                    error(msg)
-                else
-                    @warn msg
-                end
+        if iszero(x) && !allow_zero
+            msg = "Constructing an offcurve element zero. Use `allow_zero` to hide this warning."
+            if isstrict()
+                error(msg)
+            else
+                @warn msg
             end
-        else
-            @assert oncurve(x) "Point is not in curve"
-            @assert x * S.cofactor != zero(x) "Point is in cofactor subgroup"
         end
+
+        if !skip_validation
+            # This allows specializing for Montgomery curves where clamping is used
+            validate(x, S.order, S.cofactor)
+        end
+
         # A test with cofactor also here
         new{P, S}(x)
     end
@@ -61,19 +90,22 @@ function Base.:+(x::P, y::P) where P <: ECPoint
     elseif iszero(y)
         return x
     elseif x.p == y.p
-        return P(double(x.p))
+        return P(double(x.p); skip_validation=true)
+    elseif x.p == -y.p
+        return zero(P)
     else
-        return P(x.p + y.p)
+        return P(x.p + y.p; skip_validation=true)
     end
 end
 
-Base.:*(x::P, n::Integer) where P <: ECPoint = P(x.p * n)
+Base.:-(x::P) where P <: ECPoint = P(-x.p; skip_validation=true)
+
+
+Base.:*(x::P, n::Integer) where P <: ECPoint = P(x.p * mod(n, order(P)); skip_validation=true)
 Base.:*(n::Integer, x::ECPoint) = x * n
 
 Base.convert(::Type{ECPoint{P, S}}, x::NTuple{2}; allow_zero=false) where {P <: AbstractPoint, S} = ECPoint{P, S}(convert(P, x); allow_zero)
 Base.convert(::Type{P}, x::P) where P <: ECPoint = x 
-
-Base.isvalid(p::P) where P <: ECPoint = order(P) * p.p == zero(p.p) 
 
 oncurve(p::ECPoint) = oncurve(p.p)
 

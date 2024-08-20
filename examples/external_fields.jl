@@ -7,6 +7,7 @@ import GaloisFields: ExtensionField, GaloisField
 
 struct GF₂{F <: ExtensionField} <: BinaryField
     x::F
+
     GF₂{F}(coeffs::NTuple{N, GaloisField(2)}) where {N, F <: ExtensionField} = new(F(coeffs))
 
     function GF₂{F}(xrev::BitVector) where F <: ExtensionField
@@ -60,18 +61,16 @@ let
 
     @test oncurve(g)
     @test oncurve(g*3)
-    @test g * q == zero(g)
+    @test g * (q + 1) == g
 end
 
-
-K_163v3 = concretize_type(ECPoint{AffinePoint{BinaryCurve, GF₂}}, Curve_K_163_PB)
-
-#@def K_163v3 ECPoint{AffinePoint{BinaryCurve, GF₂}} Curve_K_163_PB
-
 let
+    K_163v3 = concretize_type(ECPoint{AffinePoint{BinaryCurve, GF₂}}, Curve_K_163_PB)
+
     g = K_163v3(generator(Curve_K_163_PB))
+    q = order(Curve_K_163_PB)
 
     @test oncurve(g)
     @test oncurve(g*3)
-    @test isvalid(g)
+    @test g * (q + 1) == g
 end

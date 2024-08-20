@@ -1,21 +1,5 @@
-using ..Fields: Field, PrimeField, BinaryField, tobits
+using ..Fields: PrimeField, BinaryField, tobits
 import ..Fields
-
-abstract type EllipticCurve end
-abstract type AbstractPoint end
-
-(::Type{P})(x) where P <: AbstractPoint = convert(P, x)
-
-function (::Type{P})(x, y) where P <: AbstractPoint
-
-    F = field(P)
-    
-    _x = F(x) # convert(F, x) could also be used
-    _y = F(y)
-
-    return P(_x, _y)
-end
-
 
 struct AffinePoint{E <: EllipticCurve, T <: Field} <: AbstractPoint
     x::T
@@ -49,10 +33,6 @@ Base.:(==)(x::P, y::P) where P <: AffinePoint = x.x == y.x && x.y == y.y
 Base.:-(u::P) where P <: AffinePoint{<:EllipticCurve, <: PrimeField} = P(u.x, -u.y)
 Base.:-(u::P) where P <: AffinePoint{<:EllipticCurve, <: BinaryField} = P(u.x, u.x + u.y)
 
-Base.:-(u::P, v::P) where P <: AffinePoint = u + (-v)
-
-Base.isless(x::P, y::P) where P <: AbstractPoint = gx(x) == gx(y) ? gx(x) < gx(y) : gy(x) < gy(y)
-
 
 function Base.:*(P::AffinePoint, k::Integer)
     
@@ -84,24 +64,6 @@ end
 
 Base.:*(k::Integer, P::AffinePoint) = P * k
 
-
-function Base.isvalid(::Type{P}) where P <: AffinePoint
-    
-    g = generator(x)
-
-    if oncurve(g) == false
-        return false
-    end
-
-    if !(g * order(P) == zero(P))
-        return false
-    end
-    
-    return true
-end
-
-Base.isvalid(x::AffinePoint) = oncurve(x)
-
 ### Definition of some elliptic curves and coresponding operations
 
 struct Weierstrass{a, b} <: EllipticCurve end # May assume that a, b are 
@@ -116,10 +78,6 @@ b(::Type{AffinePoint{W, F}}) where {W <: Weierstrass, F <: Field} = convert(F, b
 value(p::AffinePoint{<:Weierstrass}) = convert(Tuple{BigInt, BigInt}, p)
 
 function Base.:+(u::AffinePoint{E, F}, v::AffinePoint{E, F}) where {E <: Weierstrass, F <: Field}
-        
-    if u.x == v.x && u.y + v.y == zero(F) # I could put this case into ECPoint as assertion
-        return zero(AffinePoint{E, F})
-    end
 
     @assert u.x != v.x 
     
@@ -163,10 +121,6 @@ value(p::AffinePoint{<:BinaryCurve}) = convert(Tuple{BitVector, BitVector}, p)
 
 function Base.:+(u::AffinePoint{E, F}, v::AffinePoint{E, F}) where {E<:BinaryCurve, F<:BinaryField}
         
-    if u.x == v.x && u.y + v.y + u.x == zero(F)
-        return zero(AffinePoint{E, F})
-    end
-
     @assert u.x != v.x 
 
     _a = a(AffinePoint{E, F})

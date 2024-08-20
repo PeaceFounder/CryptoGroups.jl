@@ -27,6 +27,8 @@ struct ECGroup{P<:ECPoint} <: Group
 end
 
 ECGroup{P}(x, y) where {P <: ECPoint} = ECGroup{P}(P(x, y))
+ECGroup{P}(x::Vector{UInt8}) where {P <: ECPoint} = ECGroup{P}(P(x))
+
 
 Base.convert(::Type{ECGroup{P}}, x; allow_one=false) where P <: ECPoint = ECGroup{P}(convert(P, x; allow_zero=allow_one))
 Base.convert(::Type{G}, x::G) where G <: ECGroup = x
@@ -47,6 +49,7 @@ function Base.:^(x::G, n::Integer) where G <: ECGroup
         else
             @warn msg
         end
+        return one(G)
     end
     
     if isone(x)
@@ -102,7 +105,6 @@ struct PGroup{S} <: Group
     PGroup{S}(::typeof(one)) where S = new{S}(1)
 end
 
-
 Base.one(::Type{PGroup{S}}) where S = PGroup{S}(one)
 Base.one(::PGroup{S}) where S = PGroup{S}(one)
 
@@ -120,7 +122,6 @@ order(::Type{PGroup{S}}) where S = S.q isa Nothing ? nothing : BigInt(S.q)
 name(::Type{PGroup}) = nothing
 
 name(::Type{PGroup{S}}) where S = !(@isdefined S) || isnothing(S.name) ? nothing : convert(Symbol, S.name)
-
 
 
 value(g::PGroup) = g.g
@@ -155,6 +156,7 @@ function ^(x::G, n::Integer) where G <: PGroup
         else
             @warn msg
         end
+        return one(G)
     end
 
     if isone(x)

@@ -105,7 +105,7 @@ let
 
 
     @test oncurve(point) == true
-    @test point * n == zero(point)
+    @test point * (n + 1) == point
 
 end
 
@@ -117,7 +117,7 @@ let
     b = 1
 
     ########### Polynomial basis
-
+    #n = BigInt(2)^163 + 1
     #F = F2PB([163, 7, 6, 3, 0])
     F = @F2PB{X^163 + X^7 + X^6 + X^3 + 1}
 
@@ -128,7 +128,8 @@ let
 
     point = AffinePoint{EQ, F}(Gx, Gy)
     @test oncurve(point)
-
+    #@test point * (n + 1) == point
+    
 
     ######### Normal Basis
 

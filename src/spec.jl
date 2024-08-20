@@ -138,14 +138,10 @@ end
 concretize_type(::Type{ECGroup{P}}, spec::GroupSpec; name = name(spec)) where P <: ECPoint = ECGroup{concretize_type(P, spec; name)}
 concretize_type(::Type{ECGroup}, spec::GroupSpec; name = name(spec)) = ECGroup{concretize_type(ECPoint, spec; name)}
 
-
-concretize_type(::Type{PGroup}, p::Integer, q::Union{Integer, Nothing}, name::Union{Symbol, Nothing}) = PGroup{static(; p, q, name)}
-concretize_type(::Type{PGroup}, spec::MODP; name = nothing) = concretize_type(PGroup, spec.p, spec.q, name)
-
+concretize_type(::Type{PGroup}, p::Integer, q::Union{Integer, Nothing}; name::Union{Symbol, Nothing} = nothing) = PGroup{static(; p, q, name)}
+concretize_type(::Type{PGroup}, spec::MODP; name = nothing) = concretize_type(PGroup, spec.p, spec.q; name)
 
 spec(x::Symbol) = curve(x) # 
-
-concretize_type(::Type{PGroup}, p, q) = PGroup(p, q)
 
 spec(::Type{ECGroup{P}}) where P = spec(P)
 spec(g::ECGroup) = spec(g.x)

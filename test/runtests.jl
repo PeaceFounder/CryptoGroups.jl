@@ -1,43 +1,32 @@
-#using Test
-
 using SafeTestsets
 
-# @testset "Galois field tests" begin
-#     include("galois_fields.jl")
-# end
-
-
-@testset "Galois field tests" begin
-
-module GaloisTest
-    include("galois_fields.jl")
+@safetestset "Galois field tests" begin
+     include("galois_fields.jl")
 end
 
-end
-
-@testset "Elliptic curve primitive tests" begin
+@safetestset "Elliptic curve primitive tests" begin
     include("elliptic_curves.jl")
 end
 
-@testset "Testing NIST elliptic curves" begin
-    #include("curve_specs.jl")
+@safetestset "Testing NIST elliptic curves" begin
+    include("curve_specs.jl")
 end
 
-@testset "Testing external fields" begin
+@safetestset "Testing external fields" begin
     include("../examples/external_fields.jl")
 end
 
-@testset "Testing Specs module" begin
+@safetestset "Testing Specs module" begin
     include("spec.jl")
     include("ecdsa/ecdsa_prime.jl")
     include("ecdsa/ecdsa_pb.jl")
 end
 
-@testset "Testing Conversions" begin
+@safetestset "Testing Conversions" begin
     include("conversions.jl")
 end
 
-@testset "Testing group API" begin
+@safetestset "Testing group API" begin
     include("groups.jl")
 end
 

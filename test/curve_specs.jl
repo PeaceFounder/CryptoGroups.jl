@@ -6,6 +6,21 @@ using CryptoGroups.Curves: order, oncurve, Weierstrass, ECPoint, AffinePoint, co
 using CryptoGroups.Fields: FP, F2PB, F2GNB
 
 
+function isvalid(g::ECPoint) 
+    
+    (; p) = g 
+
+    if oncurve(p) == false
+        return false
+    end
+
+    if !(p * (order(g) + 1) == p)
+        return false
+    end
+    
+    return true
+end
+
 
 const FULL_TEST = false
 
@@ -52,6 +67,10 @@ for C in [:B_163_GNB, :B_233_GNB, :B_283_GNB, :B_409_GNB, :B_571_GNB, :K_163_GNB
 
     @test oncurve(g)
     @test oncurve(g*3)
+
+    if C == :K_163_GNB # Too slow to test all 
+        @test isvalid(g)
+    end
 
 end
 

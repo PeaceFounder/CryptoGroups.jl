@@ -46,6 +46,6 @@ Base.rem(x::ECGroup, q::Integer) = rem(x.x, q)
 export spec, concretize_type #, order, bitlength
 
 import .Specs: generator 
-export generator, octet, order, value, @PGroup, @ECGroup, @ECPoint
+export generator, octet, order, value, @PGroup, @ECGroup, @ECPoint, Group
 
 end
