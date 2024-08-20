@@ -3,7 +3,6 @@ import .Fields: value, modulus, octet
 using .Curves: ECPoint, gx, gy
 using .Specs: PRG
 
-
 abstract type Group end
 
 Base.broadcasted(f::Function, x::Group, y::AbstractVector{<:Integer}) = f.((x for i in 1:length(y)), y)
@@ -21,6 +20,8 @@ name(x::G) where G <: Group = name(G)
 Base.rand(prg::PRG, ::Type{G}, N::Integer; nr::Integer = 0) where G <: Group = convert(Vector{G}, rand(prg, spec(G), N; nr))
 
 Base.ones(x::Vector{G}) where G <: Group = [one(i) for i in x] # need to extend this
+
+iscompressable(g::Group) = false 
 
 struct ECGroup{P<:ECPoint} <: Group
     x::P
@@ -81,6 +82,8 @@ Base.one(g::ECGroup{P}) where P <: ECPoint = ECGroup{P}(zero(P))
 Base.one(::Type{ECGroup{P}}) where P <: ECPoint = ECGroup{P}(zero(P))
 
 value(g::ECGroup) = value(g.x)
+
+iscompressable(g::ECGroup) = iscompressable(g.x)
 
 struct PGroup{S} <: Group
     g::BigInt

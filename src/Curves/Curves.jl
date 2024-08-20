@@ -1,6 +1,6 @@
 module Curves
 
-import ..CryptoGroups: order, name, value, concretize_type
+import ..CryptoGroups: order, name, value, concretize_type, iscompressable
 
 include("ecpoint.jl")
 include("elliptic_curves.jl")

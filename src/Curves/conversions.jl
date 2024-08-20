@@ -200,3 +200,5 @@ function _octet(x::F, y::F; mode::Symbol = :uncompressed) where F <: BinaryField
 end
 
 octet(p::AbstractPoint; mode::Symbol = :uncompressed) = _octet(gx(p), gy(p); mode)
+
+iscompressable(::P) where P <: AbstractPoint = eq(P) <: Weierstrass 

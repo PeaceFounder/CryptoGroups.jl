@@ -24,6 +24,8 @@ function order end
 function name end # Needed because of Curves.
 function value end
 
+function iscompressable end
+
 # Consider deprecating it in favour of value
 # function point end
 
