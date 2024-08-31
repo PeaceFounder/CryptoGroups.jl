@@ -1,9 +1,8 @@
-using ..CryptoGroups.Utils: static
+using ..CryptoGroups.Utils: static, @check
 
 struct FP{P} <: PrimeField
     x::BigInt # Instead of BigInt I could use BitIntegers here. Need to check performance of powermod...
     FP{P}(x::Integer) where P = new{P}(BigInt(x))
-    FP(p::Integer) = FP{static(p)}
 end
 
 Base.convert(::Type{BigInt}, x::PrimeField) = x.x
@@ -17,24 +16,15 @@ order(::Type{FP{P}}) where P = BigInt(P)
 
 #########################################
 
-@enum Endian bige little
-
-
 struct F2PB{R} <: BinaryField ### R is reducer
     x::BitVector
 
-    function F2PB{S}(x::BitVector, e::Endian) where S
-
-        @assert length(x) == length(S) - 1
-        
-        if e == bige
-            new(x)
-        elseif e == little
-            new(reverse(x))
-        end
+    function F2PB{S}(x::BitVector) where S
+        length(x) == length(S) - 1 || throw(ArgumentError("Input length incompatable with reducer polynomial"))
+        return new{S}(reverse(x))
     end 
-
-    F2PB{R}(x::BitVector; e::Endian = little) where R = F2PB{R}(x, e)
+    
+    global _bige_init(::Type{F2PB{R}}, x::BitVector) where R = new{R}(x)
 end
 
 Base.convert(::Type{BitVector}, x::F2PB) = reverse(x.x)
@@ -44,18 +34,18 @@ F2PB(x::F2PB) = x
 bitlength(::Type{F2PB{R}}) where R = length(R) - 1
 bitlength(::F) where F <: F2PB = bitlength(F)
 
-Base.convert(::Type{F}, x::BitVector) where F <: F2PB = F(x, little)
+Base.convert(::Type{F}, x::BitVector) where F <: F2PB = F(x)
 
-reducer(::Type{F2PB{S}}; e::Endian = little) where S = e == little ? reverse(convert(BitVector, S)) : convert(BitVector, S)
-reducer(::Type{F2PB}; e::Endian = little) = nothing
+_bige_reducer(::Type{F2PB{S}}) where S = convert(BitVector, S)
 
-reducer(x::F; e::Endian = little) where F <: F2PB = reducer(F; e)
+reducer(::Type{F2PB{S}}) where S = reverse(convert(BitVector, S))
+reducer(::Type{F2PB}) = nothing
+reducer(x::F) where F <: F2PB = reducer(F)
 
+Base.zero(::Type{F2PB{R}}) where R = _bige_init(F2PB{R}, BitVector(0 for i in 1:length(R)-1))
+Base.one(::Type{F2PB{R}}) where R = _bige_init(F2PB{R}, BitVector((1, (0 for i in 2:length(R)-1 )...)))
 
-Base.zero(::Type{F2PB{R}}) where R = F2PB{R}(BitVector(0 for i in 1:length(R)-1); e = bige)
-Base.one(::Type{F2PB{R}}) where R = F2PB{R}(BitVector((1, (0 for i in 2:length(R)-1 )...)); e = bige)
-
-Base.:+(x::F, y::F) where F <: F2PB = F(xor.(x.x, y.x); e = bige)
+Base.:+(x::F, y::F) where F <: F2PB = _bige_init(F, xor.(x.x, y.x))
 
 order(::Type{F}) where F <: F2PB = BigInt(2)^bitlength(F) - 1
 order(x::F) where F <: F2PB = order(F)    
@@ -107,7 +97,7 @@ end
 
 mul(a::BitVector, b::BitVector, f::BitVector) = red!(mul(a, b), f)
 
-Base.:*(x::F, y::F) where F <: F2PB = F(mul(x.x, y.x, reducer(F; e = bige)); e = bige)
+Base.:*(x::F, y::F) where F <: F2PB = _bige_init(F, mul(x.x, y.x, _bige_reducer(F)))
 Base.:(==)(x::F, y::F) where F <: F2PB = x.x == y.x
 
 ### Pretty printing
@@ -204,7 +194,7 @@ struct F2GNB{N, T} <: BinaryField
     x::BitVector
 
     function F2GNB{N, T}(x::BitVector) where {N, T}
-        @assert length(x) == N
+        length(x) == N || throw(ArgumentError("Input length incompatable with binary basis"))
         new(x)
     end
 
@@ -263,7 +253,7 @@ end
 # Is a dublicate, I could import it from Specs when dust settles
 function compute_integer_order(g::T, p::T) where T <: Integer
     
-    @assert 1 < g < p
+    @check 1 < g < p
 
     b = g
 

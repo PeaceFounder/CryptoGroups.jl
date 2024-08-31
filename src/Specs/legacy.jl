@@ -3,7 +3,7 @@
 # + https://math.stackexchange.com/questions/124408/finding-a-primitive-root-of-a-prime-number
 
 # Eventually will need to revisit this implmentation to comply with CryptoGroups standart
-
+using ..CryptoGroups.Utils: @check
 using CryptoPRG.Verificatum: PRG 
 using Primes: isprime, nextprime
 using Random: AbstractRNG, default_rng
@@ -30,7 +30,7 @@ rngint(rng::AbstractRNG, N) = n_bit_random_number(rng, N)
 ### I could manage to get 512 security
 # Something wrong with this one
 function sophie_germain_group(rng::AbstractRNG, g::Integer, t::Int)
-    @assert g!=1
+    @check g!=1
     while true
         q = rngprime(rng, 2*t)
         p = 2*q + 1

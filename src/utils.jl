@@ -2,6 +2,19 @@ module Utils
 
 import CryptoPRG: bitlength
 
+macro check(ex, msg = nothing)
+    return quote
+        if !$(esc(ex))
+            failed_expr = $(QuoteNode(ex))
+            error_msg = $(msg === nothing ? string(ex) : msg)
+            file = $(string(__source__.file))
+            line = $(__source__.line)
+            throw(AssertionError("$error_msg"))
+        end
+        nothing
+    end
+end
+
 function int2octet(x::Integer)
 
     hex = string(x, base=16)
@@ -81,6 +94,8 @@ macro bin_str(x)
     return a
 end
 
+dynamic(x) = x 
+
 struct StaticBigInt{N} <: Integer
     x::NTuple{N, UInt8}
 end
@@ -101,6 +116,8 @@ Base.convert(::Type{BigInt}, x::StaticBigInt) = octet2int(x.x)
 Base.convert(::Type{Integer}, x::StaticBigInt) = convert(BigInt, x)
 
 Base.BigInt(x::StaticBigInt) = octet2int(x.x)
+
+dynamic(x::StaticBigInt) = convert(BigInt, x)
 
 style(x, n) = "\33[1;$(n)m$x\33[0m"
 
@@ -180,6 +197,7 @@ function Base.convert(::Type{BitVector}, x::StaticBitVector)
     return a
 end
 
+dynamic(x::StaticBitVector) = convert(BitVector, x)
 
 function Base.show(io::IO, x::StaticBitVector) 
     print(io, "static(")
@@ -188,9 +206,6 @@ function Base.show(io::IO, x::StaticBitVector)
     print(io, "\"")
     print(")")
 end
-
-
-modinv(s, q) = mod(gcdx(s, q)[2], q)
 
 Base.length(x::StaticBitVector) = x.len
 
@@ -230,11 +245,31 @@ function Base.convert(::Type{Symbol}, s::StaticSymbol)
 end
 
 static(x::Symbol) = StaticSymbol(x)
+dynamic(x::StaticSymbol) = convert(Symbol, x)
 
-# Goeas through the keyword arguments and returns a coresponding namedtuple where on each argument static is being called
-static(; kwargs...) = NamedTuple((key, static(value)) for (key, value) in pairs(kwargs))
+Base.show(io::IO, x::StaticSymbol) = show(io, dynamic(x))
+
+struct StaticNamedTuple{T, V}
+    args::NamedTuple{T, V}
+end
+
+StaticNamedTuple(; kwargs...) = StaticNamedTuple(NamedTuple((key, static(value)) for (key, value) in pairs(kwargs)))
+
+Base.propertynames(x::StaticNamedTuple) = propertynames(getfield(x, :args))
+Base.getproperty(x::StaticNamedTuple, sym::Symbol) = dynamic(getfield(getfield(x, :args), sym))
+
+static(; kwargs...) = StaticNamedTuple(; kwargs...)
+dynamic(x::StaticNamedTuple) = NamedTuple((key, dynamic(value)) for (key, value) in pairs(getfield(x, :args)))
+
+function Base.show(io::IO, x::StaticNamedTuple)
+
+    print(io, "static")
+    show(io, dynamic(x))
+
+    return
+end
 
 
-export static, @bin_str, @hex_str, octet2int, int2octet, octet2bits, bits2octet
+export static, dynamic, @bin_str, @hex_str, octet2int, int2octet, octet2bits, bits2octet
 
 end

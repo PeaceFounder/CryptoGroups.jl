@@ -3,8 +3,6 @@ using ..Fields: modulus, value, bitlength, int2octet, octet2int, octet2bits, bit
 using CryptoUtils: sqrt_mod_prime
 import ..Fields: octet
 
-
-
 function decompress_weierstrass(x::BigInt, ỹ::Bool, (a, b)::Tuple{BigInt, BigInt}, p::BigInt)
 
     α = mod(x^3 + a * x + b, p)

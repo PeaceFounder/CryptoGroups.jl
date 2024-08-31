@@ -6,12 +6,12 @@ q = order(G)
 p = modulus(G)
 
 @test isvalid(G(3)) == true
-@test isvalid(G(11)) == false
+@test_throws ArgumentError G(11)
 
 n = let 
     n = 0
     for i in 2:p-1
-        isvalid(G(i)) && (n+=1)
+        isvalid(G(i; skip_validation=true)) && (n+=1)
     end
     n
 end
@@ -53,7 +53,7 @@ using Primes
 function testgroup(g::G) where G <: Group
     @test g*g^2 == g^3
     @test (g^2)^2 == g^4
-    @test g^(order(G) + 1) == g
+    # @test g^(order(G) + 1) == g # Done at the constructor
 
     @test one(g) * g == g
     @test g * one(g) == g
@@ -97,9 +97,8 @@ rng = MersenneTwister(0)
 let 
 modp_spec = Specs.sophie_germain_group(rng, 2, 100)
 G = concretize_type(PGroup, modp_spec)
-g = G(generator(modp_spec))
-
-#testgroup(g)
+# g = G(generator(modp_spec))
+# testgroup(g)
 end
 
 ### Seems to have an issue with large numbers

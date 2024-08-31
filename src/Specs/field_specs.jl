@@ -1,3 +1,4 @@
+using ..CryptoGroups.Utils: @check
 ### X9.62 spec talks about the way optimal basis is selected as for polynomial and for gaussian normal basis. Currently, selection rule is implemented only for gaussian normal basis 
 
 
@@ -12,7 +13,7 @@ end
 
 function compute_integer_order(g::T, p::T) where T <: Integer
     
-    @assert 1 < g < p
+    @check 1 < g < p
 
     b = g
 
@@ -29,7 +30,7 @@ end
 
 function gn_basis_exist(m, T)
 
-    @assert mod(m, 8) != 0 # May as well return false?
+    @check mod(m, 8) != 0 # May as well return false?
     
     p = T*m + 1
 
@@ -52,7 +53,7 @@ end
 
 function gn_basis_representation_rule(m)
 
-    @assert mod(m, 8) != 0    
+    @check mod(m, 8) != 0    
 
     if gn_basis_exist(m, 2)
         return 2

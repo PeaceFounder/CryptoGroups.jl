@@ -98,18 +98,18 @@ struct EC2N{B<:BinaryBasis} <: GroupSpec
     names::Vector{String}
 
     function EC2N(basis::B, n::BigInt, a::BitVector, b::BitVector, cofactor::Union{Int, Nothing}, Gx::BitVector, Gy::BitVector; names=String[]) where B <: BinaryBasis
-        @assert bitlength(basis) == length(a) == length(b) == length(Gx) == length(Gy) 
+        bitlength(basis) == length(a) == length(b) == length(Gx) == length(Gy) || throw(ArgumentError("Parameter Input lengths for basis, a, b, Gx, Gy are not equal"))
 
         new{B}(basis, n, a, b, cofactor, Gx, Gy, names)
     end
     
     function EC2N(basis::B, n::Union{BigInt, Nothing}, a::BitVector, b::BitVector, cofactor::Union{Int, Nothing}; names=String[]) where B <: BinaryBasis
-        @assert bitlength(basis) == length(a) == length(b) 
+        bitlength(basis) == length(a) == length(b) || throw(ArgumentError("Parameter Input lengths for basis, a, b are not equal"))
         new{B}(basis, n, a, b, cofactor, nothing, nothing, names)
     end
 
     function EC2N(basis::B, a::BitVector, b::BitVector, cofactor::Union{Int, Nothing}; names=String[]) where B <: BinaryBasis
-        @assert bitlength(basis) == length(a) == length(b) 
+        bitlength(basis) == length(a) == length(b) || throw(ArgumentError("Parameter Input lengths for basis, a, b are not equal"))
         new{B}(basis, nothing, a, b, cofactor, nothing, nothing, names)
     end
 end

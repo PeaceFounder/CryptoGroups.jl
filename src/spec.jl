@@ -18,7 +18,6 @@ concretize_type(::Type{Weierstrass}, a::BitVector, b::BitVector) = Weierstrass{S
 concretize_type(::Type{Weierstrass}, a::F, b::F) where F <: BinaryField = concretize_type(Weierstrass, tobits(a), tobits(b))
 
 
-
 function concretize_type(::Type{ECPoint{P}}, curve::GroupSpec; name = name(curve)) where P <: AbstractPoint
 
     Q = concretize_type(P, curve)
@@ -26,8 +25,6 @@ function concretize_type(::Type{ECPoint{P}}, curve::GroupSpec; name = name(curve
     _order = order(curve)
     _cofactor = cofactor(curve)
     
-    # The issue is here as I removed a method
-    #R = ECPoint{Q}(_order, _cofactor; name)
     R = concretize_type(ECPoint{Q}, _order, _cofactor; name)
 
     return R
@@ -38,7 +35,7 @@ concretize_type(::Type{ECPoint}, spec::GroupSpec; name = name(spec)) = concretiz
 
 function concretize_type(::Type{F2GNB}, N::Int)
 
-    @assert div(N, 8) != 0 "Out of X9.62 spec"
+    div(N, 8) != 0 || throw(ArgumentError("Out of X9.62 spec"))
     T = gn_basis_representation_rule(m)
 
     return F2GNB{N, T}

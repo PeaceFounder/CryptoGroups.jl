@@ -79,7 +79,7 @@ value(p::AffinePoint{<:Weierstrass}) = convert(Tuple{BigInt, BigInt}, p)
 
 function Base.:+(u::AffinePoint{E, F}, v::AffinePoint{E, F}) where {E <: Weierstrass, F <: Field}
 
-    @assert u.x != v.x 
+    @assert u.x != v.x # it is ok to be optimized away
     
     λ = (v.y - u.y)/(v.x - u.x)
 
@@ -121,7 +121,7 @@ value(p::AffinePoint{<:BinaryCurve}) = convert(Tuple{BitVector, BitVector}, p)
 
 function Base.:+(u::AffinePoint{E, F}, v::AffinePoint{E, F}) where {E<:BinaryCurve, F<:BinaryField}
         
-    @assert u.x != v.x 
+    @assert u.x != v.x # it is ok to be optimized away
 
     _a = a(AffinePoint{E, F})
 

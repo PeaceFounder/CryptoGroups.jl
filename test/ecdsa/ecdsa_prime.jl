@@ -1,5 +1,5 @@
 using Test
-using CryptoGroups.Utils: @bin_str, @hex_str, octet2int, modinv
+using CryptoGroups.Utils: @bin_str, @hex_str, octet2int
 using CryptoGroups: concretize_type, generator, order, octet
 using CryptoGroups.Curves: ECPoint, gx, gy
 using CryptoPRG.Verificatum: HashSpec
@@ -57,7 +57,7 @@ r = x̄₁ % n
 
 @test r == 3342403536405981729393488334694600415596881826869351677613
 
-s = modinv(k, n) * (e + d*r) % n
+s = invmod(k, n) * (e + d*r) % n
 
 @test s == 5735822328888155254683894997897571951568553642892029982342
 
@@ -80,7 +80,7 @@ e′ = octet2int(H(M′))
 @test 1 < r′ < n - 1
 @test 1 < s′ < n - 1
 
-c = modinv(s′, n)
+c = invmod(s′, n)
 
 @test c == 3250964404472526825130516490452346217749189704049629042861
 

@@ -23,8 +23,8 @@ Base.isless(x::P, y::P) where P <: AbstractPoint = gx(x) == gx(y) ? gx(x) < gx(y
 
 function validate(x::AbstractPoint, order::Integer, cofactor::Integer)
 
-    @assert oncurve(x) "Point is not in curve"
-    @assert x * cofactor != zero(x) "Point is in cofactor subgroup"
+    oncurve(x) || throw(ArgumentError("Point is not in curve"))
+    x * cofactor != zero(x) || throw(ArgumentError("Point is in cofactor subgroup"))
 
     return
 end
@@ -57,7 +57,7 @@ struct ECPoint{P<:AbstractPoint, S} <: AbstractPoint # The same contract is sati
         return EP(p)
     end
 
-    ECPoint{P, S}(::typeof(zero)) where {P <: AbstractPoint, S} = new{P, S}(zero(P))
+    Base.zero(::Type{ECPoint{P, S}}) where {P <: AbstractPoint, S} = new{P, S}(zero(P))
 
     ECPoint{P, S}(x::F, y::F) where {P <: AbstractPoint, S, F <: Field} = ECPoint{P, S}(P(x, y))
 end
@@ -81,7 +81,6 @@ name(::Type{ECPoint{P, S}}) where {P <: AbstractPoint, S} = isnothing(S.name) ? 
 eq(::Type{ECPoint{P, S}}) where {P <: AbstractPoint, S} = eq(P)
 field(::Type{ECPoint{P, S}}) where {P <: AbstractPoint, S} = field(P)
 
-Base.zero(::Type{ECPoint{P, S}}) where {P <: AbstractPoint, S} = ECPoint{P, S}(zero)
 Base.zero(::P) where P <: ECPoint = zero(P)
 
 function Base.:+(x::P, y::P) where P <: ECPoint 

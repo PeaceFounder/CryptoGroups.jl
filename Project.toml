@@ -20,8 +20,9 @@ julia = "1"
 [extras]
 BitIntegers = "c3b6d118-76ef-56ca-8cc7-ebb389d030a1"
 GaloisFields = "8d0d7f98-d412-5cd4-8397-071c807280aa"
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+Polynomials = "f27b6e38-b328-58d1-80ce-0feddd5e7a45"
 SafeTestsets = "1bc83da4-3b8d-516f-aca4-4fe02f6d838f"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["SafeTestsets", "Test", "GaloisFields", "BitIntegers"]
+test = ["SafeTestsets", "Test", "GaloisFields", "BitIntegers", "Polynomials"]

@@ -1,6 +1,5 @@
 using Test
 using CryptoGroups
-using CryptoGroups.Utils: modinv
 using Random: RandomDevice
 
 # DSA example
@@ -27,7 +26,7 @@ function sign(e::Integer, g::Group, sk::Integer)
     R = g^k
 
     r = R % n
-    s = modinv(k, n) * (e + sk * r) % n 
+    s = invmod(k, n) * (e + sk * r) % n 
 
     if r == 0 || s == 0
         return sign(e, g, sk)
@@ -46,7 +45,7 @@ function verify(e::Integer, P::G, pk::Vector{UInt8}, sig::DSA) where {G <: Group
     @assert 1 < s < n - 1
 
     Q = G(pk)
-    c = modinv(s, n)
+    c = invmod(s, n)
     
     u₁ = e * c % n
     u₂ = r * c % n

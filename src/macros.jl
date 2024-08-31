@@ -1,6 +1,5 @@
 using .Specs: modp_spec
 
-
 # TODO: Add support for @PGroup{p = _p, q = _q} where _q and _p are defined out of the scope
 macro PGroup(expr)
     if expr.head == :braces

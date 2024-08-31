@@ -1,5 +1,5 @@
 using CryptoPRG: HashSpec
-using CryptoGroups.Utils: @bin_str, @hex_str, octet2int, modinv
+using CryptoGroups.Utils: @bin_str, @hex_str, octet2int
 using CryptoGroups.Curves: gx, gy
 using CryptoGroups.Specs: EC2N, PB
 using CryptoGroups: concretize_type, ECPoint, generator, octet, order
@@ -56,7 +56,7 @@ r = x̄ % n
 
 ## Modular computation
 
-s = modinv(k, n) * (e + d*r) % n
+s = invmod(k, n) * (e + d*r) % n
 
 @test s == 308992691965804947361541664549085895292153777025772063598
 
@@ -76,7 +76,7 @@ e′ = octet2int(H(M′))
 @test 1 < r′ < n - 1
 @test 1 < s′ < n - 1
 
-c = modinv(s′, n)
+c = invmod(s′, n)
 
 @test c == 952933666850866331568782284754801289889992082635386177703
 

@@ -15,11 +15,22 @@ Base.inv(x::Field) = x^(order(x) - 1)
 Base.literal_pow(::typeof(^), x::F, ::Val{2}) where F <: Field = square(x)
 Base.literal_pow(::typeof(^), x::F, ::Val{0}) where F <: Field = one(F)
 
+# Theese methods perhaps should be optionally enabled/disabled
+Base.:*(k::Integer, x::F) where F <: Field = F(k) * x
+Base.:*(x::Field, k::Integer) = k * x
+
+Base.:/(x::F, k::Integer) where F <: Field = x / F(k)
+
+Base.isnan(::Field) = false
+
 abstract type BinaryField <: Field end
 
 Base.:-(x::F, y::F) where F <: BinaryField = x + y
+Base.:-(x::BinaryField) = x 
 
 Base.convert(::Type{F}, x::BitVector) where F <: BinaryField = F(x)
+
+Base.eltype(::Type{F}) where F <: Field = F
 
 function Base.convert(::Type{F}, x::Bool) where F <: BinaryField
     if x == false
@@ -29,7 +40,18 @@ function Base.convert(::Type{F}, x::Bool) where F <: BinaryField
     end
 end
 
-Base.convert(::Type{F}, x::Integer) where F <: BinaryField = convert(F, Bool(x))
+function Base.convert(::Type{F}, x::Integer) where F <: BinaryField 
+
+    if x == 0
+        return zero(F)
+    elseif x==1
+        return one(F)
+    else
+        bytes = reinterpret(UInt8, [x])
+        return F(reverse(bytes))
+    end
+
+end
 
 function Base.:^(g::F, a::Integer) where F <: BinaryField
 
@@ -56,16 +78,7 @@ function Base.:^(g::F, a::Integer) where F <: BinaryField
     return x
 end
 
-
-function (::Type{F})(x::Integer) where F <: BinaryField
-    if x == 0
-        return zero(F)
-    elseif x==1
-        return one(F)
-    else
-        error("Not supported")
-    end
-end
+(::Type{F})(x) where F <: BinaryField = convert(F, x)
 
 function Base.convert(::Type{F}, x) where F <: BinaryField 
     
@@ -103,13 +116,10 @@ function value end
 
 Base.show(io::IO, x::PrimeField) = print(io, value(x))
 
-modinv(s, q) = mod(gcdx(s, q)[2], q)
-
-Base.inv(x::F) where F <: PrimeField = F(modinv(value(x), modulus(x)))
+Base.inv(x::F) where F <: PrimeField = F(invmod(value(x), modulus(x)))
 
 Base.zero(::Type{F}) where F <: PrimeField = F(0)
 Base.one(::Type{F}) where F <: PrimeField = F(1)
-
 
 Base.:+(x::F, y::F) where F <: PrimeField = F(mod(value(x) + value(y), modulus(F)))
 Base.:-(x::F, y::F) where F <: PrimeField = x + F(modulus(F) - value(y))
@@ -132,3 +142,5 @@ octet(x::PrimeField) = int2octet(value(x), bitlength(modulus(x)))
 # Perhaps a convert method fits better here as the type is specific
 (::Type{F})(x::Vector{UInt8}) where F <: PrimeField = F(octet2int(x))
 (::Type{F})(x::Vector{UInt8}) where F <: BinaryField = F(octet2bits(x, bitlength(F)))
+
+
