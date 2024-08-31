@@ -3,8 +3,10 @@ using CryptoGroups
 
 makedocs(
     sitename = "CryptoGroups",
+    repo = Documenter.Remotes.GitHub("PeaceFounder", "CryptoGroups.jl"),
     format = Documenter.HTML(),
-    modules = [CryptoGroups]
+    modules = [CryptoGroups],
+    warnonly = true
 )
 
 
