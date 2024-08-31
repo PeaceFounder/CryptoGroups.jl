@@ -96,33 +96,27 @@ struct PGroup{S} <: Group
     function PGroup{S}(x_int::Integer; allow_one::Bool=false, skip_validation=false) where S
 
         x = convert(BigInt, x_int)
-
-        if !allow_one && x == 1
-            msg = "Constructing a degenerate element. Use `allow_one` to hide this warning"
-            if isstrict()
-                error(msg)
-            else
-                @warn msg
-            end
-        end
-        
         _order = order(PGroup{S})
         _modulus = modulus(PGroup{S})
-        if !skip_validation && !isnothing(_order)
-            powermod(x, _order, _modulus) == 1 || throw(ArgumentError("Element $x is not an element of prime group with order $_order and modulus $_modulus"))
+
+        if !skip_validation
+            if x == 1 
+                if !allow_one
+                    msg = "Constructing a degenerate element. Use `allow_one` to hide this warning"
+                    isstrict() ? throw(ArgumentError(msg)) : @warn msg
+                end
+            elseif !isnothing(_order)
+                0 < x < S.p || throw(ArgumentError("Element $x is not in range of the prime group with modulus $_modulus"))
+                powermod(x, _order, _modulus) == 1 || throw(ArgumentError("Element $x is not an element of prime group with order $_order and modulus $_modulus"))
+            end            
         end
-        
-        # Relaxing a little so that group products could happen properly
-        0 < x < S.p || throw(ArgumentError("Element $x is not in range of the prime group with modulus $_modulus"))
+
         new{S}(x)
     end
-
-    #PGroup{S}(x::Integer; skip_validation=false) where S = PGroup{S}(BigInt(x); skip_validation)
 
     Base.one(::Type{PGroup{S}}) where S = new{S}(1)
 end
 
-#Base.one(::Type{PGroup{S}}) where S = PGroup{S}(one)
 Base.one(::PGroup{S}) where S = one(PGroup{S})
 
 octet(x::PGroup) = int2octet(value(x), bitlength(modulus(x)))

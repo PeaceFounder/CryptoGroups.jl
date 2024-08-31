@@ -34,18 +34,16 @@ struct ECPoint{P<:AbstractPoint, S} <: AbstractPoint # The same contract is sati
 
     function ECPoint{P, S}(x::P; allow_zero=false, skip_validation=false) where {P <: AbstractPoint, S}
 
-        if iszero(x) && !allow_zero
-            msg = "Constructing an offcurve element zero. Use `allow_zero` to hide this warning."
-            if isstrict()
-                error(msg)
-            else
-                @warn msg
-            end
-        end
-
         if !skip_validation
-            # This allows specializing for Montgomery curves where clamping is used
-            validate(x, S.order, S.cofactor)
+            if iszero(x) 
+                if !allow_zero
+                    msg = "Constructing an offcurve element zero. Use `allow_zero` to hide this warning/error."
+                    isstrict() ? throw(ArgumentError(msg)) : @warn msg
+                end
+            else 
+                # This allows specializing for Montgomery curves where clamping is used
+                validate(x, S.order, S.cofactor)
+            end
         end
 
         # A test with cofactor also here
