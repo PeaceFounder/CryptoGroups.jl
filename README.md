@@ -1,6 +1,7 @@
 # CryptoGroups
 
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://PeaceFounder.github.io/CryptoGroups.jl/dev)
+[![codecov](https://codecov.io/gh/PeaceFounder/CryptoGroups.jl/graph/badge.svg?token=G9HT9VSV4T)](https://codecov.io/gh/PeaceFounder/CryptoGroups.jl)
 
 Cryptographic groups are a fundamental building block for digital signatures, key exchange algorithms, asymmetric encryption and many other exciting algorithms of practical importance. 
 
