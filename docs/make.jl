@@ -1,10 +1,14 @@
+dirname(@__DIR__) in LOAD_PATH || Base.push!(LOAD_PATH, dirname(@__DIR__))
+
 using Documenter
 using CryptoGroups
 
 makedocs(
-    sitename = "CryptoGroups",
+    sitename = "CryptoGroups.jl",
+    repo = Documenter.Remotes.GitHub("PeaceFounder", "CryptoGroups.jl"),
     format = Documenter.HTML(),
-    modules = [CryptoGroups]
+    modules = [CryptoGroups],
+    warnonly = true
 )
 
 
