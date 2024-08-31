@@ -1,8 +1,10 @@
 # CryptoGroups
 
+[![](https://img.shields.io/badge/docs-dev-blue.svg)](https://PeaceFounder.github.io/CryptoGroups.jl/dev)
+
 Cryptographic groups are a fundamental building block for digital signatures, key exchange algorithms, asymmetric encryption and many other exciting algorithms of practical importance. 
 
-![](https://raw.githubusercontent.com/PeaceFounder/CryptoGroups.jl/b7e6d4b8be1807e124422229428bb4c289523769/doc/assets/CryptoGroups%20types.svg) 
+![](https://raw.githubusercontent.com/PeaceFounder/CryptoGroups.jl/b7e6d4b8be1807e124422229428bb4c289523769/docs/src/assets/CryptoGroups%20types.svg) 
 
 - Cryptographic group library with generic elliptic curve implementation. It avoids the need for partial initialisations and uses the Julia type system with extensive use of type parameters, which are used for group-specifying constants. This offers unprecedented flexibility for implementing new curves and ensures the highest grade type safety. The typing is more static than what is generally offered in other cryptographic library implementations where cryptographic parameters are partially initialised.
 
@@ -16,7 +18,7 @@ Cryptographic groups are a fundamental building block for digital signatures, ke
 
 - Performance: Projective coordinates for elliptic curves are currently not implemented, making them much slower than the state-of-the-art. Also, binary field implementations would highly benefit from using low-level assembly instructions for practical use.
 
-- Offers cryptographic groups interface for all FIPS 1.4 curves, including:
+- Offers cryptographic groups interface for all [FIPS 186.4](https://csrc.nist.gov/pubs/fips/186-4/final) curves, including:
 
   - Prime curves: P_192 (prime192v1, secp192r1), P_224, P_256 (prime256v1, secp256r1), P_384, P_521
   - Koblitz curves: K_163, K_233, K_283, K_409, K_571
