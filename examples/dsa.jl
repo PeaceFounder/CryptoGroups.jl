@@ -1,8 +1,8 @@
+# # Digital Signature Algorithm
+
 using Test
 using CryptoGroups
 using Random: RandomDevice
-
-# DSA example
 
 struct DSA
     r::Integer
@@ -50,7 +50,7 @@ function verify(e::Integer, P::G, pk::Vector{UInt8}, sig::DSA) where {G <: Group
     u₁ = e * c % n
     u₂ = r * c % n
 
-    # Special cases must be handled by the developer
+    ## Special cases must be handled by the developer
     if u₁ == 0
         W = Q ^ u₂
     elseif u₂ == 0

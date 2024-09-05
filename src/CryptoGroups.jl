@@ -17,9 +17,27 @@ end
 
 isstrict() = strict_mode
 
+"""
+    spec(::Union{G, Type{G}})::GroupSpec where G <: Group
 
+Constructs a specification of a group type or instance. It's general intended use is for debugging purposes and serves as an inverse to `concretize_type` method. If called with a group instance the the value of it is used for a generator for the group specification otherwise it is left empty.
+
+See also `concretize_type`
+"""
 function spec end
+
+
+"""
+    concretize_type(::Type{T}, args...) <: T where T
+
+Constructs a concrete subtype of union all or abstract type `T`. The arguments `args` are used to set concrtete values for type parameters of `T`, effectivelly `concretizing` a generic abstract type. The resulting type then can be instanitated by a value. 
+
+See also `spec`
+"""
 function concretize_type end
+
+# HEllo world
+
 function order end
 function name end # Needed because of Curves.
 function value end
@@ -37,17 +55,8 @@ include("groups.jl")
 include("spec.jl")
 include("macros.jl")
 
-using .Fields: PrimeField, BinaryField
-
-Base.rem(p::AbstractPoint, q::Integer) = rem(gx(p), q)
-Base.rem(x::BinaryField, q::Integer) = rem(octet(x) |> Utils.octet2int, q) # used in ec2n.jl test in CryptoSignatures
-Base.rem(x::PrimeField, q::Integer) = rem(value(x), q)
-Base.rem(x::PGroup, q::Integer) = rem(value(x), q)
-Base.rem(x::ECGroup, q::Integer) = rem(x.x, q)
-
+import .Specs: generator
 export spec, concretize_type #, order, bitlength
-
-import .Specs: generator 
-export generator, octet, order, value, @PGroup, @ECGroup, @ECPoint, Group
+export octet, order, value, @PGroup, @ECGroup, @ECPoint, Group
 
 end

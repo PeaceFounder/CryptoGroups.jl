@@ -138,7 +138,33 @@ concretize_type(::Type{ECGroup}, spec::GroupSpec; name = name(spec)) = ECGroup{c
 concretize_type(::Type{PGroup}, p::Integer, q::Union{Integer, Nothing}; name::Union{Symbol, Nothing} = nothing) = PGroup{static(; p, q, name)}
 concretize_type(::Type{PGroup}, spec::MODP; name = nothing) = concretize_type(PGroup, spec.p, spec.q; name)
 
-spec(x::Symbol) = curve(x) # 
+"""
+    spec(name::Symbol)::GroupSpec
+
+Gets a group specification from a provided canonical `name` of the group specification which are hardcoded into the library. 
+
+# Examples
+
+```julia
+# NIST elliptic curve P-192 specification:
+p192_spec = spec(:P_192)
+P192 = concretize_type(ECGroup, p192_spec)
+
+# Modular prime group specification
+modp_spec = spec(:RFC5114_2048_224)
+MODP = concretize_type(PGroup, modp_spec)
+```
+
+See also `concretize_type`, `@ECGroup`, `@PGroup`
+"""
+function spec(x::Symbol)
+    try
+        return curve(x)
+    catch
+        return modp_spec(x)
+    end
+end
+
 
 spec(::Type{ECGroup{P}}) where P = spec(P)
 spec(g::ECGroup) = spec(g.x)

@@ -2,6 +2,11 @@ module Utils
 
 import CryptoPRG: bitlength
 
+"""
+    @check(ex, msg = nothing)
+
+Drop in replacement for `@assert` macro as it can be eliminated in optimizations.
+"""
 macro check(ex, msg = nothing)
     return quote
         if !$(esc(ex))
@@ -15,6 +20,11 @@ macro check(ex, msg = nothing)
     end
 end
 
+"""
+    int2octet(x::Integer, N::Int = bitlength(x))::Vector{UInt8}
+
+Converts integer `x` into an octet where optional `N` specifies number of allocated bits for the integer encoding. 
+"""
 function int2octet(x::Integer)
 
     hex = string(x, base=16)
@@ -27,8 +37,8 @@ end
 
 
 function int2octet(x::Integer, N::Int)
-    k = div(N, 8, RoundUp)
 
+    k = div(N, 8, RoundUp)
 
     bytes = int2octet(x)
 
@@ -37,12 +47,21 @@ function int2octet(x::Integer, N::Int)
     return UInt8[pad..., bytes...]
 end
 
+"""
+    octet2int(x::Vector{UInt8})::BigInt
+    octet2int(x::String)::BigInt
 
+Converts a binary octet to a `BigInt`. In case a string is passed it is treated as hexadecimal and is converted with `hex2bytes`.
+"""
 octet2int(x::Vector{UInt8}) = parse(BigInt, bytes2hex(x), base=16)
 octet2int(x::String) = octet2int(hex2bytes(x))
-
 octet2int(x::NTuple{N, UInt8}) where N = octet2int([x...])
-    
+
+"""
+    octet2bits(x::Vector{UInt8}[, N::Int])::BitVector
+
+Converts an octet ot a bitvector with an optionally specified length `N`.
+"""    
 function octet2bits(x::Vector{UInt8})
     bv = BitVector(u << -i % Bool for u in x for i in 7:-1:0)
     return bv
@@ -66,6 +85,11 @@ function bits2uint8(x::BitVector)
     return s
 end
 
+"""
+    bits2octet(x::BitVector)::Vector{UInt8}
+
+Converts a bitvector to an octet.
+"""
 function bits2octet(_x::BitVector)
     
     x = copy(_x)
@@ -88,12 +112,24 @@ function bits2octet(_x::BitVector)
     return bytes
 end
 
+"""
+    @bin_str(x)::BitVector
 
+Converts binary representation to `BitVector`:
+```julia
+bin"1010" == BitVector([1, 0, 1, 0])
+```
+"""
 macro bin_str(x)
     a = BitVector((i for i in x) .== '1')
     return a
 end
 
+"""
+    dynamic(x)
+
+Converts static type to it's closest base type. Inverse of `static` method.
+"""
 dynamic(x) = x 
 
 struct StaticBigInt{N} <: Integer
@@ -143,6 +179,14 @@ function _hex2bytes(x::String)
     return hex2bytes(normalized)
 end
 
+"""
+    @hex_str(x)::Vector{UInt8}
+
+A convinience macro for converting a hex to byte vector:
+```julia
+hex"AAEF BBEC" == UInt8[0xaa, 0xef, 0xbb, 0xec]
+```
+"""
 macro hex_str(x)
     return _hex2bytes(x)
 end
@@ -211,6 +255,31 @@ Base.length(x::StaticBitVector) = x.len
 
 ########################
 
+"""
+    static(x)
+    static(; kwargs...)
+
+If `x` is not bitstype converts to a bitstype representation. Keyword arguments are used to construct a named tuple with every value
+being converted with static. Can be converted back to original type with `dynamic` method.
+
+# Example
+
+```julia
+# Single argument case
+x = BigInt(23)
+isbitstype(typeof(x)) == false
+isbitstype(typeof(static(x))) == true
+x == dynamic(static(x))
+
+# NamedTuple construction
+
+nt = static(; x = BigInt(23), y = 51, z = :name)
+isbittstype(typeof(nt)) == true
+nt.x == BigInt(23) # accessor methods do conversion with dynamic
+dynamic(nt) # ordinary named tuple with every value made dynamic
+```
+
+"""
 static(x::BitVector) = StaticBitVector(x)
 static(x::BigInt) = StaticBigInt(x)
 static(x::Integer) = x # BigInt is the only exception
@@ -257,6 +326,7 @@ StaticNamedTuple(; kwargs...) = StaticNamedTuple(NamedTuple((key, static(value))
 
 Base.propertynames(x::StaticNamedTuple) = propertynames(getfield(x, :args))
 Base.getproperty(x::StaticNamedTuple, sym::Symbol) = dynamic(getfield(getfield(x, :args), sym))
+
 
 static(; kwargs...) = StaticNamedTuple(; kwargs...)
 dynamic(x::StaticNamedTuple) = NamedTuple((key, dynamic(value)) for (key, value) in pairs(getfield(x, :args)))

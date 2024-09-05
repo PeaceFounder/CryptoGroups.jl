@@ -1,5 +1,24 @@
 using ..CryptoGroups.Utils: static, @check
 
+"""
+    struct FP{P} <: PrimeField
+        x::BigInt 
+    end
+
+Modular prime field where `P` is a modulus. 
+
+# Example
+
+```julia
+# If modulus is a bitstype
+x = FP{23}(2)
+
+# For BigInt modulus use a static method from Utils
+p = BigInt(23)
+y = FP{static(p)}(2)
+```
+
+"""
 struct FP{P} <: PrimeField
     x::BigInt # Instead of BigInt I could use BitIntegers here. Need to check performance of powermod...
     FP{P}(x::Integer) where P = new{P}(BigInt(x))
@@ -16,6 +35,31 @@ order(::Type{FP{P}}) where P = BigInt(P)
 
 #########################################
 
+"""
+    struct F2PB{R} <: BinaryField
+        x::BitVector
+    end
+
+Binary extension field `GF(2)` with polynomial reducer that is encoded in a type parameter `R`. For type concretization a macro `@F2PB` is offered. The constructor from bitvector follows `ANS X9.62` standart convention. 
+
+# Example
+```julia
+# Concretizing binary field with bitvector
+F = @F2PB{bin"10011"} # equals to a polynomial f(X) = X^4 + X + 1
+
+# Passing polynomial directly
+F = @F2PB{X^4 + X + 1}
+
+# Instantiating a field element
+a = F(bin"1101")
+b = F(bin"1001")
+a * b = F(bin"1111")
+a + b = F(bin"0100")
+
+# Conversions
+α == F(octet(α)) == F(value(α))
+```
+"""
 struct F2PB{R} <: BinaryField ### R is reducer
     x::BitVector
 
@@ -31,6 +75,11 @@ Base.convert(::Type{BitVector}, x::F2PB) = reverse(x.x)
 
 F2PB(x::F2PB) = x
 
+"""
+    bitlength(::Union{F, Type{F}})::Int where F <: Field
+
+Bitlength for field type. For `BinaryFields` returns field degree wheras for `PrimeField` it is bitlength of modulus. 
+"""
 bitlength(::Type{F2PB{R}}) where R = length(R) - 1
 bitlength(::F) where F <: F2PB = bitlength(F)
 
@@ -49,7 +98,6 @@ Base.:+(x::F, y::F) where F <: F2PB = _bige_init(F, xor.(x.x, y.x))
 
 order(::Type{F}) where F <: F2PB = BigInt(2)^bitlength(F) - 1
 order(x::F) where F <: F2PB = order(F)    
-
 
 _order(x::BitVector) = findlast(x->x==1, x) - 1
 _rem(x::BitVector) = x[1:findlast(x->x==1, x)-1]
@@ -189,6 +237,34 @@ end
 
 #####################################################################################
 
+"""
+    struct F2GNB{N, T} <: BinaryField
+        x::BitVector
+    end
+
+Binary extension field in Gausian normal basis where `N` is a field degree and `T` is it's complexity type (an integer). Note that
+complexity type `T` is not an independent parameter but depends on `N` and may not exist. For generaration of complexity parameter see `CryptoGroups.Specs.GNB` constructor. Conversion between `F2GNB` and `F2PB` is not implemented, but is specified in ANSI X9.62 standard.
+
+# Example
+
+```julia
+# Direct type construction for degree 4
+F = F2GNB{4, 1}
+
+# Computing the type using `Specs.GNB`
+(; m, T) = Specs.GNB(4)
+F = F2GNB{m, T}
+
+# Instantiation
+a = F2GNB{4, 3}(bin"1000")
+b = F2GNB{4, 3}(bin"1101")
+a * b == F2GNB{4, 3}(bin"0010")
+a + b == F2GNB{4, 3}(bin"0101")
+
+# Conversions
+a == F(octet(a)) == F(value(a))
+```
+"""
 struct F2GNB{N, T} <: BinaryField
 
     x::BitVector

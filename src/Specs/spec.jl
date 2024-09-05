@@ -1,6 +1,6 @@
 using ..CryptoGroups.Curves: AffinePoint
 using ..CryptoGroups: concretize_type, value
-using ..CryptoGroups.Utils: hex2bits
+using ..CryptoGroups.Utils: hex2bits, @check
 
 abstract type GroupSpec end
 
@@ -82,9 +82,25 @@ bitlength(x::PB) = maximum(x.f) #- 1
 struct GNB <: BinaryBasis
     m::Int
     T::Int
+
+    function GNB(m::Int, T::Int; skip_validation = false)
+        if !skip_validation
+            @check mod(m, 8) != 0
+            gn_basis_exist(m, T) || throw(ArgumentError("Gaussian normal basis for field degree $m does not exist with complexity T = $T"))
+        end
+
+        return new(m, T)
+    end
+
+    function GNB(m::Int)
+        @check mod(m, 8) != 0
+        T = gn_basis_representation_rule(m)
+        return new(m, T)
+    end
 end
 
 bitlength(x::GNB) = x.m
+
 
 
 struct EC2N{B<:BinaryBasis} <: GroupSpec

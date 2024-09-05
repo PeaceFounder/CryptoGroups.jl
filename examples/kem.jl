@@ -1,4 +1,4 @@
-# key encpsulation mechanism
+# # Key Encpsulation Mechanism
 # Essentailly Diffie-Hellman
 using Test
 using CryptoGroups

@@ -1,6 +1,15 @@
 using ..Fields: PrimeField, BinaryField, tobits
 import ..Fields
 
+"""
+    struct AffinePoint{E <: EllipticCurve, T <: Field} <: AbstractPoint
+        x::T
+        y::T
+    end
+
+Affine represantion of elliptic curve point. (Alternative represnations are Jacobi and projective coordinates which are currently
+unimplemented.) Operations `*`, `+` and `-` are unsafe and hence this type shall not be used outside `ECPoint` wrapping. See also `AbstractPoint` for supported methods.
+"""
 struct AffinePoint{E <: EllipticCurve, T <: Field} <: AbstractPoint
     x::T
     y::T

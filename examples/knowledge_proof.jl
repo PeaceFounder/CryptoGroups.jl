@@ -1,3 +1,5 @@
+# # Proof of Knowledge
+
 # Proving knowledge of exponent `x` for `y` such that `y = g^x` is easy, just give away the exponent.
 # It is also prove this statement publically to a third party without disclousing the secret `x` which is what
 # noninteractive zero knowledge proof of knowledge can achieve (NIZKPoP)
@@ -12,8 +14,8 @@ verify(g::G, y::G, x::Integer) where G <: Group = g^x == y # proof by disclousur
 
 function challenge(g::G, y::G, R::G) where G <: Group
 
-    # the encoding is deserializable as `octet` returns fixed length output that depends on unerlying group
-    # nevertheless it is recommended to use a proper canoncial encoding for this purpose which we shall skip
+    ## the encoding is deserializable as `octet` returns fixed length output that depends on unerlying group
+    ## nevertheless it is recommended to use a proper canoncial encoding for this purpose which we shall skip
     prg = Verificatum.PRG(HashSpec("sha256"), [octet(g)..., octet(y)..., octet(R)...])
 
     return rand(prg, 2:order(G) - 1)
@@ -21,7 +23,7 @@ end
 
 function prove(g::G, y::G, x::Integer) where G <: Group
 
-    # we can construct proof deterministically without relying on randomness source 
+    ## we can construct proof deterministically without relying on randomness source 
     prg = Verificatum.PRG(HashSpec("sha256"), [octet(y)..., int2octet(x)...]) 
     
     r = rand(prg, 2:order(G) - 1)

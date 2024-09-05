@@ -1,3 +1,4 @@
+# # Reed-Solomon Error Correction
 # This is Reed-Solomon algorithm implemnetd in Julia. It demonstraates that polynomial field
 # ease of use and ability to compose it with Polynomials library which can do polynom multiplication, 
 # derivatives and modular reduction.
@@ -19,19 +20,19 @@ function berklekamp_massey(syndromes::Vector{GF256})
     
     L, m = 0, 1
     for n in 1:length(syndromes)
-        # Adjust for zero-based indexing in Polynomial
+        ## Adjust for zero-based indexing in Polynomial
         d = syndromes[n] + sum(C[i-1] * syndromes[n - i + 1] for i in 1:L; init = zero(GF256))
         if iszero(d)
             m += 1
         elseif 2*L <= n
             T = C
-            # Use zero-based indexing for polynomial multiplication
+            ## Use zero-based indexing for polynomial multiplication
             C -= d * B * Polynomial{GF256}([0, 1])^(m-1)
             L = n + 1 - L
             B = T
             m = 1
         else
-            # Use zero-based indexing for polynomial multiplication
+            ## Use zero-based indexing for polynomial multiplication
             C -= d * B * Polynomial{GF256}([0, 1])^(m-1)
             m += 1
         end
@@ -57,13 +58,13 @@ function rs_decode(received::Vector{UInt8}, n::Int, k::Int, g::Polynomial{GF256}
     syndromes = [received_poly(r) for r in roots(g)]
 
     if all(iszero(s) for s in syndromes)
-        return received[1:k] # no errors detected
+        return received[1:k] ## no errors detected
     end
     
     error_locator = berklekamp_massey(syndromes)
 
     error_positions = [i for i in 1:n if iszero(error_locator(GF256(2)^i))]
-    # @show error_positions
+    ## @show error_positions
 
     error_evaluator = Polynomial{GF256}(syndromes) * error_locator % Polynomial{GF256}([zeros(Int, n - k)..., 1])
 
@@ -93,4 +94,4 @@ received = encoded + errors
 
 decoded = rs_decode(received, n, k, g)
 
-# @test message == decoded
+## @test message == decoded
