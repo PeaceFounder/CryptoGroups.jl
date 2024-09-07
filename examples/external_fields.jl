@@ -1,6 +1,9 @@
 # # Field Subtyping
-# This example shows how to use your own field implementation for using them to compute on 
-# elliptic curves. For making things interesting we shall wrap GaloisFields implementeed binary extension field. 
+
+# This example demonstrates the flexibility and extensibility of the CryptoGroups package, showcasing how custom field implementations can be seamlessly integrated with existing elliptic curve operations. Specifically, it illustrates how to wrap and use `GaloisFields`'s binary extension field implementation within the `CryptoGroups` to do computations with elliptic curves.
+
+# The modular approach of `CryptoGroups` allows users to integrate custom field implementations with elliptic curves easily. By defining a few key methods and ensuring proper subtyping, users can drop in their optimised field implementations - be it binary fields as shown here or Mersenne primes and test different optimisations with elliptic curves while allowing the use of existing implementations as reference. This design promotes the separation of concerns where one can focus on optimising fields, one new elliptic curve support or new arithmetic formulas like projective coordinates separately from each other. 
+
 using Test
 using CryptoGroups
 import CryptoGroups: BinaryField, concretize_type, PB, bitlength
@@ -36,8 +39,6 @@ concretize_type(::Type{GF₂}, basis::PB) = GF₂(basis.f)
 
 Base.convert(::Type{F}, a::BitVector) where F <: GF₂ = F(a)
 Base.convert(::Type{BitVector}, a::GF₂) = reverse(BitVector(i.n for i in a.x.coeffs))
-
-#tobits(a::GF₂) = reverse(BitVector(i.n for i in a.x.coeffs)) # For the sake of symmetry 
 
 Base.:+(a::F, b::F) where F <: GF₂ = F(a.x + b.x)
 Base.:*(a::F, b::F) where F <: GF₂ = F(a.x * b.x)

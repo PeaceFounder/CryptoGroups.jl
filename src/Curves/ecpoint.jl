@@ -64,7 +64,7 @@ A wrapper type for elliptic curve points ensuring their safe use. The constructo
 and that it is not in cofactor subgroup. This check can be bypassed by specializing on `validate` method. Also adds safety 
 checks when doing a point summation in case when points are equal, inverse of each other and treats zero properly. 
 
-In addition to `AbstractPoint` methods `*`, `+`, `-`, `gx`, `gy` and `zero`, `ECPopint` implements `order`, `cofactor`
+In addition to `AbstractPoint` methods `*`, `+`, `-`, `gx`, `gy` and `zero`, `ECPoint` implements `order`, `cofactor`
 """
 struct ECPoint{P<:AbstractPoint, S} <: AbstractPoint # The same contract is satisfied thus a subtype
     p::P

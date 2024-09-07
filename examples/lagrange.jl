@@ -1,6 +1,8 @@
 # # Lagrange Interpolation
-# Lagrange interpolation for modular field. In practice it is used for 
-# Shamir Lagrange secret sharing scheme where the constant term is the secret
+
+# This Julia code demonstrates the implementation of Lagrange interpolation over a modular field, a crucial component in cryptographic schemes such as Shamir's Secret Sharing. The implementation showcases the flexibility and composability of Julia's ecosystem by seamlessly integrating the external `Polynomials` package with the custom modular field arithmetic provided by `CryptoGroups`. 
+
+# `CryptoGroups` handles the finite field arithmetic, while `Polynomials` manages the polynomial operations, without creating a direct dependency between the two. The result is a concise yet powerful implementation that can be easily adapted for various cryptographic applications. The example includes a test case that reconstructs a secret (the constant term of the polynomial) using Lagrange interpolation, illustrating its practical application in secret sharing schemes.
 
 using Test
 using CryptoGroups.Fields

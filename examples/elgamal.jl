@@ -1,5 +1,9 @@
 # # ElGamal Cryptosystem
 
+# The ElGamal cryptosystem, as demonstrated in this Julia code example, is a fundamental component of many verifiable e-voting systems. This implementation showcases the core operations of the ElGamal encryption scheme, including key generation, encryption, and decryption and is implemented in a group agnostic way. 
+
+# The example illustrates both scalar and vector cases of ElGamal encryption. It defines an `ElGamalRow` struct to represent encrypted messages, and implements functions for encryption (enc) and decryption (dec). The code demonstrates how to encrypt multiple messages simultaneously and how to work with tuples of group elements as well as vectors. By using Julia's multiple dispatch capabilities, the implementation provides a flexible and type-safe approach to handling different input types. The test cases at the end of the file are made using P-192 elliptic curve group verify the correctness of the encryption and decryption operations for both single-row and multi-row scenarios.
+
 using Test
 using CryptoGroups
 
@@ -18,7 +22,7 @@ enc(g::G, pk::G, m::NTuple{N, G}, r::NTuple{N, <:Integer}) where {N, G <: Group}
 
 dec(e::ElGamalRow{G}, x::Integer) where G <: Group = e.b ./ e.a .^ x
 
-# A scalar example with 3 row elements
+## A scalar example with 3 row elements
 
 g = @ECGroup{P_192}()
 
@@ -33,7 +37,7 @@ plaintexts = dec(cyphertexts, x)
 
 @test plaintexts == m #
 
-# A vector case with 3 rows
+## A vector case with 3 rows
 
 mvec = NTuple{3, typeof(g)}[
     (g^2, g^3, g^4),

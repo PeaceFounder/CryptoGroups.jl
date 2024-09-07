@@ -1,16 +1,17 @@
 # # Reed-Solomon Error Correction
-# This is Reed-Solomon algorithm implemnetd in Julia. It demonstraates that polynomial field
-# ease of use and ability to compose it with Polynomials library which can do polynom multiplication, 
-# derivatives and modular reduction.
 
-# HELP WANTED: Currently the implementation has bugs and can't even get correct error positions; To proceed
-# one could write a tests for `berklekamp_massey` and when it works debug error_positions
+# This Julia code demonstrates an implementation of the Reed-Solomon error correction algorithm, showcasing the power and flexibility of Julia's ecosystem in cryptographic applications. The implementation leverages the custom finite field arithmetic provided by `CryptoGroups`, specifically using a Galois Field GF(2^8) constructed from as an instance of generic polynomial extension field, and seamlessly integrates it with the external `Polynomials` package for polynomial operations.
+
+# The code illustrates versatility of `CryptoGroups` package also for low-level finite field operations with high-level polynomial manipulations. It implements key components of the Reed-Solomon algorithm, including encoding, syndrome calculation, the Berlekamp-Massey algorithm for error locator polynomial generation, and error correction. 
+
+# **HELP WANTED:** *Currently the implementation has bugs and can't even get correct error positions; To proceed
+# one could write a tests for `berklekamp_massey` and when it works debug error_positions.*
 
 using Test
 using CryptoGroups.Fields
 using Polynomials
 
-GF256 = @F2PB{X^8 + X^4 + X^3 + X + 1}
+const GF256 = @F2PB{X^8 + X^4 + X^3 + X + 1}
 
 roots(p) = GF256[i for i in 0:255 if iszero(p(GF256(i)))]
 

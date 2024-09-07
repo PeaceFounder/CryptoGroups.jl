@@ -20,6 +20,29 @@ function include_example(fname)
     return joinpath("generated", "$name.md")
 end
 
+# Setting README as index
+
+index_path = joinpath(@__DIR__, "src", "index.md")
+readme_path = joinpath(@__DIR__, "..", "README.md")
+
+rm(index_path, force=true)
+
+readme_content = read(readme_path)
+
+index_content = join([
+    """
+    ```@meta
+    EditURL = "../../README.md"
+    ```
+    """,
+    String(readme_content)
+], "\n")
+
+
+write(index_path, index_content)
+
+
+
 
 makedocs(
     sitename = "CryptoGroups.jl",
@@ -37,7 +60,7 @@ makedocs(
         ],
         "Field Examples" => [
             "Lagrange Polynomials" => include_example("lagrange.jl"),
-            "Reed Solomon EC" => include_example("reed-solomon.jl"),
+            "Reed-Solomon EC" => include_example("reed-solomon.jl"),
             "Field Subtyping" => include_example("external_fields.jl")
         ],
         "Reference" => [

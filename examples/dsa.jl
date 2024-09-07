@@ -1,7 +1,12 @@
 # # Digital Signature Algorithm
 
+# This Julia code demonstrates a group-agnostic implementation of the Digital Signature Algorithm (DSA), a widely used standard for message authentication. The implementation defines three key functions: keygen for key generation, sign for creating signatures, and verify for signature verification. While it omits the message hashing step for simplicity, the code adheres to FIPS 186-4 compliance, with safety checks integrated into the group element constructors. 
+
+# The implementation is designed to work with any abstract group, showcasing Julia's multiple dispatch capabilities and allowing for flexibility across different cryptographic settings. To illustrate its functionality, the code includes a test case using the P-192 elliptic curve group. This example serves as a foundational demonstration of DSA and is foundation of [CryptoSignatures.jl](https://github.com/PeaceFounder/CryptoSignatures.jl) which offers extensive test suite and uses deterministic randomness for $k$ generation.
+
 using Test
 using CryptoGroups
+using CryptoGroups.Utils: @check
 using Random: RandomDevice
 
 struct DSA
@@ -41,8 +46,8 @@ function verify(e::Integer, P::G, pk::Vector{UInt8}, sig::DSA) where {G <: Group
 
     (; r, s) = sig
     
-    @assert 1 < r < n - 1
-    @assert 1 < s < n - 1
+    @check 1 < r < n - 1
+    @check 1 < s < n - 1
 
     Q = G(pk)
     c = invmod(s, n)
@@ -68,9 +73,6 @@ end
 g = @ECGroup{P_192}() 
 sk, pk = keygen(g)
 
-
 m = 42
-
 sig = sign(m, g, sk)
-
 @test verify(m, g, pk, sig)

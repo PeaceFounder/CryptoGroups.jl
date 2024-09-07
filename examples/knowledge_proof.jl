@@ -1,8 +1,8 @@
 # # Proof of Knowledge
 
-# Proving knowledge of exponent `x` for `y` such that `y = g^x` is easy, just give away the exponent.
-# It is also prove this statement publically to a third party without disclousing the secret `x` which is what
-# noninteractive zero knowledge proof of knowledge can achieve (NIZKPoP)
+# This Julia code example demonstrates the implementation of a non-interactive zero-knowledge proof of knowledge (NIZKPoK) for the discrete logarithm problem. The code showcases how to prove knowledge of an exponent $x$ for a given $y = g^x$ without revealing the secret $x$ itself, using group-agnostic methods.
+
+# The implementation provides both simple proof by disclosure and a more secure non-interactive zero-knowledge proof, along with their corresponding verification functions. By leveraging Julia's multiple dispatch and parametric types, the code is designed to work with any abstract group `Group`, making it flexible and applicable to various cryptographic settings. For demonstration we use P-192 elliptic curve group, but the core functions are written to be compatible with any group provided by CryptoGroups.
 
 using Test
 using CryptoGroups

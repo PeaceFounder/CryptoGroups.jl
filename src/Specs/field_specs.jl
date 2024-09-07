@@ -68,7 +68,5 @@ function gn_basis_representation_rule(m)
             end
             T += 1            
         end
-
-        return T
     end
 end
