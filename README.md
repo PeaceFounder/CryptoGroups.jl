@@ -3,7 +3,7 @@
 [![codecov](https://codecov.io/gh/PeaceFounder/CryptoGroups.jl/graph/badge.svg?token=G9HT9VSV4T)](https://codecov.io/gh/PeaceFounder/CryptoGroups.jl)
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://PeaceFounder.github.io/CryptoGroups.jl/dev)
 
-CryptoGroups is a Julia package that provides a versatile and type-safe implementation of cryptographic groups. It offers a unified interface for working with various types of groups, including modular prime groups and elliptic curves over prime and binary fields. Blending educational value with production-ready capabilities, CryptoGroups serves both beginners and seasoned practitioners, as evidenced by its successful integration in projects like [CryptoSignatures](https://github.com/PeaceFounder/CryptoSignatures.jl) and [ShuffleProofs](https://github.com/PeaceFounder/ShuffleProofs.jl).
+CryptoGroups is a Julia package that provides a versatile and type-safe implementation of cryptographic groups. It offers a unified interface for working with various types of groups, including modular prime groups and elliptic curves over prime and binary fields. Suitable for both academic and aspiring production environments, CryptoGroups has been rigorously tested and refined through its implementation in real-world projects such as [CryptoSignatures](https://github.com/PeaceFounder/CryptoSignatures.jl) and [ShuffleProofs](https://github.com/PeaceFounder/ShuffleProofs.jl), ensuring a robust and versatile cryptographic toolkit.
 
 ## Key Features
 
@@ -111,7 +111,7 @@ Despite these limitations, CryptoGroups provides a solid foundation for cryptogr
 
 # References
 
-- [elliptic-curve](https://github.com/sdiehl/elliptic-curve#readme) library in Haskell which share similar goals
+- [elliptic-curve](https://github.com/sdiehl/elliptic-curve#readme) library in Haskell that shares similar goals regarding type safety
 - [RFC2409](https://tools.ietf.org/html/rfc2409#section-6.2) and [RFC5114](https://tools.ietf.org/html/rfc5114#section-2.1) for modular prime group constants
 - [SafeCurves](https://safecurves.cr.yp.to/complete.html) on addition checks for Weierstrass curves
 - [FIPS 186-4](https://csrc.nist.gov/pubs/fips/186-4/final) and [FIPS 186-5](https://csrc.nist.gov/pubs/fips/186-5/final)
