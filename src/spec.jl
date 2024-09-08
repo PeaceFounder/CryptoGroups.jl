@@ -17,6 +17,8 @@ concretize_type(::Type{Weierstrass}, a::Integer, b::Integer) = Weierstrass{stati
 concretize_type(::Type{Weierstrass}, a::BitVector, b::BitVector) = Weierstrass{StaticBitVector(a), StaticBitVector(b)}
 concretize_type(::Type{Weierstrass}, a::F, b::F) where F <: BinaryField = concretize_type(Weierstrass, tobits(a), tobits(b))
 
+concretize_type(::Type{P}, curve::Koblitz) where P <: AbstractPoint = concretize_type(P, curve.bec)
+concretize_type(::Type{ECPoint{P}}, curve::Koblitz; name = name(curve)) where P <: AbstractPoint = concretize_type(ECPoint{P}, curve.bec; name)
 
 function concretize_type(::Type{ECPoint{P}}, curve::GroupSpec; name = name(curve)) where P <: AbstractPoint
 
@@ -32,23 +34,7 @@ end
 
 concretize_type(::Type{ECPoint}, spec::GroupSpec; name = name(spec)) = concretize_type(ECPoint{AffinePoint}, spec; name)
 
-
-function concretize_type(::Type{F2GNB}, N::Int)
-
-    div(N, 8) != 0 || throw(ArgumentError("Out of X9.62 spec"))
-    T = gn_basis_representation_rule(m)
-
-    return F2GNB{N, T}
-end
-
-function F2GNB(x::BitVector)
-
-    N = length(x)
-    F = concretize_type(F2GNB, N)
-
-    return F(x)
-end
-
+concretize_type(::Type{F2GNB}, N::Int) = concretize_type(F2GNB, GNB(N))
 
 function concretize_type(::Type{AffinePoint{Weierstrass, F}}, curve::ECP) where F <: PrimeField
 

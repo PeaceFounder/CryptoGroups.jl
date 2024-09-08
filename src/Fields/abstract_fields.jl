@@ -213,7 +213,7 @@ octet(x::PrimeField) = int2octet(value(x), bitlength(modulus(x)))
 Converts field value to an octet and then to integer from which remainder is computed. This is in accord with FIPS 186-4
 standart for making ECDSA signatures over binary fields.
 """
-Base.rem(x::BinaryField, q::Integer) = rem(octet(x) |> Utils.octet2int, q) # used in ec2n.jl test in CryptoSignatures
+Base.rem(x::BinaryField, q::Integer) = rem(octet(x) |> octet2int, q) # used in ec2n.jl test in CryptoSignatures
 
 """
     rem(x::PrimeField, q::T)::T where T <: Integer

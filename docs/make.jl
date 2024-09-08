@@ -51,7 +51,7 @@ makedocs(
     modules = [CryptoGroups, CryptoGroups.Fields, CryptoGroups.Curves, CryptoGroups.Utils],
     warnonly = true,
     pages = [
-        "index.md",
+        "Overview" => "index.md",
         "Group Examples" => [
             "Digital Signature Algorithm" => include_example("dsa.jl"),  
             "Key Encapsulation Mechanism" => include_example("kem.jl"),

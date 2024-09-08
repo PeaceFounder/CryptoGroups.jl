@@ -1,9 +1,9 @@
-# CryptoGroups Overview
+# CryptoGroups.jl
 
 [![codecov](https://codecov.io/gh/PeaceFounder/CryptoGroups.jl/graph/badge.svg?token=G9HT9VSV4T)](https://codecov.io/gh/PeaceFounder/CryptoGroups.jl)
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://PeaceFounder.github.io/CryptoGroups.jl/dev)
 
-CryptoGroups is a Julia package that provides a flexible and type-safe implementation of cryptographic groups. It offers a unified interface for working with various types of groups, including modular prime groups and elliptic curves over prime and binary fields.
+CryptoGroups is a Julia package that provides a versatile and type-safe implementation of cryptographic groups. It offers a unified interface for working with various types of groups, including modular prime groups and elliptic curves over prime and binary fields. Blending educational value with production-ready capabilities, CryptoGroups serves both beginners and seasoned practitioners, as evidenced by its successful integration in projects like [CryptoSignatures](https://github.com/PeaceFounder/CryptoSignatures.jl) and [ShuffleProofs](https://github.com/PeaceFounder/ShuffleProofs.jl).
 
 ## Key Features
 
@@ -77,14 +77,16 @@ CryptoGroups is a Julia package that provides a flexible and type-safe implement
    g == G(octet(g)) == G(value(g))
    ```
 
-## Safety Considerations
+## Safety Guarantees
 
-- Group element arithmetics is possible only with the same types of groups and throws `MethodError` when that is violated. For instance, `@ECGroup{P_192}() * @ECGroup{P_256}()` throws an error.
-- Group elements are validated during construction, throwing `ArgumentError` for invalid inputs.
-- Moduler prime group elements are checked to belong in prime group via $g^q = 1$. 
-- Elliptic curve points are checked for curve equation satisfaction and cofactor validation.
-- The package implements checks to prevent issues with special cases in point addition formulas.
-- Exponentiation with $k \mod q = 0$ shows warning or throws an error in a strict mode.
+While no cryptographic system can guarantee absolute security, CryptoGroups implements the following safety features:
+
+- Group element arithmetics is possible only with the same types of groups and throws `MethodError` when that is violated. For instance, `@ECGroup{P_192}() * @ECGroup{P_256}()` throws an error;
+- Group elements are validated during construction, throwing `ArgumentError` for invalid inputs;
+- Modular prime group elements are checked to belong in prime group via $g^q = 1$;
+- Elliptic curve points are checked for curve equation satisfaction and cofactor validation;
+- The package implements checks to prevent issues with special cases in point addition formulas;
+- Exponentiation with $k~ {\rm mod} ~q = 0$ shows warning or throws an error in a strict mode.
 
 ## Limitations and Future Work
 
@@ -95,7 +97,7 @@ The current implementation of CryptoGroups has several areas where performance o
 - The package doesn't use projective coordinates for elliptic curve arithmetics;
 - Lacks special treatment for Koblitz curves;
 - Doesn't implement Mersenne primes when available over generic prime fields;
-- Binary field operations, the current implementation is suboptimal and doesn't take advantage of hardware-provided carryless operations;
+- Binary field operations, the current implementation is suboptimal and doesn't take advantage of hardware-provided carryless operations.
 
 These limitations result in significantly slower performance compared to state-of-the-art implementations. Preliminary estimates suggest that operations on prime curves in CryptoGroups are about 100 times slower than optimized libraries like OpenSSL, while binary curves may be up to 1000 times slower.
 
@@ -109,8 +111,11 @@ Despite these limitations, CryptoGroups provides a solid foundation for cryptogr
 
 # References
 
+- [elliptic-curve](https://github.com/sdiehl/elliptic-curve#readme) library in Haskell which share similar goals
 - [RFC2409](https://tools.ietf.org/html/rfc2409#section-6.2) and [RFC5114](https://tools.ietf.org/html/rfc5114#section-2.1) for modular prime group constants
 - [SafeCurves](https://safecurves.cr.yp.to/complete.html) on addition checks for Weierstrass curves
 - [FIPS 186-4](https://csrc.nist.gov/pubs/fips/186-4/final) and [FIPS 186-5](https://csrc.nist.gov/pubs/fips/186-5/final)
 - [NIST SP 800-186](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-186-draft.pdf)
 - [ANSI X9.142](https://webstore.ansi.org/preview-pages/ASCX9/preview_ANSI+X9.142-2020.pdf) and in unpaywalled form [here](https://www.cs.miami.edu/home/burt/learning/Csc609.142/ecdsa-cert.pdf)
+- [CryptoSignatures.jl](https://github.com/PeaceFounder/CryptoSignatures.jl) FIPS 186-4 digital signature algorithm implemetation
+- [ShuffleProofs.jl](https://github.com/PeaceFounder/ShuffleProofs.jl) Verificatum compatable ElGamal proof of shuffle implementation
