@@ -35,10 +35,11 @@ Base.:-(u::P, v::P) where P <: AbstractPoint = u + (-v)
 
 Base.isless(x::P, y::P) where P <: AbstractPoint = gx(x) == gx(y) ? gx(x) < gx(y) : gy(x) < gy(y)
 
-function validate(x::AbstractPoint, order::Integer, cofactor::Integer)
+function validate(x::P, order::Integer, cofactor::Integer) where P <: AbstractPoint
 
     oncurve(x) || throw(ArgumentError("Point is not in curve"))
-    x * cofactor != zero(x) || throw(ArgumentError("Point is in cofactor subgroup"))
+    #x * cofactor != zero(P) || throw(ArgumentError("Point is in cofactor subgroup"))
+    !iszero(x * cofactor) || throw(ArgumentError("Point is in cofactor subgroup"))
 
     return
 end
@@ -130,7 +131,7 @@ name(::Type{ECPoint{P, S}}) where {P <: AbstractPoint, S} = isnothing(S.name) ? 
 
 eq(::Type{ECPoint{P, S}}) where {P <: AbstractPoint, S} = eq(P)
 field(::Type{ECPoint{P, S}}) where {P <: AbstractPoint, S} = field(P)
-
+field(::Type{ECPoint{P}}) where {P <: AbstractPoint} = field(P)
 
 """
     zero(::Union{P, Type{P}}) where P <: AbstractPoint

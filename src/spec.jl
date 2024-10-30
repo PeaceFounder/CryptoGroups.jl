@@ -158,5 +158,5 @@ spec(g::ECGroup) = spec(g.x)
 spec(::Type{G}) where G <: PGroup = MODP(; p = modulus(G), q = order(G))
 
 (::Type{P})() where P <: ECPoint = P(generator(curve(name(P))))
-(::Type{G})() where G <: ECGroup = G(generator(curve(name(G))))
+(::Type{ECGroup{P}})() where P <: ECPoint = ECGroup{P}(P())
 (::Type{G})() where G <: PGroup = G(generator(modp_spec(name(G))))
