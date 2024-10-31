@@ -1,5 +1,5 @@
 using Test
-import CryptoGroups: PGroup, @PGroup, order, modulus, value, concretize_type, Specs, generator
+import CryptoGroups: PGroup, @PGroup, order, modulus, value, concretize_type, Specs, generator, octet
 
 G = @PGroup{p = 23, q = 11}
 q = order(G)
@@ -57,6 +57,10 @@ function testgroup(g::G) where G <: Group
 
     @test one(g) * g == g
     @test g * one(g) == g
+
+    @test convert(G, value(one(G)); allow_one=true) == one(G)
+    @test convert(G, octet(one(G)); allow_one=true) == one(G)
+
 end
 
 G = @PGroup{p = 23, q = 11}

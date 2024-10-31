@@ -123,7 +123,7 @@ Converts representation of `x` into a group element type `G`. The conversion is 
 group constructors. In case identity element needs to be read into `allow_one` flag can be used to allow constructing identity elements. 
 """
 Base.convert(::Type{ECGroup{P}}, x; allow_one=false) where P <: ECPoint = ECGroup{P}(convert(P, x; allow_zero=allow_one))
-Base.convert(::Type{G}, x::G) where G <: ECGroup = x
+Base.convert(::Type{G}, x::G) where G <: Group = x
 
 
 """
@@ -277,7 +277,7 @@ Converts modulus prime group element into octet representation. A padding is add
 """
 octet(x::PGroup) = int2octet(value(x), bitlength(modulus(x)))
 
-Base.convert(group::Type{<:PGroup}, element::Vector{UInt8}) = convert(group, octet2int(element))
+Base.convert(group::Type{<:PGroup}, element::Vector{UInt8}; allow_one::Bool=false) = convert(group, octet2int(element); allow_one)
 PGroup{S}(element::Vector{UInt8}) where S = convert(PGroup{S}, element)
 
 """

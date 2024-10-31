@@ -1,4 +1,4 @@
-using .Utils: StaticBitVector, StaticBigInt, static
+using .Utils: StaticBitVector, StaticBigInt, static, @check
 using .Fields: F2GNB, F2PB, @F2PB, FP, Field, PrimeField, BinaryField, tobits, value, reducer
 using .Curves: AbstractPoint, ECPoint, AffinePoint, Weierstrass, BinaryCurve, gx, gy, field, eq, a, b, cofactor
 using .Specs: MODP, Koblitz, ECP, EC2N, GroupSpec, PB, GNB, curve
@@ -160,3 +160,40 @@ spec(::Type{G}) where G <: PGroup = MODP(; p = modulus(G), q = order(G))
 (::Type{P})() where P <: ECPoint = P(generator(curve(name(P))))
 (::Type{ECGroup{P}})() where P <: ECPoint = ECGroup{P}(P())
 (::Type{G})() where G <: PGroup = G(generator(modp_spec(name(G))))
+
+
+# Shall be added to CryptoGroups
+iscompatable(x::GroupSpec, y::GroupSpec) = false
+
+function iscompatable(x::ECP, y::ECP)
+
+    x.p == y.p || return false
+    x.n == y.n || return false
+    x.a == y.a || return false
+    x.b == y.b || return false
+    x.cofactor == y.cofactor || return false
+
+    return true
+end
+
+function iscompatable(x::EC2N, y::EC2N)
+
+    x.basis == y.basis || return false
+    x.n == y.n || return false
+    x.a == y.a || return false
+    x.b == y.b || return false
+    x.cofactor == y.cofactor || return false
+
+    return true
+end
+
+iscompatable(G::Type{<:Group}, Q::Type{<:Group}) = iscompatable(spec(G), spec(Q))
+
+
+function _convert(G::Type{<:Group}, q::Group)
+    @check iscompatable(G, typeof(q)) "Conversion not possible as group types represent different specifications"
+    return G(octet(q))
+end
+
+Base.convert(G::Type{<:Group}, q::Group) = _convert(G, q)
+Base.convert(G::Type{ECGroup{P}}, q::Group) where P <: ECPoint = _convert(G, q)

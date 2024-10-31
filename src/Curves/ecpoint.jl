@@ -176,7 +176,7 @@ end
 
 Base.:*(n::Integer, x::ECPoint; skip_validation = false) = *(x, n; skip_validation)
 
-Base.convert(::Type{ECPoint{P, S}}, x::NTuple{2}; allow_zero=false) where {P <: AbstractPoint, S} = ECPoint{P, S}(convert(P, x); allow_zero)
+Base.convert(::Type{ECPoint{P, S}}, x; allow_zero=false) where {P <: AbstractPoint, S} = ECPoint{P, S}(convert(P, x); allow_zero)
 Base.convert(::Type{P}, x::P) where P <: ECPoint = x 
 
 """
