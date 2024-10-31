@@ -72,14 +72,18 @@ function Base.show(io::IO, ::Type{G}) where G <: PGroup
     end
 end
 
-
 macro ECGroup(expr)
     if expr.head == :braces && length(expr.args) == 1
         arg = expr.args[1]
-        point_expr = Expr(:macrocall, Symbol("@ECPoint"), LineNumberNode(@__LINE__), 
+        # Create a GlobalRef to @ECPoint in the current module
+        #ecpoint_macro = GlobalRef(__module__, Symbol("@ECPoint"))
+
+        ecpoint_macro = getproperty(@__MODULE__, Symbol("@ECPoint"))
+
+        point_expr = Expr(:macrocall, ecpoint_macro, LineNumberNode(@__LINE__), 
                          Expr(:braces, arg))
-        # Use __module__ to get the ECGroup type from the defining module
-        return :(ECGroup{$(esc(point_expr))})
+
+        return :($ECGroup{$(esc(point_expr))})
     else
         error("Invalid syntax. Use @ECGroup{curve_name} or @ECGroup{Module.curve_name}")
     end
