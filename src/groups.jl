@@ -113,7 +113,7 @@ struct ECGroup{P<:ECPoint} <: Group
 end
 
 ECGroup{P}(x, y) where {P <: ECPoint} = ECGroup{P}(P(x, y))
-ECGroup{P}(x::Vector{UInt8}) where {P <: ECPoint} = ECGroup{P}(P(x))
+ECGroup{P}(x::Union{Vector{UInt8}, NTuple{2, <:Union{Integer, BitVector}}}; allow_one=false, skip_validation=false) where {P <: ECPoint} = ECGroup{P}(P(x; allow_zero=allow_one, skip_validation))
 
 
 """

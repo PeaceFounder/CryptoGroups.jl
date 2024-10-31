@@ -98,6 +98,8 @@ struct ECPoint{P<:AbstractPoint, S} <: AbstractPoint # The same contract is sati
     ECPoint{P, S}(x::F, y::F) where {P <: AbstractPoint, S, F <: Field} = ECPoint{P, S}(P(x, y))
 end
 
+ECPoint{P, S}(x; allow_zero=false, skip_validation=false) where {P <: AbstractPoint, S} = ECPoint{P, S}(convert(P, x); allow_zero, skip_validation)
+
 """
     concretize_type(::Type{ECPoint{P}}, order::Integer, cofactor::Integer; name=nothing) where P <: AbstractPoint
 

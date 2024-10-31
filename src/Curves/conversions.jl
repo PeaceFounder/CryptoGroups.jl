@@ -28,7 +28,9 @@ function decompress_weierstrass(x::BigInt, ỹ::Bool, (a, b)::Tuple{F, F}) where
 end
 
 
-function (::Type{P})(po::Vector{UInt8}) where P <: AbstractPoint
+#function (::Type{P})(po::Vector{UInt8}) where P <: AbstractPoint
+
+function Base.convert(::Type{P}, po::Vector{UInt8}) where P <: AbstractPoint
 
     pc = po[1]
 
@@ -129,6 +131,10 @@ end
 # This shall be considered internal as x, y can't be arbitrary!!!
 function _octet(x::BigInt, y::BigInt, N::Int; mode::Symbol = :uncompressed) # N is bitlength(modulus(field()))
 
+    if iszero(x) && iszero(y)
+        return UInt8[0]
+    end
+
     _x = int2octet(x, N)
     _y = int2octet(y, N)
 
@@ -162,6 +168,10 @@ _octet(x::F, y::F; mode::Symbol = :uncompressed) where F <: PrimeField = _octet(
 
 function _octet(x::F, y::F; mode::Symbol = :uncompressed) where F <: BinaryField
 
+    if iszero(x) && iszero(y)
+        return UInt8[0]
+    end
+
     _x = octet(x)
     _y = octet(y)
 
@@ -170,9 +180,6 @@ function _octet(x::F, y::F; mode::Symbol = :uncompressed) where F <: BinaryField
         return _uncompressed_octet(_x, _y)
 
     elseif mode in [:compressed, :hybrid]
-
-        #x_ = F(reverse(x))
-        #y_ = F(reverse(y))
 
         if isstrict()
             @warn "Calculation of ỹ could be wrong due to insufficient tests."
