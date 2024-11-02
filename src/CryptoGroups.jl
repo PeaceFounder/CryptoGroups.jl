@@ -36,8 +36,6 @@ See also `spec`
 """
 function concretize_type end
 
-# HEllo world
-
 function order end
 function name end # Needed because of Curves.
 function value end

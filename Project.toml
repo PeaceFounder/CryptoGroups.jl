@@ -1,7 +1,7 @@
 name = "CryptoGroups"
 uuid = "bc997328-bedd-407e-bcd3-5758e064a52d"
 authors = ["Janis Erdmanis <janiserdmanis@protonmail.ch>"]
-version = "0.5.4"
+version = "0.6.0"
 
 [deps]
 CryptoPRG = "d846c407-34c1-46cb-aa27-d51818cc05e2"
@@ -11,7 +11,7 @@ Primes = "27ebfcd6-29c5-5fa9-bf4b-fb8fc14df3ae"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [compat]
-CryptoPRG = "0.1"
+CryptoPRG = "0.2"
 CryptoUtils = "0.1"
 Nettle = "1"
 Primes = "0.5"

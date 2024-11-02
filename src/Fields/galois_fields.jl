@@ -27,11 +27,14 @@ end
 Base.convert(::Type{BigInt}, x::PrimeField) = x.x
 
 value(x::FP) = x.x
-modulus(::FP{P}) where P = BigInt(P)
-modulus(::Type{FP{P}}) where P = BigInt(P)
+modulus(::FP{P}) where P = modulus(FP{P})
+@generated modulus(::Type{FP{P}}) where P = BigInt(P)
 
-order(::FP{P}) where P = BigInt(P)
-order(::Type{FP{P}}) where P = BigInt(P)
+order(::FP{P}) where P = order(FP{P})
+@generated order(::Type{FP{P}}) where P = BigInt(P)
+
+bitlength(::F) where F <: PrimeField = bitlength(F)
+@generated bitlength(::Type{F}) where F <: PrimeField = bitlength(modulus(F))
 
 #########################################
 

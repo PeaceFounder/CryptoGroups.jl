@@ -30,7 +30,7 @@ end
 
 #function (::Type{P})(po::Vector{UInt8}) where P <: AbstractPoint
 
-function Base.convert(::Type{P}, po::Vector{UInt8}) where P <: AbstractPoint
+function Base.convert(::Type{P}, po::AbstractVector{UInt8}) where P <: AbstractPoint
 
     pc = po[1]
 

@@ -61,6 +61,8 @@ function testgroup(g::G) where G <: Group
     @test convert(G, value(one(G)); allow_one=true) == one(G)
     @test convert(G, octet(one(G)); allow_one=true) == one(G)
 
+    @test G(value(one(G)); allow_one=true) == one(G)
+    @test G(octet(one(G)); allow_one=true) == one(G)
 end
 
 G = @PGroup{p = 23, q = 11}

@@ -39,7 +39,9 @@ function validate(x::P, order::Integer, cofactor::Integer) where P <: AbstractPo
 
     oncurve(x) || throw(ArgumentError("Point is not in curve"))
     #x * cofactor != zero(P) || throw(ArgumentError("Point is in cofactor subgroup"))
-    !iszero(x * cofactor) || throw(ArgumentError("Point is in cofactor subgroup"))
+    if cofactor != 1
+        !iszero(x * cofactor) || throw(ArgumentError("Point is in cofactor subgroup"))
+    end
 
     return
 end
@@ -99,6 +101,8 @@ struct ECPoint{P<:AbstractPoint, S} <: AbstractPoint # The same contract is sati
 end
 
 ECPoint{P, S}(x; allow_zero=false, skip_validation=false) where {P <: AbstractPoint, S} = ECPoint{P, S}(convert(P, x); allow_zero, skip_validation)
+
+Base.iszero(x::ECPoint) = iszero(x.p)
 
 """
     concretize_type(::Type{ECPoint{P}}, order::Integer, cofactor::Integer; name=nothing) where P <: AbstractPoint

@@ -1,8 +1,6 @@
 using .Utils: int2octet, octet2int
 import .Fields: value, modulus, octet
 using .Curves: ECPoint, gx, gy
-#using .Specs: PRG
-
 
 """
     abstract type Group end
@@ -30,7 +28,6 @@ Base.broadcasted(f::Function, x::NTuple{N, G}, y::G) where {N, G <: Group} = Bas
 Base.broadcasted(f::Function, x::G, y::Vector{G}) where G <: Group = f.((x for i in 1:length(y)), y)
 Base.broadcasted(f::Function, x::Vector{G}, y::G) where G <: Group = Base.broadcasted(f, y, x)
 
-#Base.broadcasted(::typeof(*), x::Vector{G}, y::G) where G <: Group =  x .* (y for i in 1:length(x))
 
 """
     value(g::Group)::Union{BigInt, Tuple{BigInt, BigInt}, Tuple{BitVector, BitVector}}
@@ -65,11 +62,6 @@ Convinience method for `x * inv(y)`
 Base.:/(x::G, y::G) where G <: Group = x * inv(y)
 
 name(x::G) where G <: Group = name(G)
-
-# Base.rand(prg::PRG, ::Type{G}, N::Integer; nr::Integer = 0) where G <: Group = convert(Vector{G}, rand(prg, spec(G), N; nr))
-
-# Incorrect use
-# Base.ones(x::Vector{G}) where G <: Group = [one(i) for i in x] # need to extend this
 
 """
     iscompressable(g::Group)::Bool
@@ -113,8 +105,9 @@ struct ECGroup{P<:ECPoint} <: Group
 end
 
 ECGroup{P}(x, y) where {P <: ECPoint} = ECGroup{P}(P(x, y))
-ECGroup{P}(x::Union{Vector{UInt8}, NTuple{2, <:Union{Integer, BitVector}}}; allow_one=false, skip_validation=false) where {P <: ECPoint} = ECGroup{P}(P(x; allow_zero=allow_one, skip_validation))
+ECGroup{P}(x::Union{AbstractVector{UInt8}, NTuple{2, <:Union{Integer, BitVector}}}; allow_one=false, skip_validation=false) where {P <: ECPoint} = ECGroup{P}(P(x; allow_zero=allow_one, skip_validation))
 
+Curves.field(::Type{ECGroup{P}}) where P <: ECPoint = field(P)
 
 """
     convert(::Type{G}, x; allow_one=false)::G where G <: Group
@@ -265,10 +258,13 @@ struct PGroup{S} <: Group
         new{S}(x)
     end
 
+    PGroup{S}(x::Vector{UInt8}; allow_one::Bool=false, skip_validation=false) where S = PGroup{S}(octet2int(x); allow_one, skip_validation)
+
     Base.one(::Type{PGroup{S}}) where S = new{S}(1)
 end
 
 Base.one(::PGroup{S}) where S = one(PGroup{S})
+
 
 """
     octet(x::PGroup)::Vector{UInt8}
@@ -278,7 +274,6 @@ Converts modulus prime group element into octet representation. A padding is add
 octet(x::PGroup) = int2octet(value(x), bitlength(modulus(x)))
 
 Base.convert(group::Type{<:PGroup}, element::Vector{UInt8}; allow_one::Bool=false) = convert(group, octet2int(element); allow_one)
-PGroup{S}(element::Vector{UInt8}) where S = convert(PGroup{S}, element)
 
 """
     modulus(::Union{G, Type{G}})::BigInt where G <: PGroup
