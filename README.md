@@ -83,7 +83,7 @@ While no cryptographic system can guarantee absolute security, CryptoGroups impl
 
 - Group element arithmetics is possible only with the same types of groups and throws `MethodError` when that is violated. For instance, `@ECGroup{P_192}() * @ECGroup{P_256}()` throws an error;
 - Group elements are validated during construction, throwing `ArgumentError` for invalid inputs;
-- Modular prime group elements are checked to belong in prime group via $g^q = 1$;
+- Modular prime group elements are checked to belong in prime group via $g^q = 1$ or with an efficient `jaocbi(g, p) = 1` for quadratic residue groups;
 - Elliptic curve points are checked for curve equation satisfaction and cofactor validation;
 - The package implements checks to prevent issues with special cases in point addition formulas;
 - Exponentiation with $k~ {\rm mod} ~q = 0$ shows warning or throws an error in a strict mode.
