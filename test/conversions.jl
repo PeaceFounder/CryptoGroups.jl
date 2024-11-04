@@ -5,6 +5,7 @@ import CryptoGroups.Specs: ECP, EC2N, PB, point
 import CryptoGroups: octet, value, concretize_type, GroupSpec
 import CryptoGroups.Curves: AffinePoint
 
+
 let 
     x = UInt8[0, 129]
     @test bits2octet(octet2bits(x)) == x
@@ -16,11 +17,11 @@ let
     @test octet2bits(x, 13) == octet2bits(x)[4:end]
 end
 
-@test int2octet(123456789, 4) == hex"075BCD15"
+#@test int2octet(123456789, 4) == hex"075BCD15"
 
 @test octet2int(hex"0003ABF1CD") == 61600205
 
-@test int2octet(94311, 17) == hex"017067" # I could deprecate
+#@test int2octet(94311, 17) == hex"017067" # I could deprecate
 
 @test bits2octet(bin"11011011011101111001101111110110111110001") == hex"01B6EF37EDF1"
 
@@ -31,6 +32,45 @@ end
 # Field element to integer conversion
 
 @test octet2int(bits2octet(bin"11111111001000010011110000110011110101110")) == 2191548508078
+
+function test_bigint2bytes(x::BigInt)
+
+    hex = string(x, base=16)
+    if mod(length(hex), 2) != 0
+        hex = string("0", hex)
+    end
+
+    bytes = hex2bytes(hex)
+    
+    @test int2octet(x) == bytes
+end
+
+function test_bytes2bigint(x::BigInt)
+    bytes = int2octet(x)
+    @test octet2int(bytes) == x
+end
+
+@test int2octet(BigInt(0)) == UInt8[0]
+
+for i in BigInt[1,
+                2,
+                28527,
+                2271661837,
+                10220473608088,
+                155378122852724392868,
+                67711243447462057491300654662,
+                850788629110566047430375891739932349,
+                13861665429400309259090417042216659399253,
+                181982173945937697230958265759545531627346454,
+                63801187789356693097942198067182712075804486362,
+                10650276354463219896828481064994007532874019652885,
+                4927817297841055714930438280818688523583617802629668]
+    
+    test_bigint2bytes(i)
+    test_bytes2bigint(i)
+    
+end
+
 
 let
 

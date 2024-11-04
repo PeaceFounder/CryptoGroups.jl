@@ -1,5 +1,5 @@
 # Implements point compression. Currently it is tied to AffinePoint but should be extended for generic case
-using ..Fields: modulus, value, bitlength, int2octet, octet2int, octet2bits, bits2octet, tobits
+using ..Fields: modulus, value, bitlength, int2octet!, octet2int, octet2bits, bits2octet, tobits
 using CryptoUtils: sqrt_mod_prime
 import ..Fields: octet
 
@@ -26,9 +26,6 @@ function decompress_weierstrass(x::BigInt, ỹ::Bool, (a, b)::Tuple{F, F}) where
     
     return decompress_weierstrass(x, ỹ, (value(a), value(b)), p)
 end
-
-
-#function (::Type{P})(po::Vector{UInt8}) where P <: AbstractPoint
 
 function Base.convert(::Type{P}, po::AbstractVector{UInt8}) where P <: AbstractPoint
 
@@ -101,108 +98,99 @@ end
 (::Type{ECPoint{P, S}})(po::Vector{UInt8}) where {P <: AffinePoint, S} = ECPoint{P, S}(P(po))
 
 
-function _compressed_octet(x::Vector{UInt8}, y::Vector{UInt8}, ỹ::Bool)
-
-    if ỹ == false
-        return UInt8[2, x...]
-    elseif ỹ == true
-        return UInt8[3, x...]
-    end
-
-end
-
-
-function _hybrid_octet(x::Vector{UInt8}, y::Vector{UInt8}, ỹ::Bool)
-
-    if ỹ == false
-        return UInt8[6, x..., y...]
-    elseif ỹ == true
-        return UInt8[7, x..., y...]
-    end
-    
-end
-
-
-function _uncompressed_octet(x::Vector{UInt8}, y::Vector{UInt8})
-     return UInt8[4, x..., y...]
-end
-
-
-# This shall be considered internal as x, y can't be arbitrary!!!
-function _octet(x::BigInt, y::BigInt, N::Int; mode::Symbol = :uncompressed) # N is bitlength(modulus(field()))
-
+function _octet(x::BigInt, y::BigInt, N::Int; mode::Symbol = :uncompressed)
     if iszero(x) && iszero(y)
         return UInt8[0]
     end
-
-    _x = int2octet(x, N)
-    _y = int2octet(y, N)
-
+    
+    nbytes = cld(N, 8)
+    # Preallocate single output buffer
+    # Size is 1 (mode byte) + nbytes (x) + nbytes (y) for the largest case
+    out = Vector{UInt8}(undef, 2*nbytes + 1)
+    
     if mode == :uncompressed
-
-        return _uncompressed_octet(_x, _y)
-
+        out[1] = 0x04
+        # Write x and y directly into the output buffer at appropriate offsets
+        int2octet!(@view(out[2:nbytes+1]), x)
+        int2octet!(@view(out[nbytes+2:2nbytes+1]), y)
+        written = 2*nbytes + 1
     elseif mode in [:compressed, :hybrid]
-
-        ỹ = mod(y, 2) % Bool
+        ỹ = mod(y, 2) % Bool
         
         if mode == :compressed
-            
-            return _compressed_octet(_x, _y, ỹ)
-            
-        elseif mode == :hybrid
-
-            return _hybrid_octet(_x, _y, ỹ)
-
+            out[1] = ỹ ? 0x03 : 0x02
+            int2octet!(@view(out[2:nbytes+1]), x)
+            written = nbytes + 1
+        else # mode == :hybrid
+            out[1] = ỹ ? 0x07 : 0x06
+            int2octet!(@view(out[2:nbytes+1]), x)
+            int2octet!(@view(out[nbytes+2:2nbytes+1]), y)
+            written = 2*nbytes + 1
         end
-
     else
         error("Unrecognized mode $mode")
     end
     
+    # Return only the portion of the buffer that was written to
+    return resize!(out, written)
 end
 
 
 _octet(x::F, y::F; mode::Symbol = :uncompressed) where F <: PrimeField = _octet(value(x), value(y), bitlength(modulus(F)); mode)
 
-
 function _octet(x::F, y::F; mode::Symbol = :uncompressed) where F <: BinaryField
-
     if iszero(x) && iszero(y)
         return UInt8[0]
     end
-
+    
+    # Get octets for x and y
     _x = octet(x)
     _y = octet(y)
-
+    
+    # Calculate result size and allocate buffer
+    nbytes_x = length(_x)
+    nbytes_y = length(_y)
+    
+    # Determine output size based on mode
+    outsize = if mode == :compressed
+        nbytes_x + 1  # 1 byte for header + x
+    else # :uncompressed or :hybrid
+        nbytes_x + nbytes_y + 1  # 1 byte for header + x + y
+    end
+    
+    out = Vector{UInt8}(undef, outsize)
+    
     if mode == :uncompressed
-
-        return _uncompressed_octet(_x, _y)
-
+        # [4; x; y]
+        out[1] = 0x04
+        copyto!(out, 2, _x, 1, nbytes_x)
+        copyto!(out, nbytes_x + 2, _y, 1, nbytes_y)
+        
     elseif mode in [:compressed, :hybrid]
-
         if isstrict()
-            @warn "Calculation of ỹ could be wrong due to insufficient tests."
+            @warn "Calculation of ỹ could be wrong due to insufficient tests."
         end
-
         z = y * inv(x)
-
-        ỹ = tobits(z)[end]
-
+        ỹ = tobits(z)[end]
+        
         if mode == :compressed
+            # [2/3; x]
+            out[1] = ỹ ? 0x03 : 0x02
+            copyto!(out, 2, _x, 1, nbytes_x)
             
-            return _compressed_octet(_x, _y, ỹ)
-            
-        elseif mode == :hybrid
-
-            return _hybrid_octet(_x, _y, ỹ)
-
+        else # mode == :hybrid
+            # [6/7; x; y]
+            out[1] = ỹ ? 0x07 : 0x06
+            copyto!(out, 2, _x, 1, nbytes_x)
+            copyto!(out, nbytes_x + 2, _y, 1, nbytes_y)
         end
-
     else
         error("Unrecognized mode $mode")
     end
+    
+    return out
 end
+
 
 octet(p::AbstractPoint; mode::Symbol = :uncompressed) = _octet(gx(p), gy(p); mode)
 

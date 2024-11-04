@@ -1,5 +1,6 @@
 using Test
 import CryptoGroups: PGroup, @PGroup, order, modulus, value, concretize_type, Specs, generator, octet
+import CryptoUtils
 
 G = @PGroup{p = 23, q = 11}
 q = order(G)
@@ -94,25 +95,9 @@ let
 
     testgroup(g)
 end
-### PGroup generation algorithms for 
 
-using Random: MersenneTwister
-rng = MersenneTwister(0)
+### Safe prime generation via CryptoUtils
 
-# Broken
-let 
-modp_spec = Specs.sophie_germain_group(rng, 2, 100)
-G = concretize_type(PGroup, modp_spec)
-# g = G(generator(modp_spec))
-# testgroup(g)
-end
-
-### Seems to have an issue with large numbers
-let
-modp_spec = Specs.dsa_standart_group(rng, 10, 10)
-G = concretize_type(PGroup, modp_spec)
-g = G(generator(modp_spec))
-
+p = CryptoUtils.safe_prime(100)
+g = @PGroup{p = p, q = div(p - 1, 2)}(4)
 testgroup(g)
-end
-

@@ -1,6 +1,8 @@
-using .Utils: int2octet, octet2int
-import .Fields: value, modulus, octet
-using .Curves: ECPoint, gx, gy
+using .Utils: int2octet!, octet2int, jacobi
+import .Fields: value, modulus, octet, bitlength
+using .Curves: ECPoint, gx, gy, field
+using Primes: isprime
+using CryptoUtils
 
 """
     abstract type Group end
@@ -52,7 +54,6 @@ Computes inverse of the group element so that `inv(g) * g == one(G)`
 """
 Base.inv(g::G) where G <: Group = g^(order(G) - 1) 
 
-#import Base./
 
 """
     /(x::G, y::G)::G where G <: Group
@@ -171,6 +172,10 @@ Base.:(==)(x::G, y::G) where G <: ECGroup = x.x == y.x
 
 modulus(::Type{ECGroup{P}}) where P <: ECPoint = modulus(P)
 
+# this method has somewhat controversial meaning
+bitlength(::Type{ECGroup{P}}) where P <: ECPoint = bitlength(field(P)) 
+bitlength(g::G) where G <: ECGroup = bitlength(G)
+
 name(::Type{ECGroup}) = nothing
 name(::Type{ECGroup{P}}) where P <: ECPoint = name(P)
 
@@ -197,6 +202,20 @@ iscompressable(g::ECGroup) = iscompressable(g.x)
 Computes remainder of the elliptic curve point
 """
 Base.rem(x::ECGroup, q::Integer) = rem(x.x, q)
+
+
+"""
+Verifies membership in a prime-order group with optimizations for common cases.
+"""
+function verify_pgroup_membership(x::BigInt, modulus::BigInt, order::BigInt)
+    # Assumes modulus to be a prime!!!
+
+    if modulus == order * 2 + 1
+        return jacobi(x, modulus) == 1
+    else
+        return powermod(x, order, modulus) == 1
+    end
+end
 
 """
     struct PGroup{S} <: Group
@@ -250,8 +269,9 @@ struct PGroup{S} <: Group
                     isstrict() ? throw(ArgumentError(msg)) : @warn msg
                 end
             elseif !isnothing(_order)
-                0 < x < S.p || throw(ArgumentError("Element $x is not in range of the prime group with modulus $_modulus"))
-                powermod(x, _order, _modulus) == 1 || throw(ArgumentError("Element $x is not an element of prime group with order $_order and modulus $_modulus"))
+                0 < x < _modulus || throw(ArgumentError("Element $x is not in range of the prime group with modulus $_modulus"))
+
+                verify_pgroup_membership(x, _modulus, _order) == 1 || throw(ArgumentError("Element $x is not an element of prime group with order $_order and modulus $_modulus"))
             end            
         end
 
@@ -271,7 +291,13 @@ Base.one(::PGroup{S}) where S = one(PGroup{S})
 
 Converts modulus prime group element into octet representation. A padding is added to match the length of modulus.
 """
-octet(x::PGroup) = int2octet(value(x), bitlength(modulus(x)))
+function octet(x::PGroup) 
+    
+    bytes = Vector{UInt8}(undef, cld(bitlength(x), 8))
+    int2octet!(bytes, value(x))
+
+    return bytes
+end
 
 Base.convert(group::Type{<:PGroup}, element::Vector{UInt8}; allow_one::Bool=false) = convert(group, octet2int(element); allow_one)
 
@@ -280,10 +306,13 @@ Base.convert(group::Type{<:PGroup}, element::Vector{UInt8}; allow_one::Bool=fals
 
 Modulus of a prime group. It is not recommended to depend on this method in the codebase as it destroys polymorphism.
 """
-modulus(::Type{PGroup{S}}) where S = BigInt(S.p)
+@generated modulus(::Type{PGroup{S}}) where S = BigInt(S.p)
 modulus(::G) where G <: PGroup = modulus(G)
 
-order(::Type{PGroup{S}}) where S = S.q isa Nothing ? nothing : BigInt(S.q)
+bitlength(::Type{G}) where G <: PGroup = bitlength(modulus(G))
+bitlength(x::G) where G <: PGroup = bitlength(G)
+
+@generated order(::Type{PGroup{S}}) where S = S.q isa Nothing ? nothing : BigInt(S.q)
 
 name(::Type{PGroup}) = nothing
 

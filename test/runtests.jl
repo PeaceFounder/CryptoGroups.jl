@@ -22,6 +22,10 @@ end
     include("conversions.jl")
 end
 
+@safetestset "Testing Jacoby symbol" begin
+    include("jacobi.jl")
+end
+
 @safetestset "Testing group API" begin
     include("groups.jl")
 end

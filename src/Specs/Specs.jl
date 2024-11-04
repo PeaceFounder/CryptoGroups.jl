@@ -9,9 +9,6 @@ import ..CryptoGroups.Utils: octet2int, octet2bits, hex2bits, int2octet, bits2oc
 
 include("spec.jl")
 include("field_specs.jl")
-
-include("legacy.jl")
-
 include("curve_constants.jl")
 include("modp_constants.jl")
 

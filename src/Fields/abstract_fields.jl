@@ -1,4 +1,4 @@
-import ..CryptoGroups.Utils: int2octet, octet2int, octet2bits, bits2octet
+import ..CryptoGroups.Utils: int2octet!, octet2int, octet2bits, bits2octet
 
 """
     abstract type Field end
@@ -200,7 +200,16 @@ Base.isless(x::F, y::F) where F <: PrimeField = value(x) < value(y)
 Returns a byte representation of a field element according to FIPS 186-4 standart.
 """
 octet(x::BinaryField) = bits2octet(tobits(x))
-octet(x::PrimeField) = int2octet(value(x), bitlength(modulus(x)))
+#octet(x::PrimeField) = int2octet(value(x), bitlength(modulus(x)))
+function octet(x::PrimeField)
+    
+    nbytes = cld(bitlength(x), 8)
+    buffer = Vector{UInt8}(undef, nbytes)
+    int2octet!(buffer, value(x), )
+
+    return buffer
+end
+
 
 # Perhaps a convert method fits better here as the type is specific
 (::Type{F})(x::Vector{UInt8}) where F <: PrimeField = F(octet2int(x))

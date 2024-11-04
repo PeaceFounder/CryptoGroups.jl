@@ -1,6 +1,7 @@
 module Utils
 
 import CryptoPRG: bitlength
+import Base.GMP
 
 """
     @check(ex, msg = nothing)
@@ -20,40 +21,194 @@ macro check(ex, msg = nothing)
     end
 end
 
+function jacobi(n::BigInt, k::BigInt)
+
+    # Get the last limb (word) of a BigInt
+    get_limb(n::BigInt, i::Int) = unsafe_load(n.d, 1 + i)
+
+    iseven(k) && throw("Argument k=$k should be odd.")
+    n = mod(n, k)
+    t = 1
+    k_1 = true  # k is odd by requirement
+    last_limb = get_limb(k, 0)
+    k_2 = (last_limb & 2 == 2)  # second bit
+    k_3 = (last_limb & 4 == 4)  # third bit
+    
+    while !iszero(n)
+        z = trailing_zeros(n)
+        n >>= z
+        # After right shift, check bits directly on the last limb
+        last_limb = get_limb(n, 0)
+        n_2 = (last_limb & 2 == 2)  # second bit
+        
+        # For k ≡ 3,5 (mod 8) when z is odd
+        if isodd(z) && (k_2 ⊻ k_3)
+            t = -t
+        end
+        
+        # For quadratic reciprocity when both are ≡ 3 (mod 4)
+        if k_2 && n_2
+            t = -t
+        end
+        
+        # Save current n's bits for next iteration's k
+        k_2 = n_2
+        k_3 = (last_limb & 4 == 4)
+        n, k = k, n
+        n = mod(n, k)
+    end
+    return isone(k) ? t : 0
+end
+
+
 """
     int2octet(x::Integer, N::Int = bitlength(x))::Vector{UInt8}
 
 Converts integer `x` into an octet where optional `N` specifies number of allocated bits for the integer encoding. 
 """
-function int2octet(x::Integer)
+function int2octet(x::Integer, N::Int) # We will need a refactor here
 
+    error("This method will be deprecated")
+    #@warn "This method will be deprecated"
+
+    k = div(N, 8, RoundUp)
+    
+    # Pre-allocate the full buffer with zeros
+    result = zeros(UInt8, k)
+    
+    # Convert to hex and ensure even length
     hex = string(x, base=16)
     if mod(length(hex), 2) != 0
         hex = string("0", hex)
     end
     
-    return hex2bytes(hex)
+    # Fill the latter part of result with the converted bytes
+    hex2bytes!(view(result, k-div(length(hex),2)+1:k), hex)
+    
+    return result
 end
 
+function int2octet!(buffer::Union{Vector{UInt8}, SubArray{UInt8, 1}}, n::BigInt)
 
-function int2octet(x::Integer, N::Int)
-
-    k = div(N, 8, RoundUp)
-
-    bytes = int2octet(x)
-
-    pad = UInt8[0 for i in 1:(k - length(bytes))]
-
-    return UInt8[pad..., bytes...]
+    if iszero(n)
+        fill!(buffer, 0)
+        return 1
+    end
+    
+    # Calculate number of bytes needed
+    nbits = ndigits(n, base=2)
+    needed_bytes = cld(nbits + (n < 0 ? 1 : 0), 8)
+    
+    # Fill leading positions with zeros
+    if needed_bytes < length(buffer)
+        fill!(@view(buffer[1:length(buffer)-needed_bytes]), 0)
+    end
+    
+    # Export bytes directly to the end of buffer
+    _, written = GMP.MPZ.export!(@view(buffer[end-needed_bytes+1:end]), n;
+                                 order = 1,    # Big-endian
+                                 endian = 0,   # Native endian
+                                 nails = 0     # Use all bits
+                                 )
+    
+    return written
 end
+
+function int2octet(n::BigInt)
+
+    nbits = ndigits(n, base=2)
+    # Add one bit for sign in case of negative numbers
+    nbytes = cld(nbits + (n < 0 ? 1 : 0), 8)
+    
+    # Allocate output buffer
+    buffer = Vector{UInt8}(undef, nbytes)
+    
+    int2octet!(buffer, n)
+
+    return buffer
+end
+
+int2octet(n::Integer) = reverse(reinterpret(UInt8, [n]))
+
+function int2octet!(buffer::Union{Vector{UInt8}, SubArray{UInt8, 1}}, n::Integer)
+
+    bytes = int2octet(n)
+    copyto!(buffer, @view(bytes[end-length(buffer)-1:end]))
+
+    return
+end
+
 
 """
     octet2int(x::Vector{UInt8})::BigInt
     octet2int(x::String)::BigInt
 
-Converts a binary octet to a `BigInt`. In case a string is passed it is treated as hexadecimal and is converted with `hex2bytes`.
+Converts a binary octet to a `BigInt`. In case a string is passed it is treated as hexadecimal and is converted with `hex2bytes`. Equivalent in represeentation as `parse(BigInt, bytes2hex(x), base=16)`.
 """
-octet2int(x::Vector{UInt8}) = parse(BigInt, bytes2hex(x), base=16)
+function octet2int(bytes::AbstractVector{UInt8})
+    isempty(bytes) && return BigInt(0)
+    
+    #result = BigInt()
+    n_bytes = length(bytes)
+    
+    # Calculate required limbs
+    limb_bytes = sizeof(GMP.Limb)
+    nlimbs = cld(n_bytes, limb_bytes)
+    
+    # Initialize BigInt with pre-allocated size
+    result = BigInt(; nbits = nlimbs * GMP.BITS_PER_LIMB)
+    
+    # Process full limbs first using direct memory access
+    if n_bytes >= limb_bytes
+        # Create pointer to input bytes for direct memory access
+        bytes_ptr = pointer(bytes)
+        
+        # Process full limbs
+        full_limbs = n_bytes ÷ limb_bytes
+        for i in 1:full_limbs
+            # Calculate offset from end of array
+            offset = n_bytes - i * limb_bytes
+            # Load limb directly from memory with proper byte order
+            limb = unsafe_load(Ptr{GMP.Limb}(bytes_ptr + offset))
+            # Handle endianness if needed
+            if ENDIAN_BOM == 0x04030201
+                limb = ntoh(limb)
+            end
+            unsafe_store!(result.d, limb, i)
+        end
+        
+        # Handle remaining bytes in the last partial limb
+        remaining_bytes = n_bytes % limb_bytes
+        if remaining_bytes > 0
+            limb = zero(GMP.Limb)
+            for j in 1:remaining_bytes
+                shift = (remaining_bytes - j) * 8
+                limb |= GMP.Limb(bytes[j]) << shift
+            end
+            unsafe_store!(result.d, limb, nlimbs)
+        end
+    else
+        # Handle case when input is smaller than a limb
+        limb = zero(GMP.Limb)
+        for j in 1:n_bytes
+            shift = (n_bytes - j) * 8
+            limb |= GMP.Limb(bytes[j]) << shift
+        end
+        unsafe_store!(result.d, limb, 1)
+    end
+    
+    # Set the correct size (number of non-zero limbs)
+    actual_limbs = nlimbs
+    while actual_limbs > 0 && unsafe_load(result.d, actual_limbs) == 0
+        actual_limbs -= 1
+    end
+    result.size = actual_limbs
+    
+    return result
+end
+
+#octet2int(x::Vector{UInt8}) = parse(BigInt, bytes2hex(x), base=16)
+
 octet2int(x::String) = octet2int(hex2bytes(x))
 octet2int(x::NTuple{N, UInt8}) where N = octet2int([x...])
 
@@ -327,7 +482,6 @@ StaticNamedTuple(; kwargs...) = StaticNamedTuple(NamedTuple((key, static(value))
 Base.propertynames(x::StaticNamedTuple) = propertynames(getfield(x, :args))
 Base.getproperty(x::StaticNamedTuple, sym::Symbol) = dynamic(getfield(getfield(x, :args), sym))
 
-
 static(; kwargs...) = StaticNamedTuple(; kwargs...)
 dynamic(x::StaticNamedTuple) = NamedTuple((key, dynamic(value)) for (key, value) in pairs(getfield(x, :args)))
 
@@ -340,6 +494,9 @@ function Base.show(io::IO, x::StaticNamedTuple)
 end
 
 
-export static, dynamic, @bin_str, @hex_str, octet2int, int2octet, octet2bits, bits2octet
+
+
+
+export static, dynamic, @bin_str, @hex_str, octet2int, int2octet, int2octet!, octet2bits, bits2octet
 
 end
