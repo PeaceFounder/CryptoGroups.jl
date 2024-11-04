@@ -2,7 +2,6 @@ using .Utils: int2octet!, octet2int, jacobi
 import .Fields: value, modulus, octet, bitlength
 using .Curves: ECPoint, gx, gy, field
 using Primes: isprime
-using CryptoUtils
 
 """
     abstract type Group end
